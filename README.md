@@ -17,7 +17,7 @@ cd BE-Milk-Tea-Project
 ## License & Copyright
 &copy; 2025 Trương Lê Minh Nghĩa.
 # API Deploy with Swagger:
-- https://be-milk-tea.onrender.com/swagger/index.html
+- https://be-milk-tea-1.onrender.com/swagger/index.html
 - https://localhost:7234/swagger/index.html
 # URL production at:
-- https://be-milk-tea.onrender.com/
+- https://be-milk-tea-1.onrender.com/
