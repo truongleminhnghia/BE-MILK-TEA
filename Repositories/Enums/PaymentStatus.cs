@@ -4,6 +4,6 @@ namespace Repositories.Enums
     {
         PAYMENT_SUCCESS,
         PAYMENT_FAILED,
-        PAYMENT_REFURN,
+        PAYMENT_REFUND,
     }
 }

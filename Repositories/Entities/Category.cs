@@ -25,7 +25,7 @@ namespace Repositories.Entities
         public string Category_Type { get; set; }
 
         //      setup relationship
-        public virtual ICollection<Ingredient> Ingredients { get; set; }
-        public virtual ICollection<Recipe> Recipes { get; set; }
+        public virtual ICollection<Ingredient>? Ingredients { get; set; } = new List<Ingredient>();
+        public virtual ICollection<Recipe>? Recipes { get; set; } = new List<Recipe>();
     }
 }

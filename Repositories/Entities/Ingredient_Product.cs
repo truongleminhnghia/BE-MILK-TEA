@@ -35,7 +35,7 @@ namespace Repositories.Entities
         //      setup relationship
         public virtual Ingredient Ingredient { get; set; }
 
-        public virtual ICollection<Cart_Item> Cart_Items { get; set; }
-        public virtual ICollection<Order_Detail> Order_Details { get; set; }
+        public virtual ICollection<Cart_Item> Cart_Items { get; set; } = new List<Cart_Item>();
+        public virtual ICollection<Order_Detail> Order_Details { get; set; } = new List<Order_Detail>();
     }
 }

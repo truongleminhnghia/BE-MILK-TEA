@@ -58,7 +58,13 @@ namespace Repositories.Entities
         [Column("price_promotion")]
         public double PricePromotion { get; set; }
 
-        public ICollection<Payment> Orders { get; set; } = new List<Payment>();
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+        public ICollection<Order_Detail> OrderDetails { get; set; } = new List<Order_Detail>();
+
+        public ICollection<Order_Promotion> OrderDetails_Promotion { get; set; }
+
+        public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
     }
 }

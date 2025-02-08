@@ -25,8 +25,15 @@ namespace Repositories.Data
         public DbSet<Promotion_Detail> Promotion_Details { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<Image> Images { get; set; }
-
-
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Order_Detail> Order_Details { get; set; }
+        public DbSet<Order_Promotion> Orders_Promotions { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<Cart_Item> Cart_Items { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Employee> Employees { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -93,6 +100,72 @@ namespace Repositories.Data
                 .HasOne(i => i.Category)
                 .WithMany(c => c.Ingredients)
                 .HasForeignKey(i => i.Category_Id);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Account)
+                .WithMany(a => a.Orders)
+                .HasForeignKey(o => o.AccountId);
+
+            modelBuilder.Entity<Order_Detail>()
+                .HasOne(od => od.Ingredient_Product)
+                .WithMany(ip => ip.Order_Details)
+                .HasForeignKey(od => od.Product_Id);
+
+            modelBuilder.Entity<Order_Promotion>()
+                .HasKey(op => new { op.Order_Id, op.Promotion_Id });
+
+            modelBuilder.Entity<Order_Promotion>()
+                .HasOne(op => op.Order)
+                .WithMany(o => o.OrderDetails_Promotion)
+                .HasForeignKey(op => op.Order_Id);
+
+            modelBuilder.Entity<Order_Promotion>()
+                .HasOne(op => op.Promotion)
+                .WithMany(p => p.Orders_Promotions)
+                .HasForeignKey(op => op.Promotion_Id);
+
+            //cart
+            modelBuilder.Entity<Account>()
+                .HasOne(a => a.Cart)  // Một Account có một Cart
+                .WithOne(c => c.Account)  // Một Cart thuộc về một Account
+                .HasForeignKey<Cart>(c => c.AccountId)  // Cart chứa khóa ngoại AccountId
+                .IsRequired(); // Đảm bảo mỗi Cart phải có một Account
+
+            modelBuilder.Entity<Cart_Item>()
+                .HasOne(ci => ci.Cart)
+                .WithMany(c => c.Cart_Items)
+                .HasForeignKey(ci => ci.Cart_Id);
+
+            modelBuilder.Entity<Cart_Item>()
+                .HasOne(ci => ci.Product)
+                .WithMany(ip => ip.Cart_Items)
+                .HasForeignKey(ci => ci.Product_Id);
+
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.Account)
+                .WithMany(a => a.Feedbacks)
+                .HasForeignKey(f => f.AccountId);
+
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.Order)
+                .WithMany(o => o.Feedbacks)
+                .HasForeignKey(f => f.OrderId);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Order)
+                .WithMany(o => o.Payments)
+                .HasForeignKey(p => p.OrderId);
+
+            modelBuilder.Entity<Customer>()
+                .HasOne(c => c.Account)
+                .WithMany(a => a.Customers)
+                .HasForeignKey(c => c.AccountId);
+
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.Account)
+                .WithMany(a => a.Employees)
+                .HasForeignKey(e => e.AccountId);
         }
     }
+
 }

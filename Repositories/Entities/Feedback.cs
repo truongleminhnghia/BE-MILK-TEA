@@ -19,10 +19,13 @@ namespace Repositories.Entities
         [Column("order_id")]
         [Required(ErrorMessage = " order id must be note null")]
         public Guid OrderId { get; set; }
+
         public Order? Order {get; set;}
 
         [Column("account_id")]
-        [Required(ErrorMessage = "account id must ne non null")]
+        [Required(ErrorMessage = "account id must be non null")]
         public Guid AccountId { get; set; }
+
+        public Account Account { get; set; }
     }
 }

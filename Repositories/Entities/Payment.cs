@@ -29,5 +29,8 @@ namespace Repositories.Entities
 
         [Column("transcation_id")]
         public string TranscationId { get; set; } = string.Empty;
+
+        //           setup relationship
+        public virtual Order Order { get; set; }
     }
 }

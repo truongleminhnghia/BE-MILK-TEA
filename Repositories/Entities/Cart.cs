@@ -16,5 +16,7 @@ namespace Repositories.Entities
         [Column("account_id")]
         public Guid AccountId {get; set; }
         public Account Account {get; set;}
+
+        public virtual ICollection<Cart_Item> Cart_Items { get; set; } = new List<Cart_Item>();
     }
 }

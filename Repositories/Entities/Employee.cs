@@ -16,5 +16,10 @@ namespace Repositories.Entities
 
         [Column("ref_code", TypeName = "varchar(100)")]
         public string RefCode { get; set; } = string.Empty;
+
+        [Column("account_id")]
+        public Guid AccountId { get; set; }
+
+        public Account Account { get; set; }
     }
 }

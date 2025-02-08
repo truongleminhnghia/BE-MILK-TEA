@@ -49,9 +49,9 @@ namespace Repositories.Entities
 
         //      setup relationship
         public virtual Category Category { get; set; }
-        public virtual ICollection<Image> Images { get; set; }
-        public virtual ICollection<Ingredient_Promotion> Ingredients_Promotions { get; set; }
+        public virtual ICollection<Image> Images { get; set; } = new List<Image>();
+        public virtual ICollection<Ingredient_Promotion>? Ingredients_Promotions { get; set; } = new List<Ingredient_Promotion>();
         public virtual ICollection<Ingredient_Recipe> Ingredient_Recipes { get; set; }
-        public virtual ICollection<Ingredient_Product> Products { get; set; }
+        public virtual ICollection<Ingredient_Product> Products { get; set; } = new List<Ingredient_Product>();
     }
 }

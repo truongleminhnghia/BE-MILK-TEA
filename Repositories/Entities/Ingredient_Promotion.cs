@@ -15,7 +15,7 @@ namespace Repositories.Entities
         [Column("promotion_id")]
         public Guid Promotion_Id { get; set; }
         //      setup relationship
-        public virtual Ingredient Ingredient { get; set; }
+        public virtual Ingredient? Ingredient { get; set; }
         public virtual Promotion Promotion { get; set; }
     }
 }

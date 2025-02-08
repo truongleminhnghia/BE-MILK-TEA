@@ -40,8 +40,16 @@ namespace Repositories.Entities
         public RoleNameEnum Role { get; set; } = RoleNameEnum.ROLE_CUSTOMER;
 
         //     setup relationship
-        public virtual ICollection<Account_Recipe> Accounts_Recipes { get; set; }
+        public virtual ICollection<Account_Recipe> Accounts_Recipes { get; set; } 
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
+
+        public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
+
+        public Cart Cart { get; set; }
+
+        public ICollection<Customer> Customers { get; set; } = new List<Customer>();
+
+        public ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 }
