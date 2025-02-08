@@ -38,5 +38,8 @@ namespace Repositories.Entities
         [Column("role_name")]
         [Required(ErrorMessage = "Role is required")]
         public RoleNameEnum Role { get; set; } = RoleNameEnum.ROLE_CUSTOMER;
+
+        //     setup relationship
+        public virtual ICollection<Account_Recipe> Accounts_Recipes { get; set; }
     }
 }
