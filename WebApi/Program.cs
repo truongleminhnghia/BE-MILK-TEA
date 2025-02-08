@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Repositories.Data;
 using Repositories.Implements;
 using Repositories.Interfaces;
+using DotNetEnv;
 using Services.Implements;
 using Services.Interfaces;
-using dotenv.net;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,18 +15,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // DotEnv.Load();
-DotNetEnv.Env.Load();
+Env.Load();
 // var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
 if (string.IsNullOrEmpty(connectionString))
 {
-    Console.WriteLine("⚠️ DATABASE_CONNECTION không được nạp từ .env!");
+    throw new Exception("DATABASE_CONNECTION is not set!");
 }
-else
-{
-    Console.WriteLine($"✅ Đã nạp DATABASE_CONNECTION: {connectionString}");
-}
+Console.WriteLine($"DATABASE_CONNECTION: {Environment.GetEnvironmentVariable("DATABASE_CONNECTION")}");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 // Cấu hình DbContext với MySQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

@@ -31,7 +31,7 @@ namespace Repositories.Entities
         [Column("phone_number")]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        [Column("account_status")]
+        [Column("account_status", TypeName = "Enum")]
         [Required(ErrorMessage = "Account status is required")]
         public AccountStatus AccountStatus { get; set; }
 
@@ -41,5 +41,7 @@ namespace Repositories.Entities
 
         //     setup relationship
         public virtual ICollection<Account_Recipe> Accounts_Recipes { get; set; }
+
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }
