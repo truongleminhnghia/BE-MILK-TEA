@@ -12,7 +12,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("employ_id")]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Column("ref_code", TypeName = "varchar(100)")]
         public string RefCode { get; set; } = string.Empty;
@@ -21,5 +21,13 @@ namespace Repositories.Entities
         public Guid AccountId { get; set; }
 
         public Account Account { get; set; }
+
+        // constructor
+        public Employee(string refCode, Guid accountId)
+        {
+            Id = Guid.NewGuid();
+            RefCode = refCode;
+            AccountId = accountId;
+        }
     }
 }

@@ -13,26 +13,36 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("promotion_id")]
-        public Guid Promotion_Id { get; set; } = Guid.NewGuid();
+        public Guid PromotionId { get; set; }
 
         [Column("promotion_code", TypeName = "varchar(300)")]
-        public string Promotion_Code { get; set; }
+        public string PromotionCode { get; set; }
 
         [Column("start_date")]
-        public DateTime Start_Date { get; set; }
+        public DateTime StartDate { get; set; }
 
         [Column("end_date")]
-        public DateTime End_Date { get; set; }
+        public DateTime EndDate { get; set; }
 
         [Column("promotion_type")]
-        public PromotionTypeEnum Promotion_Type { get; set; }
+        public PromotionTypeEnum PromotionType { get; set; }
 
         [Column("is_active")]
-        public bool Is_Active { get; set; } = false;
+        public bool IsActive { get; set; } = false;
 
-        //     setup relationship
-        public virtual ICollection<Ingredient_Promotion> Ingredients_Promotions { get; set; }
-        public virtual ICollection<Order_Promotion> Orders_Promotions { get; set; }
-        public virtual Promotion_Detail Promotion_Detail { get; set; }
+        // Setup relationships
+        public virtual ICollection<IngredientPromotion> IngredientPromotions { get; set; }
+        public virtual ICollection<OrderPromotion> OrderPromotions { get; set; }
+        public virtual PromotionDetail PromotionDetail { get; set; }
+
+        // Constructor
+        public Promotion(string promotionCode, DateTime startDate, DateTime endDate, PromotionTypeEnum promotionType)
+        {
+            PromotionId = Guid.NewGuid();
+            PromotionCode = promotionCode;
+            StartDate = startDate;
+            EndDate = endDate;
+            PromotionType = promotionType;
+        }
     }
 }

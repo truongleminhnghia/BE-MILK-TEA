@@ -12,11 +12,16 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("cart_id")]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
         [Column("account_id")]
         public Guid AccountId {get; set; }
         public Account Account {get; set;}
 
-        public virtual ICollection<Cart_Item> Cart_Items { get; set; } = new List<Cart_Item>();
+        public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+
+        public Cart()
+        {
+            AccountId = Guid.NewGuid();
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("account_id")]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Column("first_name", TypeName = "nvarchar(300)")]
         public string FirstName { get; set; } = string.Empty;
@@ -40,8 +40,6 @@ namespace Repositories.Entities
         public RoleNameEnum Role { get; set; } = RoleNameEnum.ROLE_CUSTOMER;
 
         //     setup relationship
-        public virtual ICollection<Account_Recipe> Accounts_Recipes { get; set; } 
-
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
         public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
@@ -51,5 +49,18 @@ namespace Repositories.Entities
         public ICollection<Customer> Customers { get; set; } = new List<Customer>();
 
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
+
+        //     constructor
+        public Account(string firstName, string lastName, string email, string password, string phoneNumber, AccountStatus accountStatus, RoleNameEnum role)
+        {
+            Id = Guid.NewGuid();
+            FirstName = firstName;
+            LastName = lastName;
+            Email = email;
+            Pasword = password;
+            PhoneNumber = phoneNumber;
+            AccountStatus = accountStatus;
+            Role = role;
+        }
     }
 }

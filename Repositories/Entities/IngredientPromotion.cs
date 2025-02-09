@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 
 namespace Repositories.Entities
 {
-    public class Ingredient_Promotion
+    public class IngredientPromotion
     {
         [Column("ingredient_id")]
-        public Guid Ingredient_Id { get; set; }
+        public Guid IngredientId { get; set; }
 
         [Column("promotion_id")]
-        public Guid Promotion_Id { get; set; }
+        public Guid PromotionId { get; set; }
+
         //      setup relationship
         public virtual Ingredient? Ingredient { get; set; }
         public virtual Promotion Promotion { get; set; }

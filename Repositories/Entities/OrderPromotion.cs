@@ -1,9 +1,9 @@
 ﻿namespace Repositories.Entities
 {
-    public class Order_Promotion
+    public class OrderPromotion
     {
-        public Guid Order_Id { get; set; }
-        public Guid Promotion_Id { get; set; }
+        public Guid OrderId { get; set; }
+        public Guid PromotionId { get; set; }
         public virtual Order? Order { get; set; }
         public virtual Promotion Promotion { get; set; }
     }

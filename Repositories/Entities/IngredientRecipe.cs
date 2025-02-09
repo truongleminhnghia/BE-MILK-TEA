@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Repositories.Entities
 {
-    public class Ingredient_Recipe
+    public class IngredientRecipe
     {
-        public Guid Ingredient_Id { get; set; }
-        public Guid Recipe_Id { get; set; }
+        public Guid IngredientId { get; set; }
+        public Guid RecipeId { get; set; }
 
         //     setup relationship
         public virtual Ingredient Ingredient { get; set; }

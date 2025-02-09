@@ -13,7 +13,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("order_ID")]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Column("account_id")]
         public Guid AccountId { get; set; }
@@ -60,11 +60,29 @@ namespace Repositories.Entities
 
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
-        public ICollection<Order_Detail> OrderDetails { get; set; } = new List<Order_Detail>();
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
-        public ICollection<Order_Promotion> OrderDetails_Promotion { get; set; }
+        public ICollection<OrderPromotion> OrderDetails_Promotion { get; set; }
 
         public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
+
+        // Constructor
+        public Order(Guid accountId, string refCode, string orderCode, DateTime orderDate, string fullNameShipping, string addressShipping, string phoneShpping, string email, OrderStatus orderStatus, int quantity, double totalAmount, double pricePromotion)
+        {
+            Id = Guid.NewGuid();
+            AccountId = accountId;
+            RefCode = refCode;
+            OrderCode = orderCode;
+            OrderDate = orderDate;
+            FullNameShipping = fullNameShipping;
+            AddressShipping = addressShipping;
+            PhoneShpping = phoneShpping;
+            Email = email;
+            OrderStatus = orderStatus;
+            Quantity = quantity;
+            TotalAmount = totalAmount;
+            PricePromotion = pricePromotion;
+        }
 
     }
 }

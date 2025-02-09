@@ -12,24 +12,34 @@ namespace Repositories.Entities
     {
         [Key]
         [Column ("recipe_id")]
-        public Guid Recipe_Id { get; set; } = Guid.NewGuid();
+        public Guid RecipeId { get; set; }
 
         [Column ("recipe_code", TypeName = "nvarchar(300)")]
-        public string Recipe_Code { get; set; }
+        public string RecipeCode { get; set; }
         
         [Column ("recipe_title", TypeName = "nvarchar(300)")]
-        public string Recipe_title { get; set; }
+        public string RecipeTitle { get; set; }
 
         [Column ("content", TypeName = "nvarchar")]
         [MaxLength (1000)]
         public string Content { get; set; }
 
         [Column("category_id")]
-        public Guid Category_Id { get; set; }
+        public Guid CategoryId { get; set; }
 
         //      setup relationship
         public virtual Category Category { get; set; }
-        public virtual ICollection<Ingredient_Recipe> Ingredients_Recipes { get; set; }
+        public virtual ICollection<IngredientRecipe> Ingredients_Recipes { get; set; }
+
+        //     constructor
+        public Recipe(string recipeCode, string recipeTitle, string content, Guid categoryId)
+        {
+            RecipeId = Guid.NewGuid();
+            RecipeCode = recipeCode;
+            RecipeTitle = recipeTitle;
+            Content = content;
+            CategoryId = categoryId;
+        }
 
     }
 }

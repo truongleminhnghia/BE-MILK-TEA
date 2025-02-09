@@ -11,16 +11,24 @@ namespace Repositories.Entities
     public class Image
     {
         [Key]
-        [Column ("image_id")]
-        public Guid Image_Id { get; set; } = Guid.NewGuid();
+        [Column("image_id")]
+        public Guid ImageId { get; set; }
 
         [Column("image_url")]
-        public string Image_Url { get; set; }
+        public string ImageUrl { get; set; }
 
         [Column("ingredient_id")]
-        public Guid Ingredient_Id { get; set; }
+        public Guid IngredientId { get; set; }
 
-        //      setup relationship
+        // Setup relationship
         public virtual Ingredient Ingredient { get; set; }
+
+        // Constructor
+        public Image(string imageUrl, Guid ingredientId)
+        {
+            ImageId = Guid.NewGuid();
+            ImageUrl = imageUrl;
+            IngredientId = ingredientId;
+        }
     }
 }
