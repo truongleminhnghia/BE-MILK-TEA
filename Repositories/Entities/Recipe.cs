@@ -14,6 +14,9 @@ namespace Repositories.Entities
         [Column ("recipe_id")]
         public Guid Recipe_Id { get; set; } = Guid.NewGuid();
 
+        [Column ("recipe_code", TypeName = "nvarchar(300)")]
+        public string Recipe_Code { get; set; }
+        
         [Column ("recipe_title", TypeName = "nvarchar(300)")]
         public string Recipe_title { get; set; }
 
@@ -27,8 +30,6 @@ namespace Repositories.Entities
         //      setup relationship
         public virtual Category Category { get; set; }
         public virtual ICollection<Ingredient_Recipe> Ingredients_Recipes { get; set; }
-        public virtual ICollection<Account_Recipe> Accounts_Recipes { get; set; }
-
 
     }
 }
