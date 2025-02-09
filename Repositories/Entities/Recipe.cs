@@ -29,7 +29,7 @@ namespace Repositories.Entities
 
         //      setup relationship
         public virtual Category Category { get; set; }
-        public virtual ICollection<IngredientRecipe> Ingredients_Recipes { get; set; }
+        public virtual ICollection<IngredientRecipe> IngredientsRecipes { get; set; }
 
         //     constructor
         public Recipe(string recipeCode, string recipeTitle, string content, Guid categoryId)

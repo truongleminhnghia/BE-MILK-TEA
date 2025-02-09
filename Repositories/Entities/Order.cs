@@ -62,7 +62,7 @@ namespace Repositories.Entities
 
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
-        public ICollection<OrderPromotion> OrderDetails_Promotion { get; set; }
+        public ICollection<OrderPromotion> OrdersPromotions { get; set; }
 
         public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
