@@ -12,7 +12,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("customer_id")]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Column("account_id")]
         public Guid AccountId { get; set; }
@@ -26,9 +26,11 @@ namespace Repositories.Entities
         public Account Account { get; set; }
 
         //     constructor
+        public Customer()
+        {
+        }
         public Customer(Guid accountId, string address, string taxCode)
         {
-            Id = Guid.NewGuid();
             AccountId = accountId;
             Address = address;
             TaxCode = taxCode;

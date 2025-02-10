@@ -13,7 +13,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("ingredient_product_id")]
-        public Guid IngredientProductId { get; set; }
+        public Guid IngredientProductId { get; set; } = Guid.NewGuid();
 
         [Column("total_price")]
         public int TotalPrice { get; set; }
@@ -36,9 +36,11 @@ namespace Repositories.Entities
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
         // Constructor
+        public IngredientProduct()
+        {
+        }
         public IngredientProduct(int totalPrice, bool isSale, int quantity, ProductTypeEnum unit, Guid ingredientId)
         {
-            IngredientProductId = Guid.NewGuid();
             TotalPrice = totalPrice;
             IsSale = isSale;
             Quantity = quantity;

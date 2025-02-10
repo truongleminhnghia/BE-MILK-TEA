@@ -7,7 +7,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("cart_item_id")]
-        public Guid CartItemId { get; set; }
+        public Guid CartItemId { get; set; } = Guid.NewGuid();
 
         [Column("cart_id")]
         public Guid CartId { get; set; }
@@ -23,9 +23,11 @@ namespace Repositories.Entities
         public virtual IngredientProduct Product { get; set; }
 
         // Constructor
+        public CartItem()
+        {
+        }
         public CartItem(Guid cartId, Guid productId, int quantity)
         {
-            CartItemId = Guid.NewGuid();
             CartId = cartId;
             ProductId = productId;
             Quantity = quantity;

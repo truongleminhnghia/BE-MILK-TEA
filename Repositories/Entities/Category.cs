@@ -13,7 +13,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("category_id")]
-        public Guid CategoryId { get; set; }
+        public Guid CategoryId { get; set; } = Guid.NewGuid();
 
         [Column("category_name", TypeName = "nvarchar(300)")]
         public string CategoryName { get; set; }
@@ -29,9 +29,11 @@ namespace Repositories.Entities
         public virtual ICollection<Recipe>? Recipes { get; set; } = new List<Recipe>();
 
         // Constructor
+        public Category()
+        {
+        }
         public Category(string categoryName, CategoryStatusEnum categoryStatus, string categoryType)
         {
-            CategoryId = Guid.NewGuid();
             CategoryName = categoryName;
             CategoryStatus = categoryStatus;
             CategoryType = categoryType;

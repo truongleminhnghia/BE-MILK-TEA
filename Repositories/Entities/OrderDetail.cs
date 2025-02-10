@@ -7,7 +7,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("order_detail_id")]
-        public Guid OrderDetailId { get; set; }
+        public Guid OrderDetailId { get; set; } = Guid.NewGuid();
 
         [Column("order_id")]
         public Guid OrderId { get; set; }
@@ -26,9 +26,11 @@ namespace Repositories.Entities
         public virtual IngredientProduct IngredientProduct { get; set; }
 
         // constructor
+        public OrderDetail()
+        {
+        }
         public OrderDetail(Guid orderId, Guid productId, int quantity, double totalAmount)
         {
-            OrderDetailId = Guid.NewGuid();
             OrderId = orderId;
             IngredientProductId = productId;
             Quantity = quantity;

@@ -13,7 +13,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("promotion_id")]
-        public Guid PromotionId { get; set; }
+        public Guid PromotionId { get; set; } = Guid.NewGuid();
 
         [Column("promotion_code", TypeName = "varchar(300)")]
         public string PromotionCode { get; set; }
@@ -36,9 +36,11 @@ namespace Repositories.Entities
         public virtual PromotionDetail PromotionDetail { get; set; }
 
         // Constructor
+        public Promotion()
+        {
+        }
         public Promotion(string promotionCode, DateTime startDate, DateTime endDate, PromotionTypeEnum promotionType)
         {
-            PromotionId = Guid.NewGuid();
             PromotionCode = promotionCode;
             StartDate = startDate;
             EndDate = endDate;

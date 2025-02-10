@@ -9,6 +9,6 @@ namespace Repositories.Enums
     public enum ProductTypeEnum
     {
         PACKAGE,
-        BIN
+        BIN //1 bin = 12 packages
     }
 }

@@ -32,5 +32,18 @@ namespace Repositories.Entities
 
         //           setup relationship
         public virtual Order Order { get; set; }
+
+        // constructor
+        public Payment()
+        {
+        }
+
+        public Payment(Guid orderId, PaymentMethod paymentMethod, PaymentStatus paymentStatus, string transcationId)
+        {
+            OrderId = orderId;
+            PaymentMethod = paymentMethod;
+            PaymentStatus = paymentStatus;
+            TranscationId = transcationId;
+        }
     }
 }

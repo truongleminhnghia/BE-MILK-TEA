@@ -12,7 +12,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("image_id")]
-        public Guid ImageId { get; set; }
+        public Guid ImageId { get; set; } = Guid.NewGuid();
 
         [Column("image_url")]
         public string ImageUrl { get; set; }
@@ -24,9 +24,11 @@ namespace Repositories.Entities
         public virtual Ingredient Ingredient { get; set; }
 
         // Constructor
+        public Image()
+        {
+        }
         public Image(string imageUrl, Guid ingredientId)
         {
-            ImageId = Guid.NewGuid();
             ImageUrl = imageUrl;
             IngredientId = ingredientId;
         }

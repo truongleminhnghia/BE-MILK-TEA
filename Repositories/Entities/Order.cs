@@ -13,7 +13,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("order_ID")]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Column("account_id")]
         public Guid AccountId { get; set; }
@@ -67,9 +67,11 @@ namespace Repositories.Entities
         public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
         // Constructor
+        public Order()
+        {
+        }
         public Order(Guid accountId, string refCode, string orderCode, DateTime orderDate, string fullNameShipping, string addressShipping, string phoneShpping, string email, OrderStatus orderStatus, int quantity, double totalAmount, double pricePromotion)
         {
-            Id = Guid.NewGuid();
             AccountId = accountId;
             RefCode = refCode;
             OrderCode = orderCode;

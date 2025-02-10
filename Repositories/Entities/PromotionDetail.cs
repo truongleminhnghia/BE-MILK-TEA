@@ -13,7 +13,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("promotion_detail_id")]
-        public Guid PromotionDetailId { get; set; }
+        public Guid PromotionDetailId { get; set; } = Guid.NewGuid();
 
         [Column("promotion_name", TypeName = "nvarchar(300)")]
         public string PromotionName { get; set; }
@@ -40,9 +40,11 @@ namespace Repositories.Entities
         public virtual Promotion Promotion { get; set; }
 
         // constructor
+        public PromotionDetail()
+        {
+        }
         public PromotionDetail(string promotionName, string promotionDescription, int promotionDiscount, int minimumOrderValue, int maximumDiscount, Guid promotionId)
         {
-            PromotionDetailId = Guid.NewGuid();
             PromotionName = promotionName;
             PromotionDescription = promotionDescription;
             PromotionDiscount = promotionDiscount;

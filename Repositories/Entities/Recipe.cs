@@ -12,7 +12,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column ("recipe_id")]
-        public Guid RecipeId { get; set; }
+        public Guid RecipeId { get; set; } = Guid.NewGuid();
 
         [Column ("recipe_code", TypeName = "nvarchar(300)")]
         public string RecipeCode { get; set; }
@@ -32,9 +32,11 @@ namespace Repositories.Entities
         public virtual ICollection<IngredientRecipe> IngredientsRecipes { get; set; }
 
         //     constructor
+        public Recipe()
+        {
+        }
         public Recipe(string recipeCode, string recipeTitle, string content, Guid categoryId)
         {
-            RecipeId = Guid.NewGuid();
             RecipeCode = recipeCode;
             RecipeTitle = recipeTitle;
             Content = content;

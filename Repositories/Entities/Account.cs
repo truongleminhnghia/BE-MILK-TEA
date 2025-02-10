@@ -13,7 +13,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("account_id")]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Column("first_name", TypeName = "nvarchar(300)")]
         public string FirstName { get; set; } = string.Empty;
@@ -51,9 +51,11 @@ namespace Repositories.Entities
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
 
         //     constructor
+        public Account()
+        {
+        }
         public Account(string firstName, string lastName, string email, string password, string phoneNumber, AccountStatus accountStatus, RoleNameEnum role)
         {
-            Id = Guid.NewGuid();
             FirstName = firstName;
             LastName = lastName;
             Email = email;

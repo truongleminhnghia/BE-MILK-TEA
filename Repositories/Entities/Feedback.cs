@@ -11,7 +11,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("feedback_id")]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Column("comment", TypeName = "nvarchar(500 )")]
         public string Comment { get; set; } = string.Empty;
@@ -29,9 +29,11 @@ namespace Repositories.Entities
         public Account Account { get; set; }
 
         // constructor
+        public Feedback()
+        {
+        }
         public Feedback(string comment, Guid orderId, Order? order, Guid accountId)
         {
-            Id = Guid.NewGuid();
             Comment = comment;
             OrderId = orderId;
             AccountId = accountId;

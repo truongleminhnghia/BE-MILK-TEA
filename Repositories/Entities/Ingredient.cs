@@ -14,7 +14,7 @@ namespace Repositories.Entities
     {
         [Key]
         [Column("ingredient_id")]
-        public Guid IngredientId { get; set; }
+        public Guid IngredientId { get; set; } = Guid.NewGuid();
 
         [Column("ingredient_code", TypeName = "varchar(300)")]
         public string IngredientCode { get; set; }
@@ -56,9 +56,11 @@ namespace Repositories.Entities
         public virtual ICollection<IngredientProduct> Products { get; set; } = new List<IngredientProduct>();
 
         //      constructor
+        public Ingredient()
+        {
+        }
         public Ingredient(string ingredientCode, string supplier, string description, string foodSafetyCertification, DateTime expiredDate, Guid imageId, IngredientStatusEnum ingredientStatus, float unit, int pricePromotion, Guid categoryId)
         {
-            IngredientId = Guid.NewGuid();
             //IngredientCode = ingredientCode ?? throw new ArgumentNullException(nameof(ingredientCode));
             //Supplier = supplier ?? throw new ArgumentNullException(nameof(supplier));
             //Description = description;
