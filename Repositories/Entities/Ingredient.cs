@@ -10,6 +10,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Repositories.Entities
 {
+    [Table("ingredient")]
     public partial class Ingredient : BaseEntity
     {
         [Key]

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Repositories.Entities
 {
+    [Table("category")]
     public class Category
     {
         [Key]

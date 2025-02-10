@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Repositories.Entities
 {
-
+    [Table("promotion_detail")]
     public class PromotionDetail
     {
         [Key]

@@ -1,5 +1,8 @@
-﻿namespace Repositories.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Repositories.Entities
 {
+    [Table("order_promotion")]
     public class OrderPromotion
     {
         public Guid OrderId { get; set; }

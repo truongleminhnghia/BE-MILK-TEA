@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Repositories.Entities
 {
+    [Table("cart_item")]
     public class CartItem
     {
         [Key]

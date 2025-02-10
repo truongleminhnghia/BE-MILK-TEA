@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Repositories.Entities
 {
+    [Table("recipe")]
     public class Recipe
     {
         [Key]

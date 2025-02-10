@@ -9,6 +9,7 @@ using Repositories.Enums;
 
 namespace Repositories.Entities
 {
+    [Table("ingredient_product")]
     public class IngredientProduct
     {
         [Key]

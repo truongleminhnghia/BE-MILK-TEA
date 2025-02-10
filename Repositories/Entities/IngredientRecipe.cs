@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Repositories.Entities
 {
+    [Table("ingredient_recipe")]
     public class IngredientRecipe
     {
         public Guid IngredientId { get; set; }

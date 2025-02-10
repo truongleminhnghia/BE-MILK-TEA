@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Repositories.Entities
 {
+    [Table("ingredient_promotion")]
     public class IngredientPromotion
     {
         [Column("ingredient_id")]

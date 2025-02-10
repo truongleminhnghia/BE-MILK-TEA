@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Repositories.Entities
 {
+    [Table("feedback")]
     public class Feedback : BaseEntity
     {
         [Key]

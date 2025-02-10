@@ -8,7 +8,7 @@ using Repositories.Enums;
 
 namespace Repositories.Entities
 {
-    [Table("[payment]")]
+    [Table("payments")]
     public class Payment : BaseEntity
     {
         [Key]
