@@ -1,5 +1,5 @@
 # BE-MILK-TEA
-# Project Class SWD391
+# Project Class SWD392
 Build a web application to manage and sell beauty care cosmetics
 
 # How to run
@@ -7,7 +7,7 @@ Build a web application to manage and sell beauty care cosmetics
 ```bash
 git clone https://github.com/truongleminhnghia/BE-MILK-TEA.git
 ```
-- Open om you preferred IDE.<br>
+- Open on you preferred IDE.<br>
     or
 - Navigate to the project directory:
 ```bash
