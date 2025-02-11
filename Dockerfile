@@ -4,9 +4,9 @@ WORKDIR /app
 
 # Copy tất cả project vào container
 COPY *.sln ./
-COPY Repositories/*.csproj ./Repositories/
-COPY Services/*.csproj ./Services/
-COPY WebApi/*.csproj ./WebApi/
+COPY Repositories/*.csproj ./Data_Access_Layer/
+COPY Services/*.csproj ./Business_Logic_Layer/
+COPY WebApi/*.csproj ./WebAPI/
 
 # Restore dependencies
 RUN dotnet restore
@@ -15,7 +15,7 @@ RUN dotnet restore
 COPY . .
 
 # Build ứng dụng
-RUN dotnet publish WebApi/WebApi.csproj -c Release -o /out
+RUN dotnet publish WebAPI/WebAPI.csproj -c Release -o /out
 
 # Sử dụng runtime để chạy app
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
