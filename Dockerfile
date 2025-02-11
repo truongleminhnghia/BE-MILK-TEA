@@ -6,7 +6,7 @@ WORKDIR /app
 COPY *.sln ./
 COPY Repositories/*.csproj ./Data_Access_Layer/
 COPY Services/*.csproj ./Business_Logic_Layer/
-COPY WebApi/*.csproj ./WebAPI/
+COPY WebAPI/*.csproj ./WebAPI/
 
 # Restore dependencies
 RUN dotnet restore
@@ -23,4 +23,4 @@ WORKDIR /app
 COPY --from=build /out .
 
 # Chạy ứng dụng WebApi
-ENTRYPOINT ["dotnet", "WebApi.dll"]
+ENTRYPOINT ["dotnet", "WebAPI.dll"]
