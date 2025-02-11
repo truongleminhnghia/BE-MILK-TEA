@@ -2,13 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Data_Access_Layer.Repositories.Entities;
 
-namespace Business_Logic_Layer.Services
+namespace Business_Logic_Layer.AutoMappers
 {
-    public interface IAccountService
+    public class AccountMapper : Profile
     {
-        Task<Account> Register(RegisterRequest _request);
+        public AccountMapper()
+        {
+            CreateMap<RegisterRequest, Account>();
+        }
     }
 }

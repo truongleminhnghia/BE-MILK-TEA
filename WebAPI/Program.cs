@@ -1,6 +1,7 @@
 using Data_Access_Layer.Repositories.Data;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using Business_Logic_Layer.AutoMappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
          )
      );
 });
+
+
+builder.Services.AddAutoMapper(typeof(AccountMapper));
 
 var app = builder.Build();
 

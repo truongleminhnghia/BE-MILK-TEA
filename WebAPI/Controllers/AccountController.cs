@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Repositories.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +27,8 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var account = await _accountService.Register(_account);
+                RegisterRequest registerRequest = new RegisterRequest();
+                var account = await _accountService.Register(registerRequest);
                 return Ok(new { Account = account });
             }
             catch (ArgumentException ex)
