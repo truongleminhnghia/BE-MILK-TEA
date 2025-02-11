@@ -19,19 +19,21 @@ var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
 var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
-var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+// var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new Exception("DATABASE_CONNECTION is not set!");
-}
-Console.WriteLine($"DATABASE_CONNECTION: {Environment.GetEnvironmentVariable("DATABASE_CONNECTION")}");
+// if (string.IsNullOrEmpty(connectionString))
+// {
+//     throw new Exception("DATABASE_CONNECTION is not set!");
+// }
+// Console.WriteLine($"DATABASE_CONNECTION: {Environment.GetEnvironmentVariable("DATABASE_CONNECTION")}");
 
 // Cấu hình DbContext với MySQL
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+     Console.WriteLine($"Using connection string: {connectionString}");
     options.UseMySql(
          connectionString,
          new MySqlServerVersion(new Version(8, 0, 31)),
