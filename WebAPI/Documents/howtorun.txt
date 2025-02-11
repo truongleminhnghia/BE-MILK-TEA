@@ -1,0 +1,15 @@
+
+
+Để run project thì dùng VS hoặc VSCode đều được
+Hiện tại chưa có cách fix để chạy nới NUGET nên tất cả ae đều mở terminal lên chạy
+
+Đối với những ae ko tạo database, thì clone project về và thực hiện STEP1,2,4
+
+STEP1: Đứng tại thư mục root của project mở terminal
+STEP2: chạy biến môi trường:
+        - $env:DATABASE_CONNECTION="Server=localhost;Port=3306;User Id=root;Password=Nghia_2003;Database=DB_MILK_TEA;SslMode=Required;"
+        - chỉnh sữa lại server, port ...
+STEP3: chạy lệnh:
+        - dotnet ef migrations add InitCreate --project ./Data_Access_Layer --startup-project ./WebAPI
+STEP4: chạy lệnh update:
+        - dotnet ef database update --project ./Data_Access_Layer --startup-project ./WebAPI
