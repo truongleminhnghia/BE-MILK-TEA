@@ -62,3 +62,10 @@ namespace Data_Access_Layer.Repositories.Entities
         }
     }
 }
+
+// đk, đn, change pass, edit CRUD <oauth2> GG FB
+// đk - GG, FB // trả về FE một link, (url, url return)
+// URL FE: localhost:5170
+// DK - LOCAL (Email) --> xác thực OPT
+// LOCAL -> tạo account (STAUT đang chờ xác thực), nhập OTP thsanhf công thì --- active
+// Mua -> check status

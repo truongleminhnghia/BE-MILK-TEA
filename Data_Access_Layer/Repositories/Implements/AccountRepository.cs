@@ -19,9 +19,11 @@ namespace Data_Access_Layer.Repositories.Implements
             _context = context;
         }
 
-        public Task<Account> Create(Account _account)
+        public async Task<Account> Create(Account _account)
         {
-            return Task.FromResult(_account);
+            _context.Accounts.Add(_account);  
+            await _context.SaveChangesAsync(); 
+            return _account;
         }
 
         public Task<Account> GetByEmail(string _email)
