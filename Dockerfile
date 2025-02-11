@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy tất cả project vào container
 COPY *.sln ./
 COPY Data_Access_Layer/*.csproj ./Data_Access_Layer/
-COPY Data_Access_Layer/*.csproj ./Business_Logic_Layer/
+COPY Business_Logic_Layer/*.csproj ./Business_Logic_Layer/
 COPY WebAPI/*.csproj ./WebAPI/
 
 # Restore dependencies
