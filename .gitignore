@@ -401,5 +401,5 @@ FodyWeavers.xsd
 *.sln.iml
 
 .env
-# Ignore launchSettings.json
-WebAPI/Properties/launchSettings.json
+WebAPI/Properties/
+
