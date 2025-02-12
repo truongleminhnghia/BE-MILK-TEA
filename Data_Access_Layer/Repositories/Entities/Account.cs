@@ -28,6 +28,9 @@ namespace Data_Access_Layer.Repositories.Entities
         [Column("first_name", TypeName = "nvarchar(300)")]
         public string FirstName { get; set; } = string.Empty;
 
+        [Column("password", TypeName = "nvarchar(200)")]
+        public string Password { get; set; } = string.Empty;
+
         [Column("account_status", TypeName = "varchar(50)")]
         [Required]
         [EnumDataType(typeof(AccountStatus))]

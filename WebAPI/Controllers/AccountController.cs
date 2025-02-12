@@ -26,19 +26,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Register(RegisterRequest _request)
-        {
-            try
-            {
-                var account = await _accountService.Register(_request);
-                return Ok(new { Account = account });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { Message = ex.Message });
-            }
-        }
+        
 
     }
 }

@@ -10,6 +10,7 @@ namespace Data_Access_Layer.Enum
     {
         ACTIVE,
         CONFIRM,
-        NO_ACTIVE
+        NO_ACTIVE,
+        AWAITING_CONFIRM
     }
 }

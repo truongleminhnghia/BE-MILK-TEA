@@ -21,19 +21,19 @@ namespace Data_Access_Layer.Repositories.Implements
 
         public async Task<Account> Create(Account _account)
         {
-            _context.Accounts.Add(_account);  
-            await _context.SaveChangesAsync(); 
+            _context.Accounts.Add(_account);
+            await _context.SaveChangesAsync();
             return _account;
         }
 
-        public Task<Account> GetByEmail(string _email)
+        public async Task<Account?> GetByEmail(string _email)
         {
-            throw new NotImplementedException();
+            return await _context.Accounts.FirstOrDefaultAsync(a => a.Email == _email);
         }
 
-        public Task<Account> GetById(string _id)
+        public async Task<Account?> GetById(string _id)
         {
-            throw new NotImplementedException();
+            return await _context.Accounts.FirstAsync(a => a.Id.Equals(_id));
         }
     }
 }

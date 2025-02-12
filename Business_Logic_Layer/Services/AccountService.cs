@@ -21,7 +21,13 @@ namespace Business_Logic_Layer.Services
         {
             _accountRepository = accountRepository;
             _mapper = mapper;
-        } 
+        }
+
+        public Task<AccountResponse> Create(RegisterRequest _request)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<AccountResponse> Register(RegisterRequest _request)
         {
             // var existingAccountByEmail = await _accountRepository.GetByEmail(_request.Email);
@@ -37,3 +43,6 @@ namespace Business_Logic_Layer.Services
         }
     }
 }
+
+// đk -> GG, FB, LOCAL (params) (GG, FB ko sử dụng MK, và mặc định với ROLE_CUSTOMER) 
+// khi nó là LOCAL phải check ROLE là ADMIN hay ko phải ADMIN, nếu là ADMIN mở full ROLE nếu ko PHẢI ADMIN thì mặc định nó ra user

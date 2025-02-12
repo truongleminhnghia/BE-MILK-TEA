@@ -49,6 +49,11 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("nvarchar(300)")
                         .HasColumnName("last_name");
 
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("password");
+
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("varchar(15)")
