@@ -68,14 +68,15 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("quantity")]
         [Required]
-        public int Quantity { get; set; }
+        public int Quantity { get; set; } // quantity của bịch
 
         [Column("is_sale")]
         [Required]
         public bool IsSale { get; set; }
 
         [Column("rate")]
-        public float Rate { get; set; }
+        public float Rate { get; set; } // tính TB 4 + 5 /2
+         // bổ sung bình luận
 
         public ICollection<Image>? Images { get; set; }
         public ICollection<IngredientReview>? IngredientReviews { get; set; }
@@ -84,3 +85,6 @@ namespace Data_Access_Layer.Repositories.Entities
         public Category? Category { get; set; }
     }
 }
+
+// isStaff = true ==> crud
+// customer: xemmmm

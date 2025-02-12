@@ -13,7 +13,7 @@ namespace Data_Access_Layer.Repositories.Entities
         [Key]
         [Column("customer_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Column("account_id")]
         [Required]

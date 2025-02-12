@@ -22,6 +22,7 @@ namespace Data_Access_Layer.Migrations
                     email = table.Column<string>(type: "nvarchar(300)", nullable: false),
                     last_name = table.Column<string>(type: "nvarchar(300)", nullable: false),
                     first_name = table.Column<string>(type: "nvarchar(300)", nullable: false),
+                    password = table.Column<string>(type: "nvarchar(200)", nullable: false),
                     account_status = table.Column<string>(type: "varchar(50)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     phone_number = table.Column<string>(type: "varchar(15)", nullable: false)

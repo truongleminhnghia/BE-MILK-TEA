@@ -9,7 +9,7 @@ namespace Data_Access_Layer.Repositories.Interfaces
     public interface IAccountRepository
     {
         Task<Account> Create(Account _account);
-        Task<Account> GetById(string _id);
-        Task<Account> GetByEmail(string _email);
+        Task<Account?> GetById(string _id);
+        Task<Account?> GetByEmail(string _email);
     }
 }
