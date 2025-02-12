@@ -15,7 +15,7 @@ namespace Data_Access_Layer.Repositories.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } 
 
-        [Column("image_url", TypeName = "nvarchar(500)")]
+        [Column("image_url", TypeName = "nvarchar(500)")] // URL
         public string? ImageUrl { get; set; }
 
         [Column("ingredient_id")]

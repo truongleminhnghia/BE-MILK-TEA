@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250211075723_InitCreate")]
+    [Migration("20250212035440_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
@@ -51,6 +51,11 @@ namespace Data_Access_Layer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(300)")
                         .HasColumnName("last_name");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("password");
 
                     b.Property<string>("Phone")
                         .IsRequired()

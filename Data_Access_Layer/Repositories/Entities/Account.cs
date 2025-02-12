@@ -28,6 +28,9 @@ namespace Data_Access_Layer.Repositories.Entities
         [Column("first_name", TypeName = "nvarchar(300)")]
         public string FirstName { get; set; } = string.Empty;
 
+        [Column("password", TypeName = "nvarchar(200)")]
+        public string Password { get; set; } = string.Empty;
+
         [Column("account_status", TypeName = "varchar(50)")]
         [Required]
         [EnumDataType(typeof(AccountStatus))]
@@ -62,3 +65,10 @@ namespace Data_Access_Layer.Repositories.Entities
         }
     }
 }
+
+// đk, đn, change pass, edit CRUD <oauth2> GG FB
+// đk - GG, FB // trả về FE một link, (url, url return)
+// URL FE: localhost:5170
+// DK - LOCAL (Email) --> xác thực OPT
+// LOCAL -> tạo account (STAUT đang chờ xác thực), nhập OTP thsanhf công thì --- active
+// Mua -> check status
