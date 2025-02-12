@@ -402,4 +402,4 @@ FodyWeavers.xsd
 
 .env
 # Ignore launchSettings.json
-Properties/launchSettings.json
+WebAPI/Properties/launchSettings.json
