@@ -24,6 +24,12 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
+      "SERVER_LOCAL": "localhost",
+      "PORT_LOCAL": "3306",
+      "USER_LOCAL": "root",
+      "PASSWORD_LOCAL": "Nghia_2003",
+      "DATABASE_NAME_LOCAL": "DB_MILK_TEA",
+      "SSLMODE": "Required",
       "applicationUrl": "https://localhost:7190;http://localhost:5181",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
