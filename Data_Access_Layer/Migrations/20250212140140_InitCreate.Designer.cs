@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250212035440_InitCreate")]
+    [Migration("20250212140140_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
@@ -533,9 +533,9 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("order_detail_id");
 
-                    b.Property<Guid>("IngredientId")
+                    b.Property<Guid>("IngredientProductId")
                         .HasColumnType("char(36)")
-                        .HasColumnName("ingredient_id");
+                        .HasColumnName("ingredient_product_id");
 
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("char(36)");
@@ -550,7 +550,7 @@ namespace Data_Access_Layer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IngredientId");
+                    b.HasIndex("IngredientProductId");
 
                     b.HasIndex("OrderId");
 
@@ -902,9 +902,9 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Repositories.Entities.Ingredient", "Ingredient")
+                    b.HasOne("Data_Access_Layer.Repositories.Entities.IngredientProduct", "IngredientProduct")
                         .WithMany()
-                        .HasForeignKey("IngredientId")
+                        .HasForeignKey("IngredientProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -912,7 +912,7 @@ namespace Data_Access_Layer.Migrations
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId");
 
-                    b.Navigation("Ingredient");
+                    b.Navigation("IngredientProduct");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.OrderPromotion", b =>

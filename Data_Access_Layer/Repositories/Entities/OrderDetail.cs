@@ -23,10 +23,10 @@ namespace Data_Access_Layer.Repositories.Entities
         [Required]
         public double Price { get; set; }
 
-        [Column("ingredient_id")]
+        [Column("ingredient_product_id")]
         [Required]
-        public Guid IngredientId { get; set; }
+        public Guid IngredientProductId { get; set; }
 
-        public Ingredient? Ingredient { get; set; }
+        public IngredientProduct? IngredientProduct { get; set; }
     }
 }
