@@ -363,33 +363,6 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "order_detail",
-                columns: table => new
-                {
-                    order_detail_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    quantity = table.Column<int>(type: "int", nullable: false),
-                    price = table.Column<double>(type: "double", nullable: false),
-                    ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    OrderId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_order_detail", x => x.order_detail_id);
-                    table.ForeignKey(
-                        name: "FK_order_detail_ingredient_ingredient_id",
-                        column: x => x.ingredient_id,
-                        principalTable: "ingredient",
-                        principalColumn: "ingredient_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_order_detail_order_info_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "order_info",
-                        principalColumn: "order_id");
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "ingredient_recipe",
                 columns: table => new
                 {
@@ -496,6 +469,33 @@ namespace Data_Access_Layer.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "order_detail",
+                columns: table => new
+                {
+                    order_detail_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    quantity = table.Column<int>(type: "int", nullable: false),
+                    price = table.Column<double>(type: "double", nullable: false),
+                    ingredient_product_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    OrderId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_order_detail", x => x.order_detail_id);
+                    table.ForeignKey(
+                        name: "FK_order_detail_ingredient_product_ingredient_product_id",
+                        column: x => x.ingredient_product_id,
+                        principalTable: "ingredient_product",
+                        principalColumn: "ingredient_product_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_order_detail_order_info_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "order_info",
+                        principalColumn: "order_id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_account_email",
                 table: "account",
@@ -577,9 +577,9 @@ namespace Data_Access_Layer.Migrations
                 column: "ingredient_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_order_detail_ingredient_id",
+                name: "IX_order_detail_ingredient_product_id",
                 table: "order_detail",
-                column: "ingredient_id");
+                column: "ingredient_product_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_order_detail_OrderId",
@@ -655,10 +655,10 @@ namespace Data_Access_Layer.Migrations
                 name: "cart");
 
             migrationBuilder.DropTable(
-                name: "ingredient_product");
+                name: "recipe");
 
             migrationBuilder.DropTable(
-                name: "recipe");
+                name: "ingredient_product");
 
             migrationBuilder.DropTable(
                 name: "promotion");
