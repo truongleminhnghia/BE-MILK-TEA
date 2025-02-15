@@ -25,9 +25,14 @@ namespace Data_Access_Layer.Repositories.Entities
         public double TotalPrice { get; set; }
 
         [Column("quantity")]
+        [Range(1, int.MinValue, ErrorMessage = "Quantity must be greater than 0")]
         [Required]
         public int Quantity { get; set; }
 
         public Ingredient? Ingredient { get; set; }
+
+        public ICollection<CartItem>? CartItems { get; set; }
+
+        public ICollection<OrderDetail>? OrderDetails { get; set; }
     }
 }

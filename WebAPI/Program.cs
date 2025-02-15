@@ -11,7 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 Env.Load();
-// var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
+//var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
 var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
 var _port = Environment.GetEnvironmentVariable("PORT_LOCAL");
@@ -30,7 +30,7 @@ Console.WriteLine($"DATABASE_CONNECTION: {Environment.GetEnvironmentVariable("DA
 
 // Cấu hình DbContext với MySQL
 
-
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseMySql(

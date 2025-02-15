@@ -1,3 +1,4 @@
+using Data_Access_Layer.Enum;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,7 +14,7 @@ namespace Data_Access_Layer.Repositories.Entities
         [Key]
         [Column("customer_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Column("account_id")]
         [Required]
@@ -23,13 +24,18 @@ namespace Data_Access_Layer.Repositories.Entities
         [Column("tax_code", TypeName = "varchar(200)")]
         public string TaxCode { get; set; } = string.Empty;
 
+        [Column("address", TypeName = "nvarchar(500)")]
+        public string Address { get; set; } = string.Empty;
+
+        [Column("account_level")]
+        [Required]
+        public AccountLevelEnum AccountLevel { get; set; } = AccountLevelEnum.NORMAL;
+
+        [Column("purchased")]
+        public Boolean Purchased { get; set; } = false;
+
         // relationship
         // 1-1 Account
         public Account? Account { get; set; }
-
-        public Customer()
-        {
-            
-        }
     }
 }
