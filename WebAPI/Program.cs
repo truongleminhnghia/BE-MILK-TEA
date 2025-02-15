@@ -2,6 +2,14 @@ using Data_Access_Layer.Repositories.Data;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 using Business_Logic_Layer.AutoMappers;
+using Business_Logic_Layer.Services;
+using Data_Access_Layer.Repositories.Interfaces;
+using Data_Access_Layer.Repositories.Implements;
+using System.Text.Json.Serialization;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Business_Logic_Layer.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,12 +29,13 @@ var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
 var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+// var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Nghia_2003;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new Exception("DATABASE_CONNECTION is not set!");
 }
-Console.WriteLine($"DATABASE_CONNECTION: {Environment.GetEnvironmentVariable("DATABASE_CONNECTION")}");
+Console.WriteLine($"DATABASE_CONNECTION: {connectionString}");
 
 // Cấu hình DbContext với MySQL
 
@@ -45,13 +54,63 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 
-builder.Services.AddAutoMapper(typeof(AccountMapper));
+// lấy biến JWT từ môi trường
+var _secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+
+// kiểm tra xem, nó có tồn tai hay khoong
+
+if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
+{
+    throw new InvalidOperationException("JWT environment variables are not set properly.");
+}
+
+// đăng kí xác thực
+builder.Services.AddAuthentication(option =>
+{
+    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // mặc định cơ chế xác thực Bearer (JWT)
+    // hiểu nôm na đơn giản là khi một người dùng yêu cầu đến API, hệ thống sẽ kiểm tra JWT token trong Authorization owrphaanf header, 
+    // nếu không có hoặc không hợp lệ sẽ nhận lỗi 401
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true, // người, chỗ, nơi phát hành, tức là tk cho tạo token
+        ValidateAudience = true, // đối tượng sử dụng token
+        ValidateLifetime = true, // kiểm tra thời gian hết hạn
+        ValidateIssuerSigningKey = true, // kiểm tra khóa primate dùng để sign 
+        ValidIssuer = _issuer, // giá trị phá hành được lấy từ biến môi trường
+        ValidAudience = _audience, // tương tự
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey)) // phải mã khóa serect_key lại nhé
+    };
+});
+
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAuthenService, AuthenService>();
+builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+builder.Services.AddAuthorization();
+
+
+builder.Services.AddAutoMapper(
+    typeof(AccountMapper),
+    typeof(CategoryMapper)
+    );
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseMiddleware<JwtMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
