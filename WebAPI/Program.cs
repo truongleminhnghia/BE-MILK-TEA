@@ -96,6 +96,7 @@ builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
 
 
 builder.Services.AddAutoMapper(
@@ -118,4 +119,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+var webSocketOptions = new WebSocketOptions {
+    KeepAliveInterval = TimeSpan.FromMinutes(2) // 2 phút là khoảng tg để client - server kết nối
+};
+app.UseWebSockets();
 app.Run();
