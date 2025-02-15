@@ -1,0 +1,12 @@
+
+
+============================== HƯỚNG DẪN SỬ DỤNG PROJECT ==============================
+
+--- sử dụng mô hình 3 lớp controller -> service -> repository
+--- Những hàm code được viết đi viết lại nhiều chỗ (dùng chung) thì sẽ được viết ở Utils/ Source.cs
+--- Cứ có một cặp repository, service, automaper thì đều phải được đăng kí ở Program.cs
+--- lm việc và bắt lỗi haonf toàn nằm ở service
+--- đối với những API vần TOKEN và ROLE để xử lý thì phải dùng [Authorize]
+------ dùng [Authorize]: yêu cầu đăng nhập (yêu cầu token)
+------ [Authorize(Roles = "ROLE_CUSTOMER")]: đối với những  acocunt có ROLE_CUSTOMER mới được phải truy cập
+------ [Authorize(Roles = "ROLE_CUSTOMER, ROLE_ADMIN")]: chỉ có ROLE_ADMIN và ROLE_CUSTOMER

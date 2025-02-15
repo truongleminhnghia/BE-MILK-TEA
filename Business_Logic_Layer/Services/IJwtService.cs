@@ -10,6 +10,11 @@ namespace Business_Logic_Layer.Services
     public interface IJwtService
     {
         public string GenerateJwtToken(Account _account);
-        ClaimsPrincipal ValidateToken(string token);
+        public int? ValidateToken(string token);
+        public string GetAccountId();
+        public string GetEmail();
+        public string GetRole();
+        public string GetTokenId();
+        
     }
 }
