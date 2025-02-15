@@ -17,6 +17,7 @@ namespace Data_Access_Layer.Repositories.Entities
         public Guid Id { get; set; }
 
         [Column("order_id")]
+        [ForeignKey("OrderId")]
         [Required]
         public Guid OrderId { get; set; }
 

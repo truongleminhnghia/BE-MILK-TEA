@@ -17,7 +17,7 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("ingredient_id")]
         [Required]
-        [ForeignKey("ingredient_id")]
+        [ForeignKey("IngredientId")]
         public Guid IngredientId { get; set; }
 
         [Column("total_price")]
@@ -29,6 +29,7 @@ namespace Data_Access_Layer.Repositories.Entities
         [Required]
         public int Quantity { get; set; }
 
+        
         public Ingredient? Ingredient { get; set; }
 
         public ICollection<CartItem>? CartItems { get; set; }

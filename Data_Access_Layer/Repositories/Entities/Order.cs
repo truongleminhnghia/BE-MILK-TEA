@@ -65,7 +65,7 @@ namespace Data_Access_Layer.Repositories.Entities
         public string? ReasonCancel { get; set; }
 
         [Column("account_id")]
-        [ForeignKey("account_id")]
+        [ForeignKey("AccountId")]
         [Required(ErrorMessage = "Account ID cannot be null")]
         public Guid AccountId { get; set; }
 

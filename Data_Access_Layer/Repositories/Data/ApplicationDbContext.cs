@@ -38,6 +38,8 @@ namespace Data_Access_Layer.Repositories.Data
         public virtual DbSet<Promotion> Promotions { get; set; }
         public virtual DbSet<PromotionDetail> PromotionDetails { get; set; }
         public virtual DbSet<Recipe> Recipes { get; set; }
+        public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+        public virtual DbSet<Token> Tokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -63,11 +65,7 @@ namespace Data_Access_Layer.Repositories.Data
                 .IsUnique();
             modelBuilder.Entity<CartItem>()
                 .HasIndex(ci => ci.CartId)
-                .IsUnique();
-            modelBuilder.Entity<Ingredient>()
-                .HasOne(i => i.Category) 
-                .WithMany(c => c.Ingredients) 
-                .HasForeignKey(i => i.CategoryId); 
+                .IsUnique();         
             modelBuilder.Entity<Category>()
                 .Property(a => a.CategoryStatus)
                 .HasConversion<string>();
@@ -89,6 +87,7 @@ namespace Data_Access_Layer.Repositories.Data
             modelBuilder.Entity<Promotion>()
                 .Property(a => a.PromotionType)
                 .HasConversion<string>();
+
         }
 
         public override int SaveChanges()
@@ -108,7 +107,5 @@ namespace Data_Access_Layer.Repositories.Data
 
             return base.SaveChanges();
         }
-
-
     }
 }

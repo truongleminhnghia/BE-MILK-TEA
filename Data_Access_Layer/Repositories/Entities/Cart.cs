@@ -16,10 +16,10 @@ namespace Data_Access_Layer.Repositories.Entities
         public Guid Id { get; set; }
         [Column("account_id")]
         [Required]
-        [ForeignKey("account_id")]
+        [ForeignKey("AccountId")]
         public Guid AccountId { get; set; }
 
-        public Account? Account { get; set; }
+        public Account Account { get; set; }
 
         public ICollection<CartItem>? CartItems { get; set; }
 
@@ -27,9 +27,5 @@ namespace Data_Access_Layer.Repositories.Entities
         // 1-1 Account
         // 1-N CartItem
 
-        public Cart()
-        {
-
-        }
     }
 }

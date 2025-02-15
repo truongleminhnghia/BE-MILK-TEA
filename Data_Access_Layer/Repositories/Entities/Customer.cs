@@ -18,7 +18,7 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("account_id")]
         [Required]
-        [ForeignKey("account_id")]
+        [ForeignKey("AccountId")]
         public Guid AccountId { get; set; }
 
         [Column("tax_code", TypeName = "varchar(200)")]
@@ -32,7 +32,7 @@ namespace Data_Access_Layer.Repositories.Entities
         public AccountLevelEnum AccountLevel { get; set; } = AccountLevelEnum.NORMAL;
 
         [Column("purchased")]
-        public Boolean Purchased { get; set; } = false;
+        public bool Purchased { get; set; } = false;
 
         // relationship
         // 1-1 Account

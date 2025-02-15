@@ -21,19 +21,18 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("cart_id")]
         [Required]
-        [ForeignKey("cart_id")]
+        [ForeignKey("CartId")]
         public Guid CartId { get; set; }
 
         [Column("ingredient_product_id")]
         [Required]
-        [ForeignKey("ingredient_product_id")]
+        [ForeignKey("IngredientProductId")]
         public Guid IngredientProductId { get; set; }
-        public Cart? Cart { get; set; }
-        public IngredientProduct? IngredientProduct { get; set; }
 
         // relationship
         // N-1 Cart
         // 1-1 Product
-
+        public Cart? Cart { get; set; }
+        public IngredientProduct? IngredientProduct { get; set; }
     }
 }
