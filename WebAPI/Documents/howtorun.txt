@@ -1,17 +1,48 @@
 
-Clone project
+Clone PROJECT về
 
-- Thêm file .env ở root
- nội dung file .env:
+======= MỘT LƯU Ý VÔ CÙNG QTRONG =======
+==> khi có các biến môi trường mới mọi người phải thông báo cho ae trogn team biến và dùng
 
-SERVER_LOCAL=localhost
-PORT_LOCAL=3306
-USER_LOCAL=root
-PASSWORD_LOCAL=Nghia_2003
-DATABASE_NAME_LOCAL=DB_MILK_TEA
-SSLMODE=Required
+thực hiện đối với VSCode (Xanh)
+nếu chưa có file .vscode ở trên đầu, F5 để nso tự build lên,
+sau đó thêm các biến sau vào chỗ "env" trong file << launch.json >>
+Danh sách các biến môi trường: 
+                "SERVER_LOCAL": "mysql-892b9c4-minhnghia.b.aivencloud.com",
+                "PORT_LOCAL": "22092",
+                "USER_LOCAL": "avnadmin",
+                "PASSWORD_LOCAL": "AVNS_PB6DI1D9e03Z08UH-Bx",
+                "DATABASE_NAME_LOCAL": "DB_MILK_TEA",
+                "SSLMODE":"Required",
+                "JWT_SECRET_KEY": "E007827940DB15A8380D0A2C12CFDBF58C92553A14D80611BDBF3C7CAC06C09B16BCDD6DDE82A5D616DB8C6EE2577243F4C24F36605EF478EFDB03DE3FCFE47C",
+                "JWT_ISSUER": "https://localhost:7190",
+                "JWT_AUDIENCE": "https://localhost:7190",
+                "JWT_EXPIRY_MINUTES": "30"
+sau đó mở terminal chạy lệnh dotnet build
 
-==> chỉ thay đổi giá trị, ko được thay đổi tên biến
+và thực hiện các lệnh bên dưới để khởi tạo biến môi trường:
 
-đối với VSCode đứng tại program nhấn F5 (bắt buộc phải cài đặt môi trường của VSCode), hoặc mở terminal tại thư mục WebAPI: dotnet run
-còn đối với VS như bình thường
+                $env:SERVER_LOCAL="localhost" // lưu ý sửa theo server trên máy của mình
+                $env:PORT_LOCAL="3306" // lưu ý sửa theo poryt trên máy của mình
+                $env:USER_LOCAL="root" // lưu ý sửa theo user trên máy của mình
+                $env:PASSWORD_LOCAL="pasword" // lưu ý sửa theo pasword trên máy của mình
+                $env:DATABASE_NAME_LOCAL="DB_MILK_TEA" // lưu ý sửa theo database trên máy của mình
+                $env:SSLMODE="Required"
+                (đối với JWT thì sẽ sử dụng chung biến)
+                $env:JWT_SECRET_KEY="E007827940DB15A8380D0A2C12CFDBF58C92553A14D80611BDBF3C7CAC06C09B16BCDD6DDE82A5D616DB8C6EE2577243F4C24F36605EF478EFDB03DE3FCFE47C"
+                $env:JWT_ISSUER="https://localhost:7190"
+                $env:JWT_AUDIENCE="https://localhost:7190"
+                $env:JWT_AUDIENCE="https://localhost:7190"
+sau khi nạp từng lệnh biến môi trường ở trên chạy lệnh update lại database: 
+ << dotnet ef database update --project ./Data_Access_Layer --startup-project ./WebAPI >>
+
+
+ =====================  ĐỐI VỚI VS (TÍM MỘNG MƠ) =====================
+
+ sau khi clone PROJECT VỀ, 
+ đến thư mục Properties tạo một file << launchSettings.json >> lưu ý file này sẽ ko có trên github nên phải đặt tên chính xác, ko được sai
+ INBOX qua ZALO để gửi file này "...."
+- sau khi tạo file sẽ clean và build lại
+ Tiếp tục với bước nạp biến môi trường trong terminal như VSCode có 2 cách mở ( view + terminal hoặc ctrl + `)
+ và nạp lại từng biến như trên
+- nếu ae biết cách chạy trực tiếp ở nuget tool thì chia sẻ
