@@ -65,7 +65,7 @@ namespace Data_Access_Layer.Repositories.Data
                 .IsUnique();
             modelBuilder.Entity<CartItem>()
                 .HasIndex(ci => ci.CartId)
-                .IsUnique();         
+                .IsUnique();
             modelBuilder.Entity<Category>()
                 .Property(a => a.CategoryStatus)
                 .HasConversion<string>();
@@ -87,6 +87,11 @@ namespace Data_Access_Layer.Repositories.Data
             modelBuilder.Entity<Promotion>()
                 .Property(a => a.PromotionType)
                 .HasConversion<string>();
+            modelBuilder.Entity<Promotion>()
+                .HasOne(p => p.PromotionDetail)
+                .WithOne(pd => pd.Promotion)
+                .HasForeignKey<PromotionDetail>(pd => pd.PromotionId)
+                .IsRequired();
 
         }
 

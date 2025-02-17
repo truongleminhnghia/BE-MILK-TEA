@@ -56,19 +56,38 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "promotion_detail",
+                name: "promotion",
                 columns: table => new
                 {
-                    promotion_detail_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    promotion_name = table.Column<string>(type: "nvarchar(300)", nullable: true),
-                    description = table.Column<string>(type: "nvarchar(300)", nullable: true),
-                    discount_value = table.Column<float>(type: "float", nullable: false),
-                    mini_value = table.Column<double>(type: "double", nullable: false),
-                    max_value = table.Column<double>(type: "double", nullable: false)
+                    promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    promotion_code = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    start_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    end_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    promotion_type = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_promotion_detail", x => x.promotion_detail_id);
+                    table.PrimaryKey("PK_promotion", x => x.promotion_id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Tokens",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    token = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    expiration_date = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tokens", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -101,6 +120,9 @@ namespace Data_Access_Layer.Migrations
                     account_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     tax_code = table.Column<string>(type: "varchar(200)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    address = table.Column<string>(type: "nvarchar(500)", nullable: false),
+                    account_level = table.Column<int>(type: "int", nullable: false),
+                    purchased = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
@@ -117,7 +139,7 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "empoyee",
+                name: "employee",
                 columns: table => new
                 {
                     empoyee_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -129,9 +151,9 @@ namespace Data_Access_Layer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_empoyee", x => x.empoyee_id);
+                    table.PrimaryKey("PK_employee", x => x.empoyee_id);
                     table.ForeignKey(
-                        name: "FK_empoyee_account_account_id",
+                        name: "FK_employee_account_account_id",
                         column: x => x.account_id,
                         principalTable: "account",
                         principalColumn: "account_id",
@@ -153,14 +175,18 @@ namespace Data_Access_Layer.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     email_shipping = table.Column<string>(type: "varchar(500)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    note_shipping = table.Column<string>(type: "varchar(500)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     address_shipping = table.Column<string>(type: "varchar(500)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     order_status = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     quantity = table.Column<int>(type: "int", nullable: false),
                     total_price = table.Column<double>(type: "double", nullable: false),
-                    price_affter_promotion = table.Column<double>(type: "double", nullable: false),
+                    price_affter_promotion = table.Column<double>(type: "double", nullable: true),
                     ref_code = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    reason_cancel = table.Column<string>(type: "varchar(500)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     account_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
@@ -237,29 +263,51 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "promotion",
+                name: "promotion_detail",
                 columns: table => new
                 {
-                    promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    promotion_code = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     promotion_detail_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    start_date = table.Column<DateTime>(type: "datetime", nullable: false),
-                    end_date = table.Column<DateTime>(type: "datetime", nullable: false),
-                    promotion_type = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    promotion_name = table.Column<string>(type: "nvarchar(300)", nullable: true),
+                    description = table.Column<string>(type: "nvarchar(300)", nullable: true),
+                    discount_value = table.Column<float>(type: "float", nullable: false),
+                    mini_value = table.Column<double>(type: "double", nullable: false),
+                    max_value = table.Column<double>(type: "double", nullable: false),
+                    promtion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_promotion", x => x.promotion_id);
+                    table.PrimaryKey("PK_promotion_detail", x => x.promotion_detail_id);
                     table.ForeignKey(
-                        name: "FK_promotion_promotion_detail_promotion_detail_id",
-                        column: x => x.promotion_detail_id,
-                        principalTable: "promotion_detail",
-                        principalColumn: "promotion_detail_id",
+                        name: "FK_promotion_detail_promotion_promtion_id",
+                        column: x => x.promtion_id,
+                        principalTable: "promotion",
+                        principalColumn: "promotion_id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "order_promotion",
+                columns: table => new
+                {
+                    order_promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    order_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_order_promotion", x => x.order_promotion_id);
+                    table.ForeignKey(
+                        name: "FK_order_promotion_order_info_order_id",
+                        column: x => x.order_id,
+                        principalTable: "order_info",
+                        principalColumn: "order_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_order_promotion_promotion_promotion_id",
+                        column: x => x.promotion_id,
+                        principalTable: "promotion",
+                        principalColumn: "promotion_id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -298,7 +346,7 @@ namespace Data_Access_Layer.Migrations
                 columns: table => new
                 {
                     image_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    image_url = table.Column<string>(type: "nvarchar(500)", nullable: true),
+                    image_url = table.Column<string>(type: "nvarchar(1000)", nullable: false),
                     ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
                 constraints: table =>
@@ -330,6 +378,32 @@ namespace Data_Access_Layer.Migrations
                         column: x => x.ingredient_id,
                         principalTable: "ingredient",
                         principalColumn: "ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ingredient_promotion",
+                columns: table => new
+                {
+                    ingredient_promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ingredient_promotion", x => x.ingredient_promotion_id);
+                    table.ForeignKey(
+                        name: "FK_ingredient_promotion_ingredient_ingredient_id",
+                        column: x => x.ingredient_id,
+                        principalTable: "ingredient",
+                        principalColumn: "ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ingredient_promotion_promotion_promotion_id",
+                        column: x => x.promotion_id,
+                        principalTable: "promotion",
+                        principalColumn: "promotion_id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -389,58 +463,6 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "ingredient_promotion",
-                columns: table => new
-                {
-                    ingredient_promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ingredient_promotion", x => x.ingredient_promotion_id);
-                    table.ForeignKey(
-                        name: "FK_ingredient_promotion_ingredient_ingredient_id",
-                        column: x => x.ingredient_id,
-                        principalTable: "ingredient",
-                        principalColumn: "ingredient_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ingredient_promotion_promotion_promotion_id",
-                        column: x => x.promotion_id,
-                        principalTable: "promotion",
-                        principalColumn: "promotion_id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "order_promotion",
-                columns: table => new
-                {
-                    order_promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    order_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    promotion_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_order_promotion", x => x.order_promotion_id);
-                    table.ForeignKey(
-                        name: "FK_order_promotion_order_info_order_id",
-                        column: x => x.order_id,
-                        principalTable: "order_info",
-                        principalColumn: "order_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_order_promotion_promotion_promotion_id",
-                        column: x => x.promotion_id,
-                        principalTable: "promotion",
-                        principalColumn: "promotion_id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "cart_item",
                 columns: table => new
                 {
@@ -476,8 +498,8 @@ namespace Data_Access_Layer.Migrations
                     order_detail_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     quantity = table.Column<int>(type: "int", nullable: false),
                     price = table.Column<double>(type: "double", nullable: false),
-                    ingredient_product_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    OrderId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
+                    order_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ingredient_product_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
@@ -489,10 +511,11 @@ namespace Data_Access_Layer.Migrations
                         principalColumn: "ingredient_product_id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_order_detail_order_info_OrderId",
-                        column: x => x.OrderId,
+                        name: "FK_order_detail_order_info_order_id",
+                        column: x => x.order_id,
                         principalTable: "order_info",
-                        principalColumn: "order_id");
+                        principalColumn: "order_id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -526,8 +549,8 @@ namespace Data_Access_Layer.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_empoyee_account_id",
-                table: "empoyee",
+                name: "IX_employee_account_id",
+                table: "employee",
                 column: "account_id",
                 unique: true);
 
@@ -582,9 +605,9 @@ namespace Data_Access_Layer.Migrations
                 column: "ingredient_product_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_order_detail_OrderId",
+                name: "IX_order_detail_order_id",
                 table: "order_detail",
-                column: "OrderId");
+                column: "order_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_order_info_account_id",
@@ -607,9 +630,9 @@ namespace Data_Access_Layer.Migrations
                 column: "order_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_promotion_promotion_detail_id",
-                table: "promotion",
-                column: "promotion_detail_id",
+                name: "IX_promotion_detail_promtion_id",
+                table: "promotion_detail",
+                column: "promtion_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -628,7 +651,7 @@ namespace Data_Access_Layer.Migrations
                 name: "customer");
 
             migrationBuilder.DropTable(
-                name: "empoyee");
+                name: "employee");
 
             migrationBuilder.DropTable(
                 name: "image");
@@ -652,6 +675,12 @@ namespace Data_Access_Layer.Migrations
                 name: "payment");
 
             migrationBuilder.DropTable(
+                name: "promotion_detail");
+
+            migrationBuilder.DropTable(
+                name: "Tokens");
+
+            migrationBuilder.DropTable(
                 name: "cart");
 
             migrationBuilder.DropTable(
@@ -661,16 +690,13 @@ namespace Data_Access_Layer.Migrations
                 name: "ingredient_product");
 
             migrationBuilder.DropTable(
-                name: "promotion");
-
-            migrationBuilder.DropTable(
                 name: "order_info");
 
             migrationBuilder.DropTable(
-                name: "ingredient");
+                name: "promotion");
 
             migrationBuilder.DropTable(
-                name: "promotion_detail");
+                name: "ingredient");
 
             migrationBuilder.DropTable(
                 name: "account");

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250212140140_InitCreate")]
+    [Migration("20250217013054_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
@@ -185,9 +185,22 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("account_id");
 
+                    b.Property<int>("AccountLevel")
+                        .HasColumnType("int")
+                        .HasColumnName("account_level");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("address");
+
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
+
+                    b.Property<bool>("Purchased")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("purchased");
 
                     b.Property<string>("TaxCode")
                         .IsRequired()
@@ -235,7 +248,7 @@ namespace Data_Access_Layer.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
-                    b.ToTable("empoyee");
+                    b.ToTable("employee");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Image", b =>
@@ -246,7 +259,8 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("image_id");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1000)")
                         .HasColumnName("image_url");
 
                     b.Property<Guid>("IngredientId")
@@ -483,6 +497,10 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("full_name_shipping");
 
+                    b.Property<string>("NoteShipping")
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("note_shipping");
+
                     b.Property<string>("OrderCode")
                         .IsRequired()
                         .HasColumnType("varchar(200)")
@@ -502,13 +520,17 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("varchar(15)")
                         .HasColumnName("phone_shipping");
 
-                    b.Property<double>("PriceAffterPromotion")
+                    b.Property<double?>("PriceAffterPromotion")
                         .HasColumnType("double")
                         .HasColumnName("price_affter_promotion");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("quantity");
+
+                    b.Property<string>("ReasonCancel")
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("reason_cancel");
 
                     b.Property<string>("RefCode")
                         .IsRequired()
@@ -537,8 +559,9 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("ingredient_product_id");
 
-                    b.Property<Guid?>("OrderId")
-                        .HasColumnType("char(36)");
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("order_id");
 
                     b.Property<double>("Price")
                         .HasColumnType("double")
@@ -654,10 +677,6 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("promotion_code");
 
-                    b.Property<Guid>("PromotionDetailId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("promotion_detail_id");
-
                     b.Property<string>("PromotionType")
                         .IsRequired()
                         .HasColumnType("longtext")
@@ -672,9 +691,6 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("update_at");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PromotionDetailId")
-                        .IsUnique();
 
                     b.ToTable("promotion");
                 });
@@ -702,11 +718,18 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("double")
                         .HasColumnName("mini_value");
 
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("promtion_id");
+
                     b.Property<string>("PromotionName")
                         .HasColumnType("nvarchar(300)")
                         .HasColumnName("promotion_name");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PromotionId")
+                        .IsUnique();
 
                     b.ToTable("promotion_detail");
                 });
@@ -747,6 +770,27 @@ namespace Data_Access_Layer.Migrations
                     b.ToTable("recipe");
                 });
 
+            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Token", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("expiration_date");
+
+                    b.Property<string>("TokenString")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("token");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tokens");
+                });
+
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Cart", b =>
                 {
                     b.HasOne("Data_Access_Layer.Repositories.Entities.Account", "Account")
@@ -767,7 +811,7 @@ namespace Data_Access_Layer.Migrations
                         .IsRequired();
 
                     b.HasOne("Data_Access_Layer.Repositories.Entities.IngredientProduct", "IngredientProduct")
-                        .WithMany()
+                        .WithMany("CartItems")
                         .HasForeignKey("IngredientProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -791,7 +835,7 @@ namespace Data_Access_Layer.Migrations
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Employee", b =>
                 {
                     b.HasOne("Data_Access_Layer.Repositories.Entities.Account", "Account")
-                        .WithOne("Employee")
+                        .WithOne("Empoyee")
                         .HasForeignKey("Data_Access_Layer.Repositories.Entities.Employee", "AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -824,7 +868,7 @@ namespace Data_Access_Layer.Migrations
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.IngredientProduct", b =>
                 {
                     b.HasOne("Data_Access_Layer.Repositories.Entities.Ingredient", "Ingredient")
-                        .WithMany()
+                        .WithMany("IngredientProducts")
                         .HasForeignKey("IngredientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -841,7 +885,7 @@ namespace Data_Access_Layer.Migrations
                         .IsRequired();
 
                     b.HasOne("Data_Access_Layer.Repositories.Entities.Promotion", "Promotion")
-                        .WithMany()
+                        .WithMany("IngredientPromotions")
                         .HasForeignKey("PromotionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -902,17 +946,21 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Repositories.Entities.IngredientProduct", "IngredientProduct")
-                        .WithMany()
+                    b.HasOne("Data_Access_Layer.Repositories.Entities.IngredientProduct", "IngredientProducts")
+                        .WithMany("OrderDetails")
                         .HasForeignKey("IngredientProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Data_Access_Layer.Repositories.Entities.Order", null)
+                    b.HasOne("Data_Access_Layer.Repositories.Entities.Order", "Orders")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("IngredientProduct");
+                    b.Navigation("IngredientProducts");
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.OrderPromotion", b =>
@@ -945,15 +993,15 @@ namespace Data_Access_Layer.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Promotion", b =>
+            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.PromotionDetail", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Repositories.Entities.PromotionDetail", "PromotionDetail")
-                        .WithOne("Promotion")
-                        .HasForeignKey("Data_Access_Layer.Repositories.Entities.Promotion", "PromotionDetailId")
+                    b.HasOne("Data_Access_Layer.Repositories.Entities.Promotion", "Promotion")
+                        .WithOne("PromotionDetail")
+                        .HasForeignKey("Data_Access_Layer.Repositories.Entities.PromotionDetail", "PromotionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("PromotionDetail");
+                    b.Navigation("Promotion");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Recipe", b =>
@@ -973,7 +1021,7 @@ namespace Data_Access_Layer.Migrations
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Employee");
+                    b.Navigation("Empoyee");
 
                     b.Navigation("IngredientReviews");
 
@@ -996,11 +1044,20 @@ namespace Data_Access_Layer.Migrations
                 {
                     b.Navigation("Images");
 
+                    b.Navigation("IngredientProducts");
+
                     b.Navigation("IngredientPromotions");
 
                     b.Navigation("IngredientRecipes");
 
                     b.Navigation("IngredientReviews");
+                });
+
+            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.IngredientProduct", b =>
+                {
+                    b.Navigation("CartItems");
+
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Order", b =>
@@ -1014,12 +1071,11 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Promotion", b =>
                 {
-                    b.Navigation("OrderPromotions");
-                });
+                    b.Navigation("IngredientPromotions");
 
-            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.PromotionDetail", b =>
-                {
-                    b.Navigation("Promotion");
+                    b.Navigation("OrderPromotions");
+
+                    b.Navigation("PromotionDetail");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Recipe", b =>

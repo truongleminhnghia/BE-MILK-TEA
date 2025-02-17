@@ -20,10 +20,10 @@ namespace Data_Access_Layer.Repositories.Entities
         [Required]
         public string PromotionCode { get; set; } = string.Empty;
 
-        [Column("promotion_detail_id")]
-        [ForeignKey("PromotionDetailId")]
-        [Required]
-        public Guid PromotionDetailId { get; set; }
+        // [Column("promotion_detail_id")]
+        // [ForeignKey("PromotionDetailId")]
+        // [Required]
+        // public Guid PromotionDetailId { get; set; }
 
         [Column("is_active")]
         [Required]
