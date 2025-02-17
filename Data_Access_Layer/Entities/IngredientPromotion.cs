@@ -5,27 +5,27 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
-    [Table("image")]
-    public class Image
+    [Table("ingredient_promotion")]
+    public class IngredientPromotion
     {
         [Key]
-        [Column("image_id")]
+        [Column("ingredient_promotion_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; } 
-
-        [Column("image_url", TypeName = "nvarchar(1000)")] // URL
-        [Required]
-        public string ImageUrl { get; set; }
+        public Guid Id { get; set; }
 
         [Column("ingredient_id")]
-        [ForeignKey("IngredientId")]
         [Required]
+        [ForeignKey("IngredientId")]
         public Guid IngredientId { get; set; }
 
-        // relationship
-        // N-1 Ingredient
+        [Column("promotion_id")]
+        [ForeignKey("PromotionId")]
+        [Required]
+        public Guid PromotionId { get; set; }
+
         public Ingredient? Ingredient { get; set; }
+        public Promotion? Promotion { get; set; }
     }
 }

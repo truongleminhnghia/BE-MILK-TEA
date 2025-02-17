@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("account")]
     public class Account

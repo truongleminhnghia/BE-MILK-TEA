@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("order_info")]
     public class Order

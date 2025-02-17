@@ -1,4 +1,5 @@
-﻿using Data_Access_Layer.Repositories.Entities;
+﻿
+using Data_Access_Layer.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data_Access_Layer.Repositories.Data
+namespace Data_Access_Layer.Data
 {
     public class ApplicationDbContext : DbContext
     {

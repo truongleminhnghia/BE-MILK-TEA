@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("promotion")]
     public class Promotion : BaseEntity

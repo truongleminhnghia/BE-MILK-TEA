@@ -5,13 +5,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
-    [Table("order_detail")]
-    public class OrderDetail
+    [Table("cart_item")]
+    public class CartItem : BaseEntity
     {
         [Key]
-        [Column("order_detail_id")]
+        [Column("cart_item_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
@@ -19,22 +19,20 @@ namespace Data_Access_Layer.Repositories.Entities
         [Required]
         public int Quantity { get; set; }
 
-        [Column("price")]
+        [Column("cart_id")]
         [Required]
-        public double Price { get; set; }
-
-        [Column("order_id")]
-        [ForeignKey("OrderId")]
-        [Required]
-        public Guid OrderId { get; set; }
+        [ForeignKey("CartId")]
+        public Guid CartId { get; set; }
 
         [Column("ingredient_product_id")]
-        [ForeignKey("IngredientProductId")]
         [Required]
+        [ForeignKey("IngredientProductId")]
         public Guid IngredientProductId { get; set; }
 
-        public virtual Order? Orders { get; set; }
-
-        public IngredientProduct? IngredientProducts { get; set; }
+        // relationship
+        // N-1 Cart
+        // 1-1 Product
+        public Cart? Cart { get; set; }
+        public IngredientProduct? IngredientProduct { get; set; }
     }
 }

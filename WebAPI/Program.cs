@@ -1,10 +1,9 @@
-using Data_Access_Layer.Repositories.Data;
+using Data_Access_Layer.Data;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 using Business_Logic_Layer.AutoMappers;
 using Business_Logic_Layer.Services;
-using Data_Access_Layer.Repositories.Interfaces;
-using Data_Access_Layer.Repositories.Implements;
+using Data_Access_Layer.Repositories;
 using System.Text.Json.Serialization;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
