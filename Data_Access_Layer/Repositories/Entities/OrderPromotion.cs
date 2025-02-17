@@ -16,9 +16,11 @@ namespace Data_Access_Layer.Repositories.Entities
         public Guid Id { get; set; }
 
         [Column("order_id")]
+        [ForeignKey("OrderId")]
         public Guid OrderId { get; set; }
 
         [Column("promotion_id")]
+        [ForeignKey("PromotionId")]
         public Guid PromotionId { get; set; }
 
         public Promotion? Promotion { get; set; }

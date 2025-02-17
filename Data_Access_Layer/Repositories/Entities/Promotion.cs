@@ -21,6 +21,7 @@ namespace Data_Access_Layer.Repositories.Entities
         public string PromotionCode { get; set; } = string.Empty;
 
         [Column("promotion_detail_id")]
+        [ForeignKey("PromotionDetailId")]
         [Required]
         public Guid PromotionDetailId { get; set; }
 
@@ -40,9 +41,13 @@ namespace Data_Access_Layer.Repositories.Entities
         [Required]
         public PromotionType PromotionType { get; set; }
 
+
+        //relationship
         public PromotionDetail? PromotionDetail { get; set; }
-        
+     
         public ICollection<OrderPromotion>? OrderPromotions { get; set; }
+
+        public ICollection<IngredientPromotion>? IngredientPromotions { get; set; }
 
     }
 }

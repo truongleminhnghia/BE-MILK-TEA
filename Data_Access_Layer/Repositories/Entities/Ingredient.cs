@@ -63,7 +63,7 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("category_id")]
         [Required]
-        [ForeignKey("category_id")]
+        [ForeignKey("CategoryId")]
         public Guid CategoryId { get; set; }
 
         [Column("quantity")]
@@ -80,6 +80,7 @@ namespace Data_Access_Layer.Repositories.Entities
 
         public ICollection<Image>? Images { get; set; }
         public ICollection<IngredientReview>? IngredientReviews { get; set; }
+        public ICollection<IngredientProduct>? IngredientProducts { get; set; }
         public ICollection<IngredientPromotion>? IngredientPromotions { get; set; }
         public ICollection<IngredientRecipe>? IngredientRecipes { get; set; }
         public Category? Category { get; set; }

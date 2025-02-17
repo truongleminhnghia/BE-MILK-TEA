@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Data_Access_Layer.Repositories.Entities
 {
     [Table("empoyee")]
-    public class Empoyee : BaseEntity
+    public class Employee : BaseEntity
     {
         [Key]
         [Column("empoyee_id")]
@@ -17,7 +17,7 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("account_id")]
         [Required]
-        [ForeignKey("account_id")]
+        [ForeignKey("AccountId")]
         public Guid AccountId { get; set; }
 
         [Column("ref_code", TypeName = "varchar(200)")]
@@ -26,12 +26,6 @@ namespace Data_Access_Layer.Repositories.Entities
 
         // relationship
         // 1-1 Account
-
         public Account? Account { get; set; }
-
-        public Empoyee()
-        {
-            
-        }
     }
 }

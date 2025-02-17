@@ -31,6 +31,10 @@ namespace Data_Access_Layer.Repositories.Entities
         [Column("max_value")]
         public double MaxValue { get; set; }
 
+        [Column("promtion_id")]
+        [ForeignKey("PromotionId")]
+        public Guid PromotionId { get; set; }
+
         public Promotion? Promotion { get; set; }
     }
 }

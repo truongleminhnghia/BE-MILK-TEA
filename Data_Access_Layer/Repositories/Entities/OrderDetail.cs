@@ -23,10 +23,18 @@ namespace Data_Access_Layer.Repositories.Entities
         [Required]
         public double Price { get; set; }
 
+        [Column("order_id")]
+        [ForeignKey("OrderId")]
+        [Required]
+        public Guid OrderId { get; set; }
+
         [Column("ingredient_product_id")]
+        [ForeignKey("IngredientProductId")]
         [Required]
         public Guid IngredientProductId { get; set; }
 
-        public IngredientProduct? IngredientProduct { get; set; }
+        public virtual Order? Orders { get; set; }
+
+        public IngredientProduct? IngredientProducts { get; set; }
     }
 }

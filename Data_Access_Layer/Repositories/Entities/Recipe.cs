@@ -25,7 +25,7 @@ namespace Data_Access_Layer.Repositories.Entities
         public string? Content { get; set; }
 
         [Column("category_id", TypeName = "char(36)")]
-        [ForeignKey("category_id")]
+        [ForeignKey("CategoryId")]
         [Required]
         public Guid CategoryId { get; set; }
 

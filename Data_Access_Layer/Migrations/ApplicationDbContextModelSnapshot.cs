@@ -203,7 +203,7 @@ namespace Data_Access_Layer.Migrations
                     b.ToTable("customer");
                 });
 
-            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Empoyee", b =>
+            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Employee", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -785,11 +785,11 @@ namespace Data_Access_Layer.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Empoyee", b =>
+            modelBuilder.Entity("Data_Access_Layer.Repositories.Entities.Employee", b =>
                 {
                     b.HasOne("Data_Access_Layer.Repositories.Entities.Account", "Account")
-                        .WithOne("Empoyee")
-                        .HasForeignKey("Data_Access_Layer.Repositories.Entities.Empoyee", "AccountId")
+                        .WithOne("Employee")
+                        .HasForeignKey("Data_Access_Layer.Repositories.Entities.Employee", "AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -970,7 +970,7 @@ namespace Data_Access_Layer.Migrations
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Empoyee");
+                    b.Navigation("Employee");
 
                     b.Navigation("IngredientReviews");
 
