@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250217034454_InitCreate")]
+    [Migration("20250217083011_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
@@ -36,6 +36,10 @@ namespace Data_Access_Layer.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(50)")
                         .HasColumnName("account_status");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("create_at");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -66,6 +70,10 @@ namespace Data_Access_Layer.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(200)")
                         .HasColumnName("role_name");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("update_at");
 
                     b.HasKey("Id");
 

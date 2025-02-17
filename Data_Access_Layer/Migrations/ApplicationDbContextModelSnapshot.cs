@@ -34,6 +34,10 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("account_status");
 
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("create_at");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(300)")
@@ -63,6 +67,10 @@ namespace Data_Access_Layer.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(200)")
                         .HasColumnName("role_name");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("update_at");
 
                     b.HasKey("Id");
 
