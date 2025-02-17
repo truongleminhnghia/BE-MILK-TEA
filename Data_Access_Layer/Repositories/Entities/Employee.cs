@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Data_Access_Layer.Repositories.Entities
 {
     [Table("empoyee")]
-    public class Empoyee : BaseEntity
+    public class Employee : BaseEntity
     {
         [Key]
         [Column("empoyee_id")]
