@@ -103,6 +103,22 @@ builder.Services.AddAutoMapper(
     typeof(CategoryMapper)
     );
 
+// config CORS
+var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173") // Replace with your frontend URL
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -117,9 +133,11 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseCors(MyAllowSpecificOrigins);
 
 
-var webSocketOptions = new WebSocketOptions {
+var webSocketOptions = new WebSocketOptions
+{
     KeepAliveInterval = TimeSpan.FromMinutes(2) // 2 phút là khoảng tg để client - server kết nối
 };
 app.UseWebSockets();

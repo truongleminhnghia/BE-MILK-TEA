@@ -10,7 +10,7 @@ namespace Business_Logic_Layer.Services
     public interface IAuthenService
     {
         Task<AccountResponse> Register(RegisterRequest _request, string _type);
-        Task<string> Login(LoginRequest _request, string _type);       
+        Task<AuthenticateResponse> Login(LoginRequest _request, string _type);       
         Task<string> GenerateUrl(string _type);
     }
 }

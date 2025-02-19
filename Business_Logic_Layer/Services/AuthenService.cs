@@ -9,6 +9,7 @@ using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Repositories;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Business_Logic_Layer.Services
 {
@@ -17,7 +18,7 @@ namespace Business_Logic_Layer.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly IPasswordHasher _passwordHasher;
-        
+
         private readonly IJwtService _jwtService;
         public AuthenService(IAccountRepository accountRepository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService)
         {
@@ -32,19 +33,42 @@ namespace Business_Logic_Layer.Services
             throw new NotImplementedException();
         }
 
-        public async Task<string> Login(LoginRequest _request, string _type)
+        public async Task<AuthenticateResponse> Login(LoginRequest _request, string _type)
         {
-            if(_type.Equals(TypeLogin.LOGIN_LOCAL.ToString())) {
-                Account? _existingAccount =  await _accountRepository.GetByEmail(_request.Email);
-                if(_existingAccount == null) {
-                    throw new Exception("Email or Password Invalid");
+            try
+            {
+                AuthenticateResponse _authenticateResponse = null;
+                Account _account;
+                string _token = "";
+                if (_type.Trim().IsNullOrEmpty() || _type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
+                {
+                    _account = await _accountRepository.GetByEmail(_request.Email);
+                    if (_account == null)
+                    {
+                        throw new Exception("Account do not existing");
+                    }
+                    bool checkPassword = _passwordHasher.VerifyPassword(_request.Password, _account.Password);
+                    if (checkPassword)
+                    {
+                        _token = _jwtService.GenerateJwtToken(_account);
+                    }
+                    AccountResponse _accountResponse = _mapper.Map<AccountResponse>(_account);
+                    _authenticateResponse = new AuthenticateResponse(
+                        _token,
+                        _accountResponse
+                    );
                 }
-                bool checkPassword = _passwordHasher.VerifyPassword(_request.Password, _existingAccount.Password);
-                if(checkPassword) {
-                    return _jwtService.GenerateJwtToken(_existingAccount);
+                else if (_type.Trim().Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+                {
+                    throw new Exception("Chua DEMO");
                 }
+                return _authenticateResponse ?? new AuthenticateResponse("", new AccountResponse());
             }
-            throw new Exception("Login failed");
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                return new AuthenticateResponse("", new AccountResponse());
+            }
         }
 
         public async Task<AccountResponse> Register(RegisterRequest _request, string _type)
