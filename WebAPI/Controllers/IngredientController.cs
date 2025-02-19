@@ -51,6 +51,7 @@ namespace WebAPI.Controllers
             return Ok(ingredient);
         }
 
+        [Route("/category")]
         [HttpPost]
         public async Task<IActionResult> AddCategory([FromBody] CategoryRequest ingredient)
         {
