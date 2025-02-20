@@ -76,5 +76,10 @@ namespace Data_Access_Layer.Repositories
                 .Ingredients.OrderByDescending(i => i.IngredientCode)
                 .FirstOrDefaultAsync();
         }
+
+        Task IIngredientRepository.GetIngredientByIdAsync(Guid ingredientId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
