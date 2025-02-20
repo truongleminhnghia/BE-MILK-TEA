@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,13 +10,14 @@ namespace Business_Logic_Layer.Models
 {
     public class Ingredient
     {
-        public Guid Id { get; set; }
-        public string IngredientCode { get; set; }
+        public Guid Id { get; set; } // ko nhận id
+        // public string IngredientCode { get; set; } // ko nhận request
+        [Required(ErrorMessage ="aaaaaaa")]
         public string Supplier { get; set; }
         public string IngredientName { get; set; }
         public string Description { get; set; }
         public string FoodSafetyCertification { get; set; }
-        public DateTime ExpiredDate { get; set; }
+        public DateTime ExpiredDate { get; set; } // 
         public IngredientStatus IngredientStatus { get; set; }
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
@@ -25,6 +27,6 @@ namespace Business_Logic_Layer.Models
         public Guid CategoryId { get; set; }
         public int Quantity { get; set; }
         public bool IsSale { get; set; }
-        public float Rate { get; set; }
+        public float Rate { get; set; } // ko nhận rate
     }
 }

@@ -7,6 +7,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,6 +33,8 @@ namespace WebAPI.Controllers
         }
 
         //Lấy danh sách tất cả nguyên liệu
+        // pagesize, currentPage, total, conditionm,
+        // Get All, GET (bybId, email, code) 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -68,6 +71,7 @@ namespace WebAPI.Controllers
 
         //Thêm mới nguyên liệu
         [HttpPost]
+        [Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Add(
             [FromBody] Business_Logic_Layer.Models.Ingredient ingredient
         )
@@ -92,6 +96,7 @@ namespace WebAPI.Controllers
 
         // 🟢 Cập nhật nguyên liệu
         [HttpPut("{id}")]
+        [Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Update(
             Guid id,
             [FromBody] Business_Logic_Layer.Models.Ingredient ingredient
@@ -123,7 +128,9 @@ namespace WebAPI.Controllers
         }
 
         //  Xóa nguyên liệu
+        // id nhận về là string
         [HttpDelete("{id}")]
+        [Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var ingredient = await _ingredientService.GetIngredientByIdAsync(id);

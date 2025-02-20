@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
 
 namespace Business_Logic_Layer.Services.IngredientService
@@ -11,10 +13,12 @@ namespace Business_Logic_Layer.Services.IngredientService
     public class IngredientService : IIngredientService
     {
         private readonly IIngredientRepository _repository;
+        private readonly Source _source;
 
-        public IngredientService(IIngredientRepository repository)
+        public IngredientService(IIngredientRepository repository, Source source)
         {
             _repository = repository;
+            _source = source;
         }
 
         public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync()
@@ -44,6 +48,21 @@ namespace Business_Logic_Layer.Services.IngredientService
             // Generate ingredient code (PCxxxxx)
             ingredient.IngredientCode = await GenerateIngredientCode();
             return await _repository.CreateAsync(ingredient);
+
+            // try catch
+
+            var role = _source.CheckRoleName();
+            if(!role.Equals(RoleName.ROLE_ADMIN.ToString())) {
+                throw new Exception("401, bạn không có quyền");
+            }
+            string code = "";
+            code = "PC" + _source.GenerateRandom8Digits();
+            if(_repository.FindCode(code) != null) {
+                throw new Exception("Code already exist");
+            }            
+
+            
+
         }
 
         public async Task<Ingredient> UpdateIngredientAsync(Guid id, Ingredient ingredient)

@@ -49,6 +49,7 @@ namespace Business_Logic_Layer.Utils
             return result;
         }
 
+        // order code: OR+000000001, refcode: 23145683, productcode: P+xxxxxxx
         public string GenerateRandom8Digits()
         {
             return new Random().Next(10000000, 99999999).ToString();
