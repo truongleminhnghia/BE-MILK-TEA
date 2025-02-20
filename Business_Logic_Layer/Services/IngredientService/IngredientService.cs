@@ -24,7 +24,12 @@ namespace Business_Logic_Layer.Services.IngredientService
 
         public async Task<Ingredient> GetIngredientByIdAsync(Guid id)
         {
-            return await _repository.GetByIdAsync(id);
+            var ingredient = await _repository.GetByIdAsync(id);
+            if (ingredient == null)
+            {
+                throw new KeyNotFoundException("Ingredient not found");
+            }
+            return ingredient;
         }
 
         public async Task<Ingredient> CreateIngredientAsync(Ingredient ingredient)
@@ -46,6 +51,13 @@ namespace Business_Logic_Layer.Services.IngredientService
             var existingIngredient = await _repository.GetByIdAsync(id);
             if (existingIngredient == null)
                 throw new DirectoryNotFoundException("Ingredient not found");
+
+            // Check if the CategoryId exists
+            var categoryExists = await _repository.CategoryExistsAsync(ingredient.CategoryId);
+            if (!categoryExists)
+            {
+                throw new ArgumentException("Invalid CategoryId");
+            }
 
             ingredient.Id = id;
             ingredient.IngredientCode = existingIngredient.IngredientCode; // Preserve original code

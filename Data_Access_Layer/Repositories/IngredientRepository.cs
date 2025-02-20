@@ -48,6 +48,12 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Ingredient> UpdateAsync(Ingredient ingredient)
         {
+            var existingIngredient = await _context.Ingredients.FindAsync(ingredient.Id);
+            if (existingIngredient != null)
+            {
+                _context.Entry(existingIngredient).State = EntityState.Detached;
+            }
+
             _context.Entry(ingredient).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return ingredient;

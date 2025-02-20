@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/ingredients")]
     [ApiController]
     public class IngredientController : ControllerBase
     {
@@ -31,7 +31,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
 
-        // 🟢 Lấy danh sách tất cả nguyên liệu
+        //Lấy danh sách tất cả nguyên liệu
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -39,7 +39,7 @@ namespace WebAPI.Controllers
             return Ok(ingredients);
         }
 
-        // 🟢 Lấy một nguyên liệu theo ID
+        //Lấy một nguyên liệu theo ID
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
@@ -66,7 +66,7 @@ namespace WebAPI.Controllers
             return Ok(createdIngredient);
         }
 
-        // 🟢 Thêm mới nguyên liệu
+        //Thêm mới nguyên liệu
         [HttpPost]
         public async Task<IActionResult> Add(
             [FromBody] Business_Logic_Layer.Models.Ingredient ingredient
@@ -97,9 +97,9 @@ namespace WebAPI.Controllers
             [FromBody] Business_Logic_Layer.Models.Ingredient ingredient
         )
         {
-            if (ingredient == null || id != ingredient.Id)
+            if (ingredient == null || id == Guid.Empty)
             {
-                return BadRequest(new { message = "Invalid data" });
+                return BadRequest(new { message = "Invalid ingredient data" });
             }
 
             var existingIngredient = await _ingredientService.GetIngredientByIdAsync(id);
@@ -109,11 +109,20 @@ namespace WebAPI.Controllers
             }
 
             var ingredientEntity = _mapper.Map<Data_Access_Layer.Entities.Ingredient>(ingredient);
-            await _ingredientService.UpdateIngredientAsync(id, ingredientEntity);
-            return NoContent();
+            ingredientEntity.Id = id;
+
+            var updatedIngredient = await _ingredientService.UpdateIngredientAsync(
+                id,
+                ingredientEntity
+            );
+            var updatedIngredientModel = _mapper.Map<Business_Logic_Layer.Models.Ingredient>(
+                updatedIngredient
+            );
+
+            return Ok(updatedIngredientModel);
         }
 
-        // 🟢 Xóa nguyên liệu
+        //  Xóa nguyên liệu
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

@@ -93,10 +93,19 @@ builder
             ,
         };
     });
+
+// Add services to the container.
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+    });
 builder.Services.AddAutoMapper(
     typeof(AccountMapper),
     typeof(CategoryMapper),
-    typeof(IngredientMapper)
+    typeof(IngredientMapper),
+    typeof(ImageMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
@@ -111,6 +120,11 @@ builder.Services.AddScoped<IIngredientService, IngredientService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+// Register ImageRepository and ImageService
+builder.Services.AddScoped<IImageRepository, ImageRepository>();
+builder.Services.AddScoped<IImageService, ImageService>();
+
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
