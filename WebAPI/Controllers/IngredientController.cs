@@ -51,20 +51,7 @@ namespace WebAPI.Controllers
             return Ok(ingredient);
         }
 
-        [Route("/category")]
-        [HttpPost]
-        public async Task<IActionResult> AddCategory([FromBody] CategoryRequest ingredient)
-        {
-            if (ingredient == null)
-            {
-                return BadRequest(new { message = "Invalid ingredient data" });
-            }
-
-            var createdIngredient = await _categorytService.CreateAsync(
-                _mapper.Map<Category>(ingredient)
-            );
-            return Ok(createdIngredient);
-        }
+        
 
         //Thêm mới nguyên liệu
         [HttpPost]
