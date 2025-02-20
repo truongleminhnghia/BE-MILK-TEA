@@ -10,5 +10,6 @@ namespace Business_Logic_Layer.Services
     public interface ICategoryService
     {
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<Category?> GetByIdAsync(Guid id);
     }
 }

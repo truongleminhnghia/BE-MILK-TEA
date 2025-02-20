@@ -21,5 +21,10 @@ namespace Data_Access_Layer.Repositories
         {
             return await _context.Categories.ToListAsync();
         }
+
+        public async Task<Category?> GetByIdAsync(Guid id)
+        {
+            return await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+        }
     }
 }

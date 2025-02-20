@@ -10,5 +10,6 @@ namespace Data_Access_Layer.Repositories
     public interface ICategoryRepository
     {
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<Category?> GetByIdAsync(Guid id);
     }
 }

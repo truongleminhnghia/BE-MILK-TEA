@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Repositories;
@@ -20,11 +21,34 @@ namespace WebAPI.Controllers
             _categoryService = categorySrvice;
             _mapper = mapper;
         }
-
+        //GET ALL
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(await _categoryService.GetAllCategoriesAsync());
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            var categoriesDto = _mapper.Map<IEnumerable<CategoryRequest>>(categories);
+            return Ok(categoriesDto);
+        }
+        //GET BY ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var category = await _categoryService.GetByIdAsync(id);
+            if (category == null) return NotFound();
+
+            var categoryDto = _mapper.Map<CategoryRequest>(category);
+            return Ok(categoryDto);
+        }
+
+        //CREATE
+        [HttpPost]
+        public async Task<IActionResult> Create(Category categoryDto)
+        {
+            var category = _mapper.Map<Category>(categoryDto);
+            var createdCategory = await _categoryRepository.AddAsync(category);
+            var createdCategoryDto = _mapper.Map<CategoryDTO>(createdCategory);
+
+            return CreatedAtAction(nameof(GetById), new { id = createdCategoryDto.Id }, createdCategoryDto);
         }
     }
 }
