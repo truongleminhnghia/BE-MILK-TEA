@@ -4,14 +4,19 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Data_Access_Layer.Data;
+using Data_Access_Layer.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
 {
     public class CategoryRepository : ICategoryRepository
     {
         private readonly ApplicationDbContext _context;
+
         public CategoryRepository(ApplicationDbContext context)
         {
             _context = context;
@@ -41,9 +46,9 @@ namespace Data_Access_Layer.Repositories
         {
             var existingCategory = await _context.Categories.FindAsync(id);
             if (existingCategory == null)
-            {
+        {
                 return null;
-            }
+        }
 
             existingCategory.CategoryName = category.CategoryName;
             existingCategory.CategoryStatus = category.CategoryStatus;
@@ -59,9 +64,9 @@ namespace Data_Access_Layer.Repositories
         {
             var existingCategory = await _context.Categories.FindAsync(id);
             if (existingCategory == null)
-            {
+        {
                 return false; 
-            }
+        }
 
             _context.Categories.Remove(existingCategory);
             await _context.SaveChangesAsync(); 
@@ -71,3 +76,41 @@ namespace Data_Access_Layer.Repositories
 
     }
 }
+
+
+
+//using AutoMapper;
+//using Business_Logic_Layer.Services;
+//using Business_Logic_Layer.Services.IngredientService;
+//using Data_Access_Layer.Entities;
+//using Microsoft.AspNetCore.Http;
+//using Microsoft.AspNetCore.Mvc;
+
+//namespace WebAPI.Controllers
+//{
+//    [Route("api/[controller]")]
+//    [ApiController]
+//    public class CategoryController : ControllerBase
+//    {
+//        private readonly ICategoryService _categorytService;
+//        private readonly IMapper _mapper;
+
+//        public CategoryController(ICategoryService categorytService, IMapper mapper)
+//        {
+//            _categorytService = categorytService;
+//            _mapper = mapper;
+//        }
+
+//        [HttpPost]
+//        public async Task<IActionResult> Add([FromBody] Category ingredient)
+//        {
+//            if (ingredient == null)
+//            {
+//                return BadRequest(new { message = "Invalid ingredient data" });
+//            }
+
+//            var createdIngredient = await _categorytService.CreateAsync(ingredient);
+//            return Ok(ingredient);
+//        }
+//    }
+//}
