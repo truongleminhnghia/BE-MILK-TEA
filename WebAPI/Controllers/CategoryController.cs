@@ -26,8 +26,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
-            var categoriesDto = _mapper.Map<IEnumerable<CategoryRequest>>(categories);
-            return Ok(categoriesDto);
+            return Ok(categories);
         }
         //GET BY ID
         [HttpGet("{id}")]
@@ -35,20 +34,55 @@ namespace WebAPI.Controllers
         {
             var category = await _categoryService.GetByIdAsync(id);
             if (category == null) return NotFound();
-
-            var categoryDto = _mapper.Map<CategoryRequest>(category);
-            return Ok(categoryDto);
+            return Ok(category);
         }
 
         //CREATE
         [HttpPost]
-        public async Task<IActionResult> Create(Category categoryDto)
+        public async Task<IActionResult> AddCategory([FromBody] CategoryRequest category)
         {
-            var category = _mapper.Map<Category>(categoryDto);
-            var createdCategory = await _categoryRepository.AddAsync(category);
-            var createdCategoryDto = _mapper.Map<CategoryDTO>(createdCategory);
+            if (category == null)
+            {
+                return BadRequest(new { message = "Invalid category data" });
+            }
 
-            return CreatedAtAction(nameof(GetById), new { id = createdCategoryDto.Id }, createdCategoryDto);
+            var createdCategory = await _categoryService.CreateAsync(
+                _mapper.Map<Category>(category)
+            );
+            return Ok(createdCategory);
         }
+        //UPDATE
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] CategoryRequest categoryRequest)
+        {
+            if (categoryRequest == null)
+            {
+                return BadRequest(new { message = "Invalid category data" });
+            }
+
+            var category = _mapper.Map<Category>(categoryRequest); 
+            var updatedCategory = await _categoryService.UpdateAsync(id, category);
+
+            if (updatedCategory == null)
+            {
+                return NotFound(new { message = "Category not found" });
+            }
+
+            return Ok(updatedCategory);
+        }
+        //DELETE
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(Guid id)
+        {
+            var result = await _categoryService.DeleteAsync(id);
+
+            if (!result)
+            {
+                return NotFound(new { message = "Category not found" });
+            }
+
+            return Ok(new { message = "Category deleted successfully" });
+        }
+
     }
 }

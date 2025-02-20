@@ -11,5 +11,8 @@ namespace Data_Access_Layer.Repositories
     {
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
         Task<Category?> GetByIdAsync(Guid id);
+        Task<Category> CreateAsync(Category category);
+        Task<Category?> UpdateAsync(Guid id, Category category);
+        Task<bool> DeleteAsync(Guid id);
     }
 }

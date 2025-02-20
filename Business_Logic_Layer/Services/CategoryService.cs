@@ -24,5 +24,18 @@ namespace Business_Logic_Layer.Services
         {
             return await _categoryRepository.GetByIdAsync(id);
         }
+
+        public async Task<Category> CreateAsync(Category category)
+        {
+            return await _categoryRepository.CreateAsync(category);
+        }
+        public async Task<Category?> UpdateAsync(Guid id, Category category)
+        {
+            return await _categoryRepository.UpdateAsync(id, category);
+        }
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            return await _categoryRepository.DeleteAsync(id);
+        }
     }
 }
