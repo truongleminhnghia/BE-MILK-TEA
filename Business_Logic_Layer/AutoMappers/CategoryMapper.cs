@@ -12,7 +12,7 @@ namespace Business_Logic_Layer.AutoMappers
     {
         public CategoryMapper()
         {
-            CreateMap<CategoryRequest, Category>();
+            CreateMap<CategoryRequest, Category>().ReverseMap();
         }
     }
 }
