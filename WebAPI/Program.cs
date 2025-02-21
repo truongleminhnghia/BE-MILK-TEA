@@ -111,7 +111,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // Replace with your frontend URL
+            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app/") // Replace with your frontend URL
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials();
