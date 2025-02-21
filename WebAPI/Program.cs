@@ -114,7 +114,7 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
                   .AllowAnyMethod()
                   .AllowAnyHeader()
-                  .AllowCredentials();d
+                  .AllowCredentials();
         });
 });
 
