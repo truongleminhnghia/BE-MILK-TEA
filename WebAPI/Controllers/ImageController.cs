@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Business_Logic_Layer.Models;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -14,10 +15,12 @@ namespace WebAPI.Controllers
     public class ImageController : ControllerBase
     {
         private readonly IImageService _imageService;
+        private readonly IImageRepository _imageRepository;
 
-        public ImageController(IImageService imageService)
+        public ImageController(IImageService imageService, IImageRepository imageRepository)
         {
             _imageService = imageService;
+            _imageRepository = imageRepository;
         }
 
         [HttpGet]
@@ -56,24 +59,19 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateImage(
-            Guid id,
-            [FromBody] Business_Logic_Layer.Models.Image image
-        )
+        public async Task UpdateImageAsync(Guid id, Business_Logic_Layer.Models.Image image)
         {
-            if (id != image.Id)
-            {
-                return BadRequest(new { message = "Id mismatch" });
-            }
-
-            var existingImage = await _imageService.GetImageByIdAsync(id);
+            var existingImage = await _imageRepository.GetImageByIdAsync(id);
             if (existingImage == null)
             {
-                return NotFound(new { message = "Image not found" });
+                throw new Exception("Image not found.");
             }
-            image.Id = id;
-            await _imageService.UpdateImageAsync(id, image); // Pass both id and image
-            return NoContent();
+
+            // Update the existing image's properties
+            existingImage.ImageUrl = image.ImageUrl;
+            existingImage.IngredientId = image.IngredientId;
+
+            await _imageRepository.UpdateImageAsync(existingImage);
         }
 
         [HttpDelete("{id}")]

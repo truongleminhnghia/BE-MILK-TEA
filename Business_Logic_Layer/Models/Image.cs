@@ -9,7 +9,7 @@ namespace Business_Logic_Layer.Models
 {
     public class Image
     {
-        [JsonIgnore]
+        //[JsonIgnore]
         public Guid Id { get; set; }
         public required string ImageUrl { get; set; }
         public Guid IngredientId { get; set; }
