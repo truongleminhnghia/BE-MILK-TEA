@@ -1,4 +1,5 @@
-﻿using Data_Access_Layer.Repositories.Entities;
+﻿
+using Data_Access_Layer.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data_Access_Layer.Repositories.Data
+namespace Data_Access_Layer.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -25,7 +26,7 @@ namespace Data_Access_Layer.Repositories.Data
         public virtual DbSet<CartItem> CartItems { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
-        public virtual DbSet<Empoyee> Empoyees { get; set; }
+        public virtual DbSet<Employee> Empoyees { get; set; }
         public virtual DbSet<Image> Images { get; set; }
         public virtual DbSet<Ingredient> Ingredients { get; set; }
         public virtual DbSet<IngredientProduct> IngredientProducts { get; set; }
@@ -38,6 +39,8 @@ namespace Data_Access_Layer.Repositories.Data
         public virtual DbSet<Promotion> Promotions { get; set; }
         public virtual DbSet<PromotionDetail> PromotionDetails { get; set; }
         public virtual DbSet<Recipe> Recipes { get; set; }
+        public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+        public virtual DbSet<Token> Tokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,7 +58,7 @@ namespace Data_Access_Layer.Repositories.Data
             modelBuilder.Entity<Customer>()
                 .HasIndex(c => c.AccountId)
                 .IsUnique();
-            modelBuilder.Entity<Empoyee>()
+            modelBuilder.Entity<Employee>()
                 .HasIndex(e => e.AccountId)
                 .IsUnique();
             modelBuilder.Entity<Cart>()
@@ -64,10 +67,6 @@ namespace Data_Access_Layer.Repositories.Data
             modelBuilder.Entity<CartItem>()
                 .HasIndex(ci => ci.CartId)
                 .IsUnique();
-            modelBuilder.Entity<Ingredient>()
-                .HasOne(i => i.Category) 
-                .WithMany(c => c.Ingredients) 
-                .HasForeignKey(i => i.CategoryId); 
             modelBuilder.Entity<Category>()
                 .Property(a => a.CategoryStatus)
                 .HasConversion<string>();
@@ -89,6 +88,12 @@ namespace Data_Access_Layer.Repositories.Data
             modelBuilder.Entity<Promotion>()
                 .Property(a => a.PromotionType)
                 .HasConversion<string>();
+            modelBuilder.Entity<Promotion>()
+                .HasOne(p => p.PromotionDetail)
+                .WithOne(pd => pd.Promotion)
+                .HasForeignKey<PromotionDetail>(pd => pd.PromotionId)
+                .IsRequired();
+
         }
 
         public override int SaveChanges()
@@ -108,7 +113,5 @@ namespace Data_Access_Layer.Repositories.Data
 
             return base.SaveChanges();
         }
-
-
     }
 }

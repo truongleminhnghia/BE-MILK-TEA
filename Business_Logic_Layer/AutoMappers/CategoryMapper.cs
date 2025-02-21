@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
-using Data_Access_Layer.Repositories.Entities;
+using Data_Access_Layer.Entities;
 
 namespace Business_Logic_Layer.AutoMappers
 {

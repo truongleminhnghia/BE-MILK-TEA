@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("ingredient_review")]
     public class IngredientReview
@@ -18,10 +18,11 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("ingredient_id")]
         [Required]
-        [ForeignKey("ingredient_id")]
+        [ForeignKey("IngredientId")]
         public Guid IngredientId { get; set; }
 
         [Column("account_id")]
+        [ForeignKey("AccountId")]
         [Required]
         public Guid AccountId { get; set; }
 

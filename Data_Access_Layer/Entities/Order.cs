@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("order_info")]
     public class Order
@@ -25,18 +26,21 @@ namespace Data_Access_Layer.Repositories.Entities
         public DateTime OrderDate { get; set; }
 
         [Column("full_name_shipping", TypeName = "varchar(500)")]
-        [Required(ErrorMessage = "Name shipping cannot be null")]
+        [Required(ErrorMessage = "Name cannot be null")]
         public string? FullNameShipping { get; set; }
 
         [Column("phone_shipping", TypeName = "varchar(15)")]
-        [Required(ErrorMessage = "phone cannot be null")]
+        [Required(ErrorMessage = "Phone cannot be null")]
         public string? PhoneShipping { get; set; }
 
         [Column("email_shipping", TypeName = "varchar(500)")]
         public string? EmailShipping { get; set; }
 
+        [Column("note_shipping", TypeName = "varchar(500)")]
+        public string? NoteShipping { get; set; }
+
         [Column("address_shipping", TypeName = "varchar(500)")]
-        [Required(ErrorMessage = "address cannot be null")]
+        [Required(ErrorMessage = "Address cannot be null")]
         public string? AddressShipping { get; set; }
 
         [Column("order_status")]
@@ -52,19 +56,23 @@ namespace Data_Access_Layer.Repositories.Entities
         public double TotlaPrice { get; set; }
 
         [Column("price_affter_promotion")]
-        public double PriceAffterPromotion { get; set; }
+        public double? PriceAffterPromotion { get; set; }
 
         [Column("ref_code")]
         public string RefCode { get; set; } = string.Empty;
+
+        [Column("reason_cancel", TypeName = "varchar(500)")]
+        public string? ReasonCancel { get; set; }
+
+        [Column("account_id")]
+        [ForeignKey("AccountId")]
+        [Required(ErrorMessage = "Account ID cannot be null")]
+        public Guid AccountId { get; set; }
 
         // relationship 1-N with orderdetail
         // N-1 with account
         // N-N with promotion
         // 1-N with payment
-
-        [Column("account_id")]
-        [Required(ErrorMessage = "Account ID cannot be null")]
-        public Guid AccountId { get; set; }
 
         public Account? Account { get; set; }
 

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("ingredient")]
     public class Ingredient : BaseEntity
@@ -63,7 +63,7 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("category_id")]
         [Required]
-        [ForeignKey("category_id")]
+        [ForeignKey("CategoryId")]
         public Guid CategoryId { get; set; }
 
         [Column("quantity")]
@@ -80,6 +80,7 @@ namespace Data_Access_Layer.Repositories.Entities
 
         public ICollection<Image>? Images { get; set; }
         public ICollection<IngredientReview>? IngredientReviews { get; set; }
+        public ICollection<IngredientProduct>? IngredientProducts { get; set; }
         public ICollection<IngredientPromotion>? IngredientPromotions { get; set; }
         public ICollection<IngredientRecipe>? IngredientRecipes { get; set; }
         public Category? Category { get; set; }

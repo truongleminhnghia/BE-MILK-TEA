@@ -1,10 +1,9 @@
-using Data_Access_Layer.Repositories.Data;
+using Data_Access_Layer.Data;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 using Business_Logic_Layer.AutoMappers;
 using Business_Logic_Layer.Services;
-using Data_Access_Layer.Repositories.Interfaces;
-using Data_Access_Layer.Repositories.Implements;
+using Data_Access_Layer.Repositories;
 using System.Text.Json.Serialization;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,7 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 Env.Load();
-// var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
+//var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
 var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
 var _port = Environment.GetEnvironmentVariable("PORT_LOCAL");
@@ -39,7 +38,7 @@ Console.WriteLine($"DATABASE_CONNECTION: {connectionString}");
 
 // Cấu hình DbContext với MySQL
 
-
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseMySql(
@@ -96,12 +95,29 @@ builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
 
 
 builder.Services.AddAutoMapper(
     typeof(AccountMapper),
     typeof(CategoryMapper)
     );
+
+// config CORS
+var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173") // Replace with your frontend URL
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+});
+
 
 var app = builder.Build();
 
@@ -117,5 +133,12 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseCors(MyAllowSpecificOrigins);
 
+
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2) // 2 phút là khoảng tg để client - server kết nối
+};
+app.UseWebSockets();
 app.Run();

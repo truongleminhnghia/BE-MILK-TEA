@@ -17,35 +17,38 @@ namespace WebAPI.Controllers
     public class AuthenController : ControllerBase
     {
         private readonly IAuthenService _authenService;
+        private readonly IAccountService _accountService;
 
-        public AuthenController(IAuthenService authenService)
+        public AuthenController(IAuthenService authenService, IAccountService accountService)
         {
             _authenService = authenService;
+            _accountService = accountService;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest _request, [FromQuery] string _typeLogin)
+        public async Task<IActionResult> Register(
+            [FromBody] RegisterRequest _request,
+            [FromQuery] string? _typeLogin = null) // Cho phép null
         {
             try
             {
-                if (_typeLogin == null)
-                {
-                    _typeLogin = TypeLogin.LOGIN_LOCAL.ToString();
-                }
+                _typeLogin ??= TypeLogin.LOGIN_LOCAL.ToString();
+
                 var account = await _authenService.Register(_request, _typeLogin);
+
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK,
                     true,
                     "Đăng ký thành công",
                     account
-                    ));
+                ));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(
                     HttpStatusCode.InternalServerError,
                     false,
-                    ex.Message
+                    "An error occurred during registration. Please try again."
                 ));
             }
         }
@@ -59,12 +62,12 @@ namespace WebAPI.Controllers
                 {
                     _typeLogin = TypeLogin.LOGIN_LOCAL.ToString();
                 }
-                var token = await _authenService.Login(_request, _typeLogin);
+                var _loginSuccess = await _authenService.Login(_request, _typeLogin);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK,
                     true,
                     "Đăng nhập thành công",
-                    token
+                    _loginSuccess
                     ));
             }
             catch (Exception ex)
@@ -77,8 +80,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet("admin")]
-        [Authorize(Roles = "ROLE_CUSTOMER")]
+        [HttpGet]
         public async Task<string> Admin()
         {
             return await Task.FromResult("Hello");

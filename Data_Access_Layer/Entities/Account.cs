@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("account")]
-    public class Account
+    public class Account : BaseEntity
     {
         [Key]
         [Column("account_id")]
@@ -56,7 +56,7 @@ namespace Data_Access_Layer.Repositories.Entities
         public virtual ICollection<IngredientReview>? IngredientReviews { get; set; }
 
         public Customer? Customer { get; set; }
-        public Empoyee? Empoyee { get; set; }
+        public Employee? Empoyee { get; set; }
         public Cart? Cart { get; set; }
 
         public Account()

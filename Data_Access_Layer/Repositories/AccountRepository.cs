@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Data_Access_Layer.Repositories.Data;
-using Data_Access_Layer.Repositories.Entities;
-using Data_Access_Layer.Repositories.Interfaces;
+using Data_Access_Layer.Data;
+using Data_Access_Layer.Entities;
+using Data_Access_Layer.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data_Access_Layer.Repositories.Implements
+namespace Data_Access_Layer.Repositories
 {
     public class AccountRepository : IAccountRepository
     {

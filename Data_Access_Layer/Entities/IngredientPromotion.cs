@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("ingredient_promotion")]
     public class IngredientPromotion
@@ -17,16 +17,15 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("ingredient_id")]
         [Required]
-        [ForeignKey("ingredient_id")]
+        [ForeignKey("IngredientId")]
         public Guid IngredientId { get; set; }
 
-        public Ingredient? Ingredient { get; set; }
-
         [Column("promotion_id")]
-        [ForeignKey("promotion_id")]
+        [ForeignKey("PromotionId")]
         [Required]
         public Guid PromotionId { get; set; }
 
+        public Ingredient? Ingredient { get; set; }
         public Promotion? Promotion { get; set; }
     }
 }

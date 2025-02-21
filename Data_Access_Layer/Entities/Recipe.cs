@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("recipe")]
     public class Recipe : BaseEntity
@@ -25,7 +25,7 @@ namespace Data_Access_Layer.Repositories.Entities
         public string? Content { get; set; }
 
         [Column("category_id", TypeName = "char(36)")]
-        [ForeignKey("category_id")]
+        [ForeignKey("CategoryId")]
         [Required]
         public Guid CategoryId { get; set; }
 

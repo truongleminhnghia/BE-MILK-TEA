@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("promotion_detail")]
     public class PromotionDetail
@@ -30,6 +30,10 @@ namespace Data_Access_Layer.Repositories.Entities
 
         [Column("max_value")]
         public double MaxValue { get; set; }
+
+        [Column("promtion_id")]
+        [ForeignKey("PromotionId")]
+        public Guid PromotionId { get; set; }
 
         public Promotion? Promotion { get; set; }
     }

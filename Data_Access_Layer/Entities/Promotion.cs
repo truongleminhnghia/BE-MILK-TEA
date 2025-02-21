@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
-namespace Data_Access_Layer.Repositories.Entities
+namespace Data_Access_Layer.Entities
 {
     [Table("promotion")]
     public class Promotion : BaseEntity
@@ -20,9 +20,10 @@ namespace Data_Access_Layer.Repositories.Entities
         [Required]
         public string PromotionCode { get; set; } = string.Empty;
 
-        [Column("promotion_detail_id")]
-        [Required]
-        public Guid PromotionDetailId { get; set; }
+        // [Column("promotion_detail_id")]
+        // [ForeignKey("PromotionDetailId")]
+        // [Required]
+        // public Guid PromotionDetailId { get; set; }
 
         [Column("is_active")]
         [Required]
@@ -40,9 +41,13 @@ namespace Data_Access_Layer.Repositories.Entities
         [Required]
         public PromotionType PromotionType { get; set; }
 
+
+        //relationship
         public PromotionDetail? PromotionDetail { get; set; }
-        
+     
         public ICollection<OrderPromotion>? OrderPromotions { get; set; }
+
+        public ICollection<IngredientPromotion>? IngredientPromotions { get; set; }
 
     }
 }
