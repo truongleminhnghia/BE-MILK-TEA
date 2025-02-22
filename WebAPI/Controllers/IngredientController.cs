@@ -78,7 +78,7 @@ namespace WebAPI.Controllers
             );
         }
 
-        //Cập nhật nguyên liệu
+        // 🟢 Cập nhật nguyên liệu
         [HttpPut("{id}")]
         //[Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Update(
