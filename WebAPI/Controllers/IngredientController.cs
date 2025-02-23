@@ -8,6 +8,7 @@ using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,20 +20,16 @@ namespace WebAPI.Controllers
     {
         private readonly IIngredientService _ingredientService;
         private readonly IMapper _mapper;
-        private readonly ICategoryService _categorytService;
 
-        public IngredientController(
-            ICategoryService categoryService,
-            IIngredientService ingredientService,
-            IMapper mapper
-        )
+        public IngredientController(IIngredientService ingredientService, IMapper mapper)
         {
             _ingredientService = ingredientService;
-            _categorytService = categoryService;
             _mapper = mapper;
         }
 
         //Lấy danh sách tất cả nguyên liệu
+        // pagesize, currentPage, total, conditionm,
+        // Get All, GET (bybId, email, code)
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -52,10 +49,9 @@ namespace WebAPI.Controllers
             return Ok(ingredient);
         }
 
-        
-
         //Thêm mới nguyên liệu
         [HttpPost]
+        //[Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Add(
             [FromBody] Business_Logic_Layer.Models.Ingredient ingredient
         )
@@ -64,6 +60,10 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(new { message = "Invalid ingredient data" });
             }
+
+            // Generate new Id for the ingredient
+            ingredient.Id = Guid.NewGuid();
+
             var ingredientEntity = _mapper.Map<Data_Access_Layer.Entities.Ingredient>(ingredient);
             var createdIngredient = await _ingredientService.CreateIngredientAsync(
                 ingredientEntity
@@ -71,6 +71,7 @@ namespace WebAPI.Controllers
             var createdIngredientModel = _mapper.Map<Business_Logic_Layer.Models.Ingredient>(
                 createdIngredient
             );
+
             return CreatedAtAction(
                 nameof(Get),
                 new { id = createdIngredientModel.Id },
@@ -78,8 +79,9 @@ namespace WebAPI.Controllers
             );
         }
 
-        // 🟢 Cập nhật nguyên liệu
+        //Cập nhật nguyên liệu
         [HttpPut("{id}")]
+        //[Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Update(
             Guid id,
             [FromBody] Business_Logic_Layer.Models.Ingredient ingredient
@@ -111,7 +113,9 @@ namespace WebAPI.Controllers
         }
 
         //  Xóa nguyên liệu
+        // id nhận về là string
         [HttpDelete("{id}")]
+        //[Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var ingredient = await _ingredientService.GetIngredientByIdAsync(id);

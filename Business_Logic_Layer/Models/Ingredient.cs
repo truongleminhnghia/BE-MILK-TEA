@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
@@ -9,6 +10,7 @@ namespace Business_Logic_Layer.Models
 {
     public class Ingredient
     {
+        [JsonIgnore]
         public Guid Id { get; set; }
         public string IngredientCode { get; set; }
         public string Supplier { get; set; }
@@ -25,6 +27,8 @@ namespace Business_Logic_Layer.Models
         public Guid CategoryId { get; set; }
         public int Quantity { get; set; }
         public bool IsSale { get; set; }
+
+        [JsonIgnore]
         public float Rate { get; set; }
     }
 }

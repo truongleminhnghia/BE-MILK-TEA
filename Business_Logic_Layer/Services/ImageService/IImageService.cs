@@ -11,7 +11,7 @@ namespace Business_Logic_Layer.Services
         Task<IEnumerable<Image>> GetAllImagesAsync();
         Task<Image> GetImageByIdAsync(Guid id);
         Task AddImageAsync(Image image);
-        Task UpdateImageAsync(Image image);
+        Task UpdateImageAsync(Guid id, Image image);
         Task DeleteImageAsync(Guid id);
     }
 }
