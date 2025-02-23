@@ -4,6 +4,7 @@ using Business_Logic_Layer.AutoMappers;
 using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
+using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Repositories;
@@ -106,7 +107,8 @@ builder.Services.AddAutoMapper(
     typeof(AccountMapper),
     typeof(CategoryMapper),
     typeof(IngredientMapper),
-    typeof(ImageMapper)
+    typeof(ImageMapper),
+    typeof(IngredientProductMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
@@ -121,6 +123,8 @@ builder.Services.AddScoped<IIngredientService, IngredientService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
+builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();

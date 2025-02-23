@@ -64,5 +64,10 @@ namespace Business_Logic_Layer.Services.IngredientService
             var mappedImage = _mapper.Map<Data_Access_Layer.Entities.Image>(image);
             await _imageRepository.UpdateImageAsync(mappedImage);
         }
+
+        public Task UpdateImageAsync(Guid id, Models.Image image)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
