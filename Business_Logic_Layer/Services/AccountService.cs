@@ -66,6 +66,78 @@ namespace Business_Logic_Layer.Services
                 return null;
             }
         }
+
+        public async Task<Account> CreateAccount(CreateAccountRequest createAccountRequest)
+        {
+            try
+            {
+                if (createAccountRequest == null)
+                {
+                    throw new Exception("Request do not null!");
+                }
+                var account = _mapper.Map<Account>(createAccountRequest);
+                account.RoleName = RoleName.ROLE_CUSTOMER;
+                account.AccountStatus = AccountStatus.ACTIVE;
+
+                var result = await _accountRepository.Create(account);
+                if (result == null)
+                {
+                    throw new Exception("Create account failed");
+                }
+
+                return account;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                return null;
+            }
+        }
+
+
+
+        //public async Task<Account> CreateStaff(CreateStaffRequest createEmployeeRequest)
+        //{
+        //    try
+        //    {
+        //        if (createEmployeeRequest == null)
+        //        {
+        //            throw new Exception("Request do not null!");
+        //        }
+        //        var _account = _mapper.Map<Account>(createEmployeeRequest);
+        //        _account.RoleName = RoleName.ROLE_STAFF;
+        //        _account.AccountStatus = AccountStatus.ACTIVE;
+        //        var _result = await _accountRepository.Create(_account);
+        //        return _result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("error: " + ex.Message);
+        //        return null;
+        //    }
+        //}
+
+        //public async Task<Account> CreateManager(CreateManagerRequest createManagerRequest)
+        //{
+        //    try
+        //    {
+        //        if (createManagerRequest == null)
+        //        {
+        //            throw new Exception("Request do not null!");
+        //        }
+        //        var _account = _mapper.Map<Account>(createManagerRequest);
+        //        _account.RoleName = RoleName.ROLE_MANAGER;
+        //        _account.AccountStatus = AccountStatus.ACTIVE;
+        //        _account
+        //        var _result = await _accountRepository.Create(_account);
+        //        return _result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("error: " + ex.Message);
+        //        return null;
+        //    }
+        //}
     }
 }
 
