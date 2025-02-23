@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Business_Logic_Layer.AutoMappers;
 using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
+using Business_Logic_Layer.Services.CategoryService;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Repositories;
