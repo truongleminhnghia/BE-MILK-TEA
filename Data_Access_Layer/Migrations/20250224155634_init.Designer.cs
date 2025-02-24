@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250217083011_InitCreate")]
-    partial class InitCreate
+    [Migration("20250224155634_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -326,6 +326,11 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("ingredient_status");
 
+                    b.Property<string>("IngredientType")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ingredient_type");
+
                     b.Property<bool>("IsSale")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("is_sale");
@@ -337,10 +342,6 @@ namespace Data_Access_Layer.Migrations
                     b.Property<double>("PricePromotion")
                         .HasColumnType("double")
                         .HasColumnName("price_promotion");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int")
-                        .HasColumnName("quantity");
 
                     b.Property<int>("QuantityPerCarton")
                         .HasColumnType("int")
@@ -355,8 +356,9 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("nvarchar(300)")
                         .HasColumnName("supplier");
 
-                    b.Property<int>("Unit")
-                        .HasColumnType("int")
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("unit");
 
                     b.Property<DateTime>("UpdateAt")
@@ -384,6 +386,11 @@ namespace Data_Access_Layer.Migrations
                     b.Property<Guid>("IngredientId")
                         .HasColumnType("char(36)")
                         .HasColumnName("ingredient_id");
+
+                    b.Property<string>("ProductType")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("product_type");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
@@ -438,6 +445,10 @@ namespace Data_Access_Layer.Migrations
                     b.Property<Guid>("RecipeId")
                         .HasColumnType("char(36)")
                         .HasColumnName("recipe_id");
+
+                    b.Property<float>("WeightOfIngredient")
+                        .HasColumnType("float")
+                        .HasColumnName("weight_of_ingredient");
 
                     b.HasKey("Id");
 
