@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
+using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
-using Data_Access_Layer.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace WebAPI.Controllers
 {
@@ -27,8 +27,13 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var categories = await _categoryService.GetAllCategoriesAsync();
-            return Ok(categories);
+            var category = await _categoryService.GetAllCategoriesAsync();
+            var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(category);
+            return Ok(new ApiResponse
+                (HttpStatusCode.OK,
+                true,
+                "Thành công",
+                categoryRes));
         }
 
         //GET BY ID
@@ -36,9 +41,16 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var category = await _categoryService.GetByIdAsync(id);
-            if (category == null)
-                return NotFound();
-            return Ok(category);
+            var categoryRes = _mapper.Map<CategoryResponse>(category);
+            if (category == null) return NotFound(new ApiResponse
+                                                    (HttpStatusCode.NotFound,
+                                                    false,
+                                                    "Không tìm thấy"));
+            return Ok(new ApiResponse
+                (HttpStatusCode.OK,
+                true,
+                "Tìm thành công",
+                categoryRes));
         }
 
         //CREATE
@@ -47,13 +59,26 @@ namespace WebAPI.Controllers
         {
             if (category == null)
             {
-                return BadRequest(new { message = "Invalid category data" });
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest,
+                    false,
+                    "Data không hợp lệ"));
+            }
+            var existingCategory = await _categoryService.GetByNameAsync(category.CategoryName);
+            if (existingCategory != null)
+            {
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest,
+                    false,
+                    "Tên danh mục đã tồn tại"));
             }
 
-            var createdCategory = await _categoryService.CreateAsync(
-                _mapper.Map<Category>(category)
-            );
-            return Ok(createdCategory);
+            var createdCategory = await _categoryService.CreateAsync(_mapper.Map<Category>(category));
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK,
+                true,
+                "Tạo thành công"
+                ));
         }
 
         //UPDATE
@@ -65,7 +90,10 @@ namespace WebAPI.Controllers
         {
             if (categoryRequest == null)
             {
-                return BadRequest(new { message = "Invalid category data" });
+                return BadRequest(new ApiResponse
+                    (HttpStatusCode.BadRequest,
+                    false,
+                    "Data không hợp lệ"));
             }
 
             var category = _mapper.Map<Category>(categoryRequest);
@@ -73,10 +101,16 @@ namespace WebAPI.Controllers
 
             if (updatedCategory == null)
             {
-                return NotFound(new { message = "Category not found" });
+                return NotFound(new ApiResponse
+                    (HttpStatusCode.NotFound,
+                    false,
+                    "Không tìm thấy"));
             }
 
-            return Ok(updatedCategory);
+            return Ok(new ApiResponse
+                (HttpStatusCode.OK,
+                true,
+                "Cập nhật thành công"));
         }
 
         //DELETE
@@ -87,10 +121,16 @@ namespace WebAPI.Controllers
 
             if (!result)
             {
-                return NotFound(new { message = "Category not found" });
+                return NotFound(new ApiResponse
+                    (HttpStatusCode.NotFound,
+                    false,
+                    "Không tìm thấy"));
             }
 
-            return Ok(new { message = "Category deleted successfully" });
+            return Ok(new ApiResponse
+                (HttpStatusCode.OK,
+                true,
+                "Xoá thành công"));
         }
     }
 }

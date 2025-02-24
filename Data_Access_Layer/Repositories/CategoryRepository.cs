@@ -1,14 +1,6 @@
 ﻿using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Data_Access_Layer.Data;
-using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
@@ -31,11 +23,16 @@ namespace Data_Access_Layer.Repositories
         {
             return await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
         }
+        public async Task<Category?> GetByNameAsync(string name)
+        {
+            return await _context.Categories.FirstOrDefaultAsync(c => c.CategoryName == name);
+        }
+
 
         public async Task<Category> CreateAsync(Category category)
         {
-            category.Id = Guid.NewGuid();
             category.CreateAt = DateTime.Now;
+            category.UpdateAt = DateTime.Now;
 
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
