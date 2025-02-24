@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Business_Logic_Layer.Services
+namespace Business_Logic_Layer.Interfaces
 {
     public interface IPasswordHasher
     {

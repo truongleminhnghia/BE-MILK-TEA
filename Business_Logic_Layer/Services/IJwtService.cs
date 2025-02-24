@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Data_Access_Layer.Entities;
 
-namespace Business_Logic_Layer.Services
+namespace Business_Logic_Layer.Interfaces
 {
     public interface IJwtService
     {
