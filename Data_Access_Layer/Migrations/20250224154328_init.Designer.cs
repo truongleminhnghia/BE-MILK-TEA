@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250224150410_init")]
+    [Migration("20250224154328_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -326,8 +326,9 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("ingredient_status");
 
-                    b.Property<int>("IngredientType")
-                        .HasColumnType("int")
+                    b.Property<string>("IngredientType")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("ingredient_type");
 
                     b.Property<bool>("IsSale")
@@ -386,8 +387,9 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("ingredient_id");
 
-                    b.Property<int>("ProductType")
-                        .HasColumnType("int")
+                    b.Property<string>("ProductType")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("product_type");
 
                     b.Property<int>("Quantity")

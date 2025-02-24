@@ -219,7 +219,8 @@ namespace Data_Access_Layer.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     weight_per_bag = table.Column<float>(type: "float", nullable: false),
                     quantity_per_carton = table.Column<int>(type: "int", nullable: false),
-                    ingredient_type = table.Column<int>(type: "int", nullable: false),
+                    ingredient_type = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     unit = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     price_origin = table.Column<double>(type: "double", nullable: false),
                     price_promotion = table.Column<double>(type: "double", nullable: false),
@@ -371,7 +372,8 @@ namespace Data_Access_Layer.Migrations
                     ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     total_price = table.Column<double>(type: "double", nullable: false),
                     quantity = table.Column<int>(type: "int", nullable: false),
-                    product_type = table.Column<int>(type: "int", nullable: false)
+                    product_type = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
