@@ -2,7 +2,7 @@
 {
     public enum IngredientType
     {
-        Bot = 1,
-        Tra = 2
+        Bot,
+        Tra
     }
 }
