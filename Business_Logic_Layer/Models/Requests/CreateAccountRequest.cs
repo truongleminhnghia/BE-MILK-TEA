@@ -17,6 +17,14 @@ namespace Business_Logic_Layer.Models.Requests
 
     public class CreateCustomerRequest
     {
+        public Guid AccountId { get; set; }
+        public string TaxCode { get; set; }
+        public string Address { get; set; }
+    }
 
+    public class CreateStaffRequest
+    {
+        public Guid AccountId { get; set; }
+        public string RefCode { get; set; }
     }
 }

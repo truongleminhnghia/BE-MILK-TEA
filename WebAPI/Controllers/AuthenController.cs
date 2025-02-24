@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
-using Business_Logic_Layer.Services;
 using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +17,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Data_Access_Layer.Entities;
+using Business_Logic_Layer.Interfaces;
 
 namespace WebAPI.Controllers
 {
@@ -98,27 +98,27 @@ namespace WebAPI.Controllers
         }
 
 
-        //[HttpPost("logout")]
-        //public async Task<IActionResult> Logout()
-        //{
-        //    try
-        //    {
-        //        await _authenService.Logout();
-        //        return Ok(new ApiResponse(
-        //            HttpStatusCode.OK,
-        //            true,
-        //            "Đăng xuất thành công"
-        //        ));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new ApiResponse(
-        //            HttpStatusCode.InternalServerError,
-        //            false,
-        //            ex.Message
-        //        ));
-        //    }
-        //}
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                await _authenService.Logout();
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK,
+                    true,
+                    "Đăng xuất thành công"
+                ));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(
+                    HttpStatusCode.InternalServerError,
+                    false,
+                    ex.Message
+                ));
+            }
+        }
 
         [HttpGet]
         public async Task<string> Admin()

@@ -8,7 +8,6 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Entities;
-using Data_Access_Layer.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +16,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Google.Apis.Auth;
+using Business_Logic_Layer.Interfaces;
+using Data_Access_Layer.Interfaces;
 
 namespace Business_Logic_Layer.Services
 {

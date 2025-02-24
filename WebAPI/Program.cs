@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Builder.Extensions;
 using System;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore;
+using Business_Logic_Layer.Interfaces;
+using Data_Access_Layer.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

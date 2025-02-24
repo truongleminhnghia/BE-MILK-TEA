@@ -6,7 +6,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Entities;
 
-namespace Business_Logic_Layer.Services
+namespace Business_Logic_Layer.Interfaces
 {
     public interface IAccountService
     {

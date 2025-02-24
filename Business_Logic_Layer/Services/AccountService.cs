@@ -8,7 +8,8 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Entities;
-using Data_Access_Layer.Repositories;
+using Business_Logic_Layer.Interfaces;
+using Data_Access_Layer.Interfaces;
 
 namespace Business_Logic_Layer.Services
 {
@@ -71,14 +72,16 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
-                if (createAccountRequest == null)
+                foreach (var item in createAccountRequest.GetType().GetProperties())
                 {
-                    throw new Exception("Request do not null!");
+                    if (item.GetValue(createAccountRequest) == null)
+                    {
+                        throw new Exception("Request do not null!");
+                    }
                 }
                 var account = _mapper.Map<Account>(createAccountRequest);
+                account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
                 account.RoleName = RoleName.ROLE_CUSTOMER;
-                account.AccountStatus = AccountStatus.ACTIVE;
-
                 var result = await _accountRepository.Create(account);
                 if (result == null)
                 {
@@ -93,29 +96,29 @@ namespace Business_Logic_Layer.Services
                 return null;
             }
         }
+         
+        
 
-
-
-        //public async Task<Account> CreateStaff(CreateStaffRequest createEmployeeRequest)
-        //{
-        //    try
-        //    {
-        //        if (createEmployeeRequest == null)
-        //        {
-        //            throw new Exception("Request do not null!");
-        //        }
-        //        var _account = _mapper.Map<Account>(createEmployeeRequest);
-        //        _account.RoleName = RoleName.ROLE_STAFF;
-        //        _account.AccountStatus = AccountStatus.ACTIVE;
-        //        var _result = await _accountRepository.Create(_account);
-        //        return _result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine("error: " + ex.Message);
-        //        return null;
-        //    }
-        //}
+        public async Task<Employee> CreateStaff(CreateStaffRequest createEmployeeRequest)
+        {
+            try
+            {
+                if (createEmployeeRequest == null)
+                {
+                    throw new Exception("Request do not null!");
+                }
+                var _account = _mapper.Map<Account>(createEmployeeRequest);
+                _account.RoleName = RoleName.ROLE_STAFF;
+                _account.AccountStatus = AccountStatus.ACTIVE;
+                var _result = await _accountRepository.Create(_account);
+                return _result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
+                return null;
+            }
+        }
 
         //public async Task<Account> CreateManager(CreateManagerRequest createManagerRequest)
         //{
