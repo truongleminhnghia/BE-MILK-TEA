@@ -9,11 +9,12 @@ namespace Business_Logic_Layer.Interfaces
 {
     public interface IAuthenService
     {
-        //Task<AccountResponse> Register(RegisterRequest _request, string _type);
-        Task<AccountResponse> Register(RegisterRequest request);
-        Task<AuthenticateResponse> Login(LoginRequest _request, string _type);  
-        //Task<ApiResponse> Logout();
-        Task<ApiResponse> LoginWithGoogle(string googleToken);
-        Task<string> GenerateUrl(string _type);
+        Task<AccountResponse> Register(RegisterRequest _request);
+        Task<AuthenticateResponse> Login(LoginRequest _request, string _type);
+        public string GenerateUrl(string type);
+
+        public Task<Dictionary<string, object>> AuthenticateAndFetchProfile(string code, string type);
+
+        public Task<AuthenticateResponse> LoginOauth2(Oauth2Request _request);
     }
 }
