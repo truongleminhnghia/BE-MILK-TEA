@@ -30,15 +30,8 @@ var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
 var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
-<<<<<<< HEAD
-var connectionString =
-    $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
-
-// var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Nghia_2003;Database=DB_MILK_TEA;SslMode=Required;";
-=======
 var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 //var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Pass;Database=DB_MILK_TEA;SslMode=Required;";
->>>>>>> a01ef06d72df6cd07ceccd25761de6d58f3fbde3
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -151,17 +144,7 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
-<<<<<<< HEAD
-            policy
-                .WithOrigins("http://localhost:5173") // Replace with your frontend URL
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        }
-    );
-});
 
-=======
             policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
                   .AllowAnyMethod()
                   .AllowAnyHeader()
@@ -171,8 +154,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHttpClient<AuthenService>();
 
-
->>>>>>> a01ef06d72df6cd07ceccd25761de6d58f3fbde3
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
