@@ -7,6 +7,7 @@ using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
@@ -55,6 +56,7 @@ namespace WebAPI.Controllers
 
         //CREATE
         [HttpPost]
+        [Authorize("ROLE_STAFF")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryRequest category)
         {
             if (category == null)
@@ -83,6 +85,8 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
+        [Authorize("ROLE_STAFF")]
+
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryRequest categoryRequest
@@ -115,6 +119,8 @@ namespace WebAPI.Controllers
 
         //DELETE
         [HttpDelete("{id}")]
+        [Authorize("ROLE_STAFF")]
+
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             var result = await _categoryService.DeleteAsync(id);
