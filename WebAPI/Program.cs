@@ -9,6 +9,14 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Business_Logic_Layer.Middleware;
+using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Builder.Extensions;
+using System;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore;
+using Business_Logic_Layer.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,7 +60,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
      );
 });
 
-
 // lấy biến JWT từ môi trường
 var _secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
 var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
@@ -85,7 +92,18 @@ builder.Services.AddAuthentication(option =>
         ValidAudience = _audience, // tương tự
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey)) // phải mã khóa serect_key lại nhé
     };
-});
+})
+.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+ {
+     IConfigurationSection googleAuthNSection =
+         builder.Configuration.GetSection("Authentication:Google");
+     options.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
+     options.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
+ });
+
+
+
+
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
