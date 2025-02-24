@@ -30,10 +30,15 @@ var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
 var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
+<<<<<<< HEAD
 var connectionString =
     $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
 // var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Nghia_2003;Database=DB_MILK_TEA;SslMode=Required;";
+=======
+var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+//var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Pass;Database=DB_MILK_TEA;SslMode=Required;";
+>>>>>>> a01ef06d72df6cd07ceccd25761de6d58f3fbde3
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -64,7 +69,7 @@ var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
-
+//muốn chạy thì comment từ đây lại, + xóa Migration
 if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
 {
     throw new InvalidOperationException("JWT environment variables are not set properly.");
@@ -115,6 +120,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
     () => provider.GetService<ICategoryService>()
 );
+// comment đến đây
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
@@ -145,6 +151,7 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
+<<<<<<< HEAD
             policy
                 .WithOrigins("http://localhost:5173") // Replace with your frontend URL
                 .AllowAnyMethod()
@@ -154,6 +161,18 @@ builder.Services.AddCors(options =>
     );
 });
 
+=======
+            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+});
+
+builder.Services.AddHttpClient<AuthenService>();
+
+
+>>>>>>> a01ef06d72df6cd07ceccd25761de6d58f3fbde3
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
