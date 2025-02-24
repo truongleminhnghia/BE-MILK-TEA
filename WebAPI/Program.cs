@@ -27,8 +27,8 @@ var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
 var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
-var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
-// var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Nghia_2003;Database=DB_MILK_TEA;SslMode=Required;";
+//var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=1234;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -59,34 +59,34 @@ var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
+//muốn chạy thì comment từ đây lại, + xóa Migration
+//if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
+//{
+//    throw new InvalidOperationException("JWT environment variables are not set properly.");
+//}
 
-if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
-{
-    throw new InvalidOperationException("JWT environment variables are not set properly.");
-}
-
-// đăng kí xác thực
-builder.Services.AddAuthentication(option =>
-{
-    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // mặc định cơ chế xác thực Bearer (JWT)
-    // hiểu nôm na đơn giản là khi một người dùng yêu cầu đến API, hệ thống sẽ kiểm tra JWT token trong Authorization owrphaanf header, 
-    // nếu không có hoặc không hợp lệ sẽ nhận lỗi 401
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true, // người, chỗ, nơi phát hành, tức là tk cho tạo token
-        ValidateAudience = true, // đối tượng sử dụng token
-        ValidateLifetime = true, // kiểm tra thời gian hết hạn
-        ValidateIssuerSigningKey = true, // kiểm tra khóa primate dùng để sign 
-        ValidIssuer = _issuer, // giá trị phá hành được lấy từ biến môi trường
-        ValidAudience = _audience, // tương tự
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey)) // phải mã khóa serect_key lại nhé
-    };
-});
-
+//// đăng kí xác thực
+//builder.Services.AddAuthentication(option =>
+//{
+//    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // mặc định cơ chế xác thực Bearer (JWT)
+//    // hiểu nôm na đơn giản là khi một người dùng yêu cầu đến API, hệ thống sẽ kiểm tra JWT token trong Authorization owrphaanf header, 
+//    // nếu không có hoặc không hợp lệ sẽ nhận lỗi 401
+//})
+//.AddJwtBearer(options =>
+//{
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuer = true, // người, chỗ, nơi phát hành, tức là tk cho tạo token
+//        ValidateAudience = true, // đối tượng sử dụng token
+//        ValidateLifetime = true, // kiểm tra thời gian hết hạn
+//        ValidateIssuerSigningKey = true, // kiểm tra khóa primate dùng để sign 
+//        ValidIssuer = _issuer, // giá trị phá hành được lấy từ biến môi trường
+//        ValidAudience = _audience, // tương tự
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey)) // phải mã khóa serect_key lại nhé
+//    };
+//});
+// comment đến đây
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
@@ -111,7 +111,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // Replace with your frontend URL
+            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials();

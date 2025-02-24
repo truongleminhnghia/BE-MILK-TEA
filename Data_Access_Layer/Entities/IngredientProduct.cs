@@ -29,11 +29,21 @@ namespace Data_Access_Layer.Entities
         [Required]
         public int Quantity { get; set; }
 
+        [Column("product_type")]
+        [Required]
+        public ProductType ProductType { get; set; }
+
+
         
         public Ingredient? Ingredient { get; set; }
 
         public ICollection<CartItem>? CartItems { get; set; }
 
         public ICollection<OrderDetail>? OrderDetails { get; set; }
+    }
+    public enum ProductType
+    {
+        Bich,
+        Thung,
     }
 }
