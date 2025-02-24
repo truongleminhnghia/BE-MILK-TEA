@@ -11,5 +11,6 @@ namespace Data_Access_Layer.Repositories
         Task<Account> Create(Account _account);
         Task<Account?> GetById(string _id);
         Task<Account?> GetByEmail(string _email);
+        public Task<bool> EmailExisting(string _email);
     }
 }
