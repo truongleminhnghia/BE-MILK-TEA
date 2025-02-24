@@ -118,6 +118,8 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddHttpClient<AuthenService>();
+
 
 var app = builder.Build();
 
