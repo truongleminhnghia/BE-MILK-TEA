@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250224111556_initt")]
-    partial class initt
+    [Migration("20250224150410_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -443,6 +443,10 @@ namespace Data_Access_Layer.Migrations
                     b.Property<Guid>("RecipeId")
                         .HasColumnType("char(36)")
                         .HasColumnName("recipe_id");
+
+                    b.Property<float>("WeightOfIngredient")
+                        .HasColumnType("float")
+                        .HasColumnName("weight_of_ingredient");
 
                     b.HasKey("Id");
 

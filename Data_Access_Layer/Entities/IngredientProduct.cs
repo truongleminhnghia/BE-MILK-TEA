@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using Data_Access_Layer.Enum;
 
 namespace Data_Access_Layer.Entities
 {
@@ -40,10 +41,5 @@ namespace Data_Access_Layer.Entities
         public ICollection<CartItem>? CartItems { get; set; }
 
         public ICollection<OrderDetail>? OrderDetails { get; set; }
-    }
-    public enum ProductType
-    {
-        Bich,
-        Thung,
-    }
+    }    
 }

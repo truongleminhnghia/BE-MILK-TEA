@@ -28,5 +28,9 @@ namespace Data_Access_Layer.Entities
         public Guid RecipeId { get; set; }
 
         public Recipe? Recipe { get; set; }
+
+        [Column("weight_of_ingredient")]
+        [Required] 
+        public float WeightOfIngredient { get; set; }
     }
 }

@@ -52,7 +52,7 @@ namespace Data_Access_Layer.Entities
 
         [Column("ingredient_type")]
         [Required]
-        public IngredientType IngredientType { get; set; } // Thêm Enum mới
+        public IngredientType IngredientType  { get; set; } // Thêm Enum mới
 
         [Column("unit", TypeName = "nvarchar(50)")]
         public string Unit { get; set; } = string.Empty; // đơn vị là bị or bịch
@@ -89,12 +89,7 @@ namespace Data_Access_Layer.Entities
         public ICollection<IngredientRecipe>? IngredientRecipes { get; set; }
         public Category? Category { get; set; }
     }
-    public enum IngredientType
-    {
-        Type1,
-        Type2,
-        Type3
-    }
+    
 }
 
 // isStaff = true ==> crud

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data_Access_Layer.Migrations
 {
     /// <inheritdoc />
-    public partial class initt : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -445,7 +445,8 @@ namespace Data_Access_Layer.Migrations
                 {
                     ingredient_recipe_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    recipe_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                    recipe_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    weight_of_ingredient = table.Column<float>(type: "float", nullable: false)
                 },
                 constraints: table =>
                 {

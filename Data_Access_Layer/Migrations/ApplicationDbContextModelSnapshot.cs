@@ -441,6 +441,10 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("recipe_id");
 
+                    b.Property<float>("WeightOfIngredient")
+                        .HasColumnType("float")
+                        .HasColumnName("weight_of_ingredient");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IngredientId");
