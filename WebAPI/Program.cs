@@ -1,33 +1,27 @@
-using Data_Access_Layer.Data;
-using Microsoft.EntityFrameworkCore;
-using DotNetEnv;
-using Business_Logic_Layer.AutoMappers;
-using Business_Logic_Layer.Services;
-using Data_Access_Layer.Repositories;
-using System.Text.Json.Serialization;
 using System.Text;
+using System.Text.Json.Serialization;
+using Business_Logic_Layer.AutoMappers;
+using Business_Logic_Layer.Middleware;
+using Business_Logic_Layer.Services;
+using Business_Logic_Layer.Services.CategoryService;
+using Business_Logic_Layer.Services.IngredientProductService;
+using Business_Logic_Layer.Services.IngredientService;
+using Data_Access_Layer.Data;
+using Data_Access_Layer.Repositories;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Business_Logic_Layer.Middleware;
-using Data_Access_Layer.Entities;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Builder.Extensions;
-using System;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore;
-using Business_Logic_Layer.Interfaces;
-using Business_Logic_Layer.Utils;
-using Microsoft.AspNetCore.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 Env.Load();
+
 //var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
 var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
@@ -52,14 +46,15 @@ Console.WriteLine($"DATABASE_CONNECTION: {connectionString}");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseMySql(
-         connectionString,
-         new MySqlServerVersion(new Version(8, 0, 31)),
-         mySqlOptions => mySqlOptions.EnableRetryOnFailure(
-             maxRetryCount: 5,
-             maxRetryDelay: TimeSpan.FromSeconds(10),
-             errorNumbersToAdd: null // Set this to null or an empty collection if no specific error numbers are needed.
-         )
-     );
+        connectionString,
+        new MySqlServerVersion(new Version(8, 0, 31)),
+        mySqlOptions =>
+            mySqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null // Set this to null or an empty collection if no specific error numbers are needed.
+            )
+    );
 });
 
 // lấy biến JWT từ môi trường
@@ -75,33 +70,69 @@ if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
 }
 
 // đăng kí xác thực
-builder.Services.AddAuthentication(option =>
-{
-    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // mặc định cơ chế xác thực Bearer (JWT)
-    // hiểu nôm na đơn giản là khi một người dùng yêu cầu đến API, hệ thống sẽ kiểm tra JWT token trong Authorization owrphaanf header, 
-    // nếu không có hoặc không hợp lệ sẽ nhận lỗi 401
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+builder
+    .Services.AddAuthentication(option =>
     {
-        ValidateIssuer = true, // người, chỗ, nơi phát hành, tức là tk cho tạo token
-        ValidateAudience = true, // đối tượng sử dụng token
-        ValidateLifetime = true, // kiểm tra thời gian hết hạn
-        ValidateIssuerSigningKey = true, // kiểm tra khóa primate dùng để sign 
-        ValidIssuer = _issuer, // giá trị phá hành được lấy từ biến môi trường
-        ValidAudience = _audience, // tương tự
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey)) // phải mã khóa serect_key lại nhé
-    };
-});
+        option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // mặc định cơ chế xác thực Bearer (JWT)
+        // hiểu nôm na đơn giản là khi một người dùng yêu cầu đến API, hệ thống sẽ kiểm tra JWT token trong Authorization owrphaanf header,
+        // nếu không có hoặc không hợp lệ sẽ nhận lỗi 401
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            RoleClaimType = "roleName",
+            ValidateIssuer = true, // người, chỗ, nơi phát hành, tức là tk cho tạo token
+            ValidateAudience = true, // đối tượng sử dụng token
+            ValidateLifetime = true, // kiểm tra thời gian hết hạn
+            ValidateIssuerSigningKey = true, // kiểm tra khóa primate dùng để sign
+            ValidIssuer = _issuer, // giá trị phá hành được lấy từ biến môi trường
+            ValidAudience = _audience, // tương tự
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_secretKey)
+            ) // phải mã khóa serect_key lại nhé
+            ,
+        };
+    });
+
+// Add services to the container.
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+builder.Services.AddAutoMapper(
+    typeof(AccountMapper),
+    typeof(CategoryMapper),
+    typeof(IngredientMapper),
+    typeof(ImageMapper),
+    typeof(IngredientProductMapper),
+    typeof(AccountMapper),
+    typeof(CategoryMapper)
+);
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<Func<ICategoryService>>(provider =>
+    () => provider.GetService<ICategoryService>()
+);
 // comment đến đây
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
-
+builder.Services.AddScoped<IIngredientRepository, IngredientRepository>();
+builder.Services.AddScoped<IIngredientService, IngredientService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
+builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
+
+// Register ImageRepository and ImageService
+builder.Services.AddScoped<IImageRepository, ImageRepository>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<Source>();
@@ -110,19 +141,16 @@ builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
 
-builder.Services.AddAutoMapper(
-    typeof(AccountMapper),
-    typeof(CategoryMapper)
-    );
-
 // config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(MyAllowSpecificOrigins,
+    options.AddPolicy(
+        MyAllowSpecificOrigins,
         policy =>
         {
+
             policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
                   .AllowAnyMethod()
                   .AllowAnyHeader()
@@ -131,7 +159,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpClient<AuthenService>();
-
 
 var app = builder.Build();
 
@@ -149,10 +176,12 @@ app.UseAuthorization();
 app.MapControllers();
 app.UseCors(MyAllowSpecificOrigins);
 
-
 var webSocketOptions = new WebSocketOptions
 {
-    KeepAliveInterval = TimeSpan.FromMinutes(2) // 2 phút là khoảng tg để client - server kết nối
+    KeepAliveInterval = TimeSpan.FromMinutes(
+        2
+    ) // 2 phút là khoảng tg để client - server kết nối
+    ,
 };
 app.UseWebSockets();
 app.Run();

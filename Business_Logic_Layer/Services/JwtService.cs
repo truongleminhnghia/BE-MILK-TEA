@@ -21,7 +21,8 @@ namespace Business_Logic_Layer.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private ClaimsPrincipal GetUserClaims() {
+        private ClaimsPrincipal GetUserClaims()
+        {
             return _httpContextAccessor.HttpContext?.User;
         }
         public string GenerateJwtToken(Account _account)
@@ -42,6 +43,8 @@ namespace Business_Logic_Layer.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] {
+                    new Claim("aud", audience),
+                    new Claim("iss", issuer),
                     new Claim("accountId", _account.Id.ToString()),
                     new Claim("email", _account.Email),
                     new Claim("roleName", _account.RoleName.ToString()),
@@ -68,7 +71,7 @@ namespace Business_Logic_Layer.Services
 
         public string GetRole()
         {
-            return GetUserClaims().FindFirst("roleName")?.Value;;
+            return GetUserClaims().FindFirst("roleName")?.Value; ;
         }
 
         public string GetTokenId()
