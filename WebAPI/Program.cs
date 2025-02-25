@@ -60,7 +60,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 var _secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
 var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
-Console.WriteLine("au" + _audience);
 
 // kiểm tra xem, nó có tồn tai hay khoong
 //muốn chạy thì comment từ đây lại, + xóa Migration
@@ -109,7 +108,9 @@ builder.Services.AddAutoMapper(
     typeof(CategoryMapper),
     typeof(IngredientMapper),
     typeof(ImageMapper),
-    typeof(IngredientProductMapper)
+    typeof(IngredientProductMapper),
+    typeof(AccountMapper),
+    typeof(CategoryMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
@@ -135,7 +136,6 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAutoMapper(typeof(AccountMapper), typeof(CategoryMapper));
 
 // config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
