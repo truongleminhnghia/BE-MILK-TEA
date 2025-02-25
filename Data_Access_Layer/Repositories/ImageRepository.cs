@@ -35,7 +35,29 @@ namespace Data_Access_Layer.Repositories
 
         public async Task UpdateImageAsync(Image image)
         {
-            _context.Set<Image>().Update(image);
+            if (image == null)
+            {
+                throw new ArgumentNullException(nameof(image), "Image object cannot be null.");
+            }
+
+            var existingImage = await _context.Images.FindAsync(image.Id);
+
+            if (existingImage == null)
+            {
+                throw new KeyNotFoundException($"Image with ID {image.Id} not found.");
+            }
+
+            // Update properties from the incoming image object
+            existingImage.ImageUrl = image.ImageUrl;
+            if (image.IngredientId != Guid.Empty)
+            {
+                existingImage.IngredientId = image.IngredientId;
+            }
+            // Add other properties as needed
+
+            // Mark as modified
+            _context.Entry(existingImage).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
         }
 

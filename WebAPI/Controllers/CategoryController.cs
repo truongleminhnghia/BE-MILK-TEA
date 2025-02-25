@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
-using Microsoft.AspNetCore.Mvc;
-using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
@@ -30,11 +30,7 @@ namespace WebAPI.Controllers
         {
             var category = await _categoryService.GetAllCategoriesAsync();
             var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(category);
-            return Ok(new ApiResponse
-                (HttpStatusCode.OK,
-                true,
-                "Thành công",
-                categoryRes));
+            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Thành công", categoryRes));
         }
 
         //GET BY ID
@@ -43,15 +39,9 @@ namespace WebAPI.Controllers
         {
             var category = await _categoryService.GetByIdAsync(id);
             var categoryRes = _mapper.Map<CategoryResponse>(category);
-            if (category == null) return NotFound(new ApiResponse
-                                                    (HttpStatusCode.NotFound,
-                                                    false,
-                                                    "Không tìm thấy"));
-            return Ok(new ApiResponse
-                (HttpStatusCode.OK,
-                true,
-                "Tìm thành công",
-                categoryRes));
+            if (category == null)
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, false, "Không tìm thấy"));
+            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Tìm thành công", categoryRes));
         }
 
         //CREATE
@@ -61,32 +51,27 @@ namespace WebAPI.Controllers
         {
             if (category == null)
             {
-                return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
-                    false,
-                    "Data không hợp lệ"));
+                return BadRequest(
+                    new ApiResponse(HttpStatusCode.BadRequest, false, "Data không hợp lệ")
+                );
             }
             var existingCategory = await _categoryService.GetByNameAsync(category.CategoryName);
             if (existingCategory != null)
             {
-                return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
-                    false,
-                    "Tên danh mục đã tồn tại"));
+                return BadRequest(
+                    new ApiResponse(HttpStatusCode.BadRequest, false, "Tên danh mục đã tồn tại")
+                );
             }
 
-            var createdCategory = await _categoryService.CreateAsync(_mapper.Map<Category>(category));
-            return Ok(new ApiResponse(
-                HttpStatusCode.OK,
-                true,
-                "Tạo thành công"
-                ));
+            var createdCategory = await _categoryService.CreateAsync(
+                _mapper.Map<Category>(category)
+            );
+            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Tạo thành công"));
         }
 
         //UPDATE
         [HttpPut("{id}")]
         [Authorize("ROLE_STAFF")]
-
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryRequest categoryRequest
@@ -94,10 +79,9 @@ namespace WebAPI.Controllers
         {
             if (categoryRequest == null)
             {
-                return BadRequest(new ApiResponse
-                    (HttpStatusCode.BadRequest,
-                    false,
-                    "Data không hợp lệ"));
+                return BadRequest(
+                    new ApiResponse(HttpStatusCode.BadRequest, false, "Data không hợp lệ")
+                );
             }
 
             var category = _mapper.Map<Category>(categoryRequest);
@@ -105,38 +89,25 @@ namespace WebAPI.Controllers
 
             if (updatedCategory == null)
             {
-                return NotFound(new ApiResponse
-                    (HttpStatusCode.NotFound,
-                    false,
-                    "Không tìm thấy"));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, false, "Không tìm thấy"));
             }
 
-            return Ok(new ApiResponse
-                (HttpStatusCode.OK,
-                true,
-                "Cập nhật thành công"));
+            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Cập nhật thành công"));
         }
 
         //DELETE
         [HttpDelete("{id}")]
         [Authorize("ROLE_STAFF")]
-
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             var result = await _categoryService.DeleteAsync(id);
 
             if (!result)
             {
-                return NotFound(new ApiResponse
-                    (HttpStatusCode.NotFound,
-                    false,
-                    "Không tìm thấy"));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, false, "Không tìm thấy"));
             }
 
-            return Ok(new ApiResponse
-                (HttpStatusCode.OK,
-                true,
-                "Xoá thành công"));
+            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Xoá thành công"));
         }
     }
 }
