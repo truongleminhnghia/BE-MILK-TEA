@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Business_Logic_Layer.Exception.Order
+namespace Business_Logic_Layer.Models.Responses
 {
-    class OrderNotFoundException
+    public class CartResponse
     {
     }
 }

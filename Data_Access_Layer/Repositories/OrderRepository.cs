@@ -17,12 +17,16 @@ namespace Data_Access_Layer.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        public async Task<List<Order>> GetAllOrdersAsync()
         {
-            return await _context.Orders.Include(o=>o.OrderDetails)
-                                        .Include(o=>o.Payments)
-                                        .Include(o=>o.OrderPromotions)
-                                        .ToListAsync();
+            try { 
+                var response = await _context.Orders.ToListAsync();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
         public async Task<Order?> GetByIdAsync(Guid id)
         {
@@ -64,10 +68,10 @@ namespace Data_Access_Layer.Repositories
             //Sua sau
             return null;
         }
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteByIdAsync(Guid id)
         {
             var existingOrder = await _context.Orders.FindAsync(id);
-            if(existingOrder == null)
+            if (existingOrder == null)
             {
                 return false;
             }

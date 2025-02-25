@@ -78,7 +78,7 @@ namespace Business_Logic_Layer.Services
             {
                 if (_type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
-                    var existingEmail = await _accountRepository.GetByEmail(_request.Email);
+                    var existingEmail = await _accountRepository.GetByEmail(_request.Email.ToString());
                     if (existingEmail != null)
                     {
                         throw new Exception("Email đã tồn tại.");

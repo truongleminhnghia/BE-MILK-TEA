@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Repositories;
@@ -28,7 +29,15 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Account?> GetByEmail(string _email)
         {
-            return await _context.Accounts.FirstOrDefaultAsync(a => a.Email == _email);
+            Account response;
+            try
+            {
+                response = await _context.Accounts.FirstOrDefaultAsync(a => a.Email == _email);
+             } catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return response;
         }
 
         public async Task<Account?> GetById(string _id)

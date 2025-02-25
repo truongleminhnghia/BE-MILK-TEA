@@ -1,6 +1,7 @@
 ﻿
 using Data_Access_Layer.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace Data_Access_Layer.Data
 
         }
 
+    
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Cart> Carts { get; set; }
         public virtual DbSet<CartItem> CartItems { get; set; }

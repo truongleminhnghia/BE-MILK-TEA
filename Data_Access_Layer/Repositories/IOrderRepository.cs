@@ -9,10 +9,10 @@ namespace Data_Access_Layer.Repositories
 {
     public interface IOrderRepository
     {
-        Task<IEnumerable<Order>> GetAllOrdersAsync();
+        Task<List<Order>> GetAllOrdersAsync();
         Task<Order?> GetByIdAsync(Guid id);
         Task<Order> CreateAsync(Order order);
         Task<Order?> UpdateAsync(Guid id,Order order);
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteByIdAsync(Guid id);
     }
 }
