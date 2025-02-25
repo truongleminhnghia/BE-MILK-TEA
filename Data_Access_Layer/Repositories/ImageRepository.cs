@@ -124,7 +124,6 @@ namespace Data_Access_Layer.Repositories
             }
             catch (KeyNotFoundException)
             {
-                // Re-throw KeyNotFoundException as is
                 throw;
             }
             catch (Exception ex)

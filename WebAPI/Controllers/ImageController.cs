@@ -7,6 +7,7 @@ using Business_Logic_Layer.Models;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -89,8 +90,9 @@ namespace WebAPI.Controllers
             }
         }
 
-        //Create Image
+        //Add Image
         [HttpPost]
+        [Authorize("ROLE_STAFF")]
         public async Task<ActionResult> AddImage([FromBody] ImageRequest imageRequest)
         {
             try
@@ -141,7 +143,9 @@ namespace WebAPI.Controllers
             }
         }
 
+        //Update Image
         [HttpPut("{id}")]
+        [Authorize("ROLE_STAFF")]
         public async Task<IActionResult> UpdateImage(Guid id, [FromBody] ImageRequest imageRequest)
         {
             try
@@ -164,7 +168,6 @@ namespace WebAPI.Controllers
                     );
                 }
 
-                // Validate image exists
                 var existingImage = await _imageService.GetImageByIdAsync(id);
                 if (existingImage == null)
                 {
@@ -201,12 +204,13 @@ namespace WebAPI.Controllers
             }
         }
 
+        //Delete Image
         [HttpDelete("{id}")]
+        [Authorize("ROLE_STAFF")]
         public async Task<ActionResult> DeleteImage(Guid id)
         {
             try
             {
-                // Check if image exists
                 var existingImage = await _imageService.GetImageByIdAsync(id);
                 if (existingImage == null)
                 {
