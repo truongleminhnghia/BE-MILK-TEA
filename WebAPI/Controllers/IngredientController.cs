@@ -5,6 +5,7 @@ using AutoMapper;
 using Business_Logic_Layer.Models;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Services;
+using Business_Logic_Layer.Services.CategoryService;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Entities;
 using Microsoft.AspNetCore.Authorization;

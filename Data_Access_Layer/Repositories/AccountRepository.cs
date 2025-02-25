@@ -27,6 +27,12 @@ namespace Data_Access_Layer.Repositories
             return _account;
         }
 
+        public async Task<bool> EmailExisting(string _email)
+        {
+            var email = await _context.Accounts.FirstOrDefaultAsync(a => a.Email == _email);
+            return email == null;
+        }
+
         public async Task<Account?> GetByEmail(string _email)
         {
             Account response;

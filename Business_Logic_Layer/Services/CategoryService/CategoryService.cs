@@ -1,16 +1,7 @@
 ﻿using Data_Access_Layer.Entities;
 using Data_Access_Layer.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Data_Access_Layer.Data;
-using Data_Access_Layer.Entities;
-using Data_Access_Layer.Repositories;
-using Microsoft.EntityFrameworkCore;
 
-namespace Business_Logic_Layer.Services
+namespace Business_Logic_Layer.Services.CategoryService
 {
     public class CategoryService : ICategoryService
     {
@@ -32,6 +23,10 @@ namespace Business_Logic_Layer.Services
         public async Task<Category> CreateAsync(Category category)
         {
             return await _categoryRepository.CreateAsync(category);
+        }
+        public async Task<Category?> GetByNameAsync(string name)
+        {
+            return await _categoryRepository.GetByNameAsync(name);
         }
         public async Task<Category?> UpdateAsync(Guid id, Category category)
         {

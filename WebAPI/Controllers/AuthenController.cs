@@ -27,14 +27,11 @@ namespace WebAPI.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(
-            [FromBody] RegisterRequest _request,
-            [FromQuery] string? _typeLogin = null) // Cho phép null
+            [FromBody] RegisterRequest _request) // Cho phép null
         {
             try
             {
-                _typeLogin ??= TypeLogin.LOGIN_LOCAL.ToString();
-
-                var account = await _authenService.Register(_request, _typeLogin);
+                var account = await _authenService.Register(_request);
 
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK,
@@ -54,20 +51,34 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest _request, [FromQuery] string _typeLogin)
+        public async Task<IActionResult> Login([FromBody] LoginRequest? _request, [FromQuery] string _typeLogin)
         {
             try
             {
-                if (_typeLogin == null)
+                if (_typeLogin == null || _typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
-                    _typeLogin = TypeLogin.LOGIN_LOCAL.ToString();
+                    var _loginSuccess = await _authenService.Login(_request, _typeLogin);
+                    return Ok(new ApiResponse(
+                        HttpStatusCode.OK,
+                        true,
+                        "Đăng nhập thành công",
+                        _loginSuccess
+                        ));
                 }
-                var _loginSuccess = await _authenService.Login(_request, _typeLogin);
-                return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
-                    true,
-                    "Đăng nhập thành công",
-                    _loginSuccess
+                else if (_typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+                {
+                    var urlLogin = _authenService.GenerateUrl(TypeLogin.LOGIN_GOOGLE.ToString());
+                    return Ok(new ApiResponse(
+                        HttpStatusCode.OK,
+                        true,
+                        "Create URL successfull",
+                        urlLogin
+                        ));
+                }
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest,
+                    false,
+                    "Failed"
                     ));
             }
             catch (Exception ex)
@@ -80,10 +91,37 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<string> Admin()
+        [HttpGet("callback")]
+        public async Task<IActionResult> CallbackAuthenticate([FromQuery] string code, [FromQuery] string type_login)
         {
-            return await Task.FromResult("Hello");
+            try
+            {
+                var infoUser = await _authenService.AuthenticateAndFetchProfile(code, type_login);
+                if (infoUser == null)
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, false, "failed", null));
+                }
+                if (type_login.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+                {
+                    var oauth2 = new Oauth2Request
+                    {
+                        FullName = infoUser.ContainsKey("name") ? infoUser["name"].ToString() : "",
+                        GoogleAccountId = infoUser.ContainsKey("sub") ? infoUser["sub"].ToString() : "",
+                        Email = infoUser.ContainsKey("email") ? infoUser["email"].ToString() : "",
+                        Avatar = infoUser.ContainsKey("picture") ? infoUser["picture"].ToString() : "",
+                        PhoneNumber = "",
+                    };
+                    var result = await _authenService.LoginOauth2(oauth2);
+                    return Ok(new ApiResponse(HttpStatusCode.OK, true, "success", result));
+                }
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, false, "failed", null));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(HttpStatusCode.InternalServerError, false, ex.Message, null));
+            }
+
         }
+
     }
 }
