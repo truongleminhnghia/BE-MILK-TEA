@@ -7,12 +7,8 @@ using Business_Logic_Layer.Models;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
-using Business_Logic_Layer.Services.CategoryService;
-using Data_Access_Layer.Entities;
-using Data_Access_Layer.Repositories;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Controllers
 {
@@ -22,93 +18,223 @@ namespace WebAPI.Controllers
     {
         private readonly IImageService _imageService;
         private readonly IMapper _mapper;
+        private readonly ILogger<ImageController> _logger;
 
-        public ImageController(IImageService imageService, IMapper mapper)
+        public ImageController(
+            IImageService imageService,
+            IMapper mapper,
+            ILogger<ImageController> logger = null
+        )
         {
             _imageService = imageService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult> GetAllImages()
         {
-            var images = await _imageService.GetAllImagesAsync();
-            var imageResponses = _mapper.Map<IEnumerable<ImageRespone>>(images);
-            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Thành công", imageResponses));
+            try
+            {
+                var images = await _imageService.GetAllImagesAsync();
+                var imageResponses = _mapper.Map<IEnumerable<ImageRespone>>(images);
+                return Ok(new ApiResponse(HttpStatusCode.OK, true, "Thành công", imageResponses));
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Lỗi truy xuất tất cả hình ảnh");
+                return StatusCode(
+                    500,
+                    new ApiResponse(
+                        HttpStatusCode.InternalServerError,
+                        false,
+                        "Đã xảy ra lỗi khi lấy danh sách hình ảnh"
+                    )
+                );
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult> GetImageById(Guid id)
         {
-            var image = await _imageService.GetImageByIdAsync(id);
-            var imageResponse = _mapper.Map<ImageRespone>(image);
-            if (image == null)
+            try
             {
-                return NotFound("Không Tìm Thấy Id");
+                var image = await _imageService.GetImageByIdAsync(id);
+                if (image == null)
+                {
+                    _logger?.LogWarning("Không tìm thấy hình ảnh có ID {ImageId}", id);
+                    return NotFound(
+                        new ApiResponse(
+                            HttpStatusCode.NotFound,
+                            false,
+                            $"Không tìm thấy hình ảnh với ID {id}"
+                        )
+                    );
+                }
+
+                var imageResponse = _mapper.Map<ImageRespone>(image);
+                return Ok(new ApiResponse(HttpStatusCode.OK, true, "Thành công", imageResponse));
             }
-            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Thành công", imageResponse));
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Lỗi truy xuất hình ảnh có ID {ImageId}", id);
+                return StatusCode(
+                    500,
+                    new ApiResponse(
+                        HttpStatusCode.InternalServerError,
+                        false,
+                        $"Đã xảy ra lỗi khi lấy hình ảnh với ID {id}"
+                    )
+                );
+            }
         }
 
         //Create Image
         [HttpPost]
-        [Authorize("ROLE_STAFF")]
         public async Task<ActionResult> AddImage([FromBody] ImageRequest imageRequest)
         {
-            if (imageRequest == null)
+            try
             {
-                return BadRequest(
-                    new ApiResponse(HttpStatusCode.BadRequest, false, "Data không hợp lệ")
+                if (imageRequest == null)
+                {
+                    return BadRequest(
+                        new ApiResponse(HttpStatusCode.BadRequest, false, "Data không hợp lệ")
+                    );
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(
+                        new ApiResponse(
+                            HttpStatusCode.BadRequest,
+                            false,
+                            "Dữ liệu không đúng định dạng"
+                        )
+                    );
+                }
+
+                var imageResponse = _mapper.Map<ImageRespone>(imageRequest);
+                await _imageService.AddImageAsync(imageResponse);
+
+                return CreatedAtAction(
+                    nameof(GetImageById),
+                    new { id = imageResponse.Id },
+                    new ApiResponse(
+                        HttpStatusCode.Created,
+                        true,
+                        "Thêm hình ảnh thành công",
+                        imageRequest
+                    )
                 );
             }
-
-            var imageResponse = _mapper.Map<ImageRespone>(imageRequest);
-
-            await _imageService.AddImageAsync(imageResponse);
-
-            return CreatedAtAction(
-                nameof(GetImageById),
-                new { id = imageRequest.IngredientId },
-                imageRequest
-            );
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Lỗi thêm hình ảnh");
+                return StatusCode(
+                    500,
+                    new ApiResponse(
+                        HttpStatusCode.InternalServerError,
+                        false,
+                        "Đã xảy ra lỗi khi thêm hình ảnh: " + ex.Message
+                    )
+                );
+            }
         }
 
-        //Update Image
         [HttpPut("{id}")]
-        [Authorize("ROLE_STAFF")]
         public async Task<IActionResult> UpdateImage(Guid id, [FromBody] ImageRequest imageRequest)
         {
-            if (imageRequest == null)
+            try
             {
-                return BadRequest(
-                    new ApiResponse(HttpStatusCode.BadRequest, false, "Dữ liệu không hợp lệ")
+                if (imageRequest == null)
+                {
+                    return BadRequest(
+                        new ApiResponse(HttpStatusCode.BadRequest, false, "Dữ liệu không hợp lệ")
+                    );
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(
+                        new ApiResponse(
+                            HttpStatusCode.BadRequest,
+                            false,
+                            "Dữ liệu không đúng định dạng"
+                        )
+                    );
+                }
+
+                // Validate image exists
+                var existingImage = await _imageService.GetImageByIdAsync(id);
+                if (existingImage == null)
+                {
+                    _logger?.LogWarning(
+                        "Cố gắng cập nhật hình ảnh không tồn tại với ID {ImageId}",
+                        id
+                    );
+                    return NotFound(
+                        new ApiResponse(
+                            HttpStatusCode.NotFound,
+                            false,
+                            $"Không tìm thấy hình ảnh với ID {id}"
+                        )
+                    );
+                }
+
+                // Map and update
+                var imageResponse = _mapper.Map<ImageRespone>(imageRequest);
+                await _imageService.UpdateImageAsync(id, imageResponse);
+
+                return Ok(new ApiResponse(HttpStatusCode.OK, true, "Cập nhật hình ảnh thành công"));
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Lỗi cập nhật hình ảnh với ID {ImageId}", id);
+                return StatusCode(
+                    500,
+                    new ApiResponse(
+                        HttpStatusCode.InternalServerError,
+                        false,
+                        $"Đã xảy ra lỗi khi cập nhật hình ảnh: {ex.Message}"
+                    )
                 );
             }
-
-            // Kiểm tra hình ảnh tồn tại không
-            var existingImage = await _imageService.GetImageByIdAsync(id);
-            if (existingImage == null)
-            {
-                return NotFound(
-                    new ApiResponse(HttpStatusCode.NotFound, false, "Không tìm thấy hình ảnh")
-                );
-            }
-
-            // Cập nhật dữ liệu
-            var imageResponse = _mapper.Map<ImageRespone>(imageRequest);
-
-            // Gọi service cập nhật ảnh
-            await _imageService.UpdateImageAsync(id, imageResponse);
-
-            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Cập nhật hình ảnh thành công"));
         }
 
-        //Delete Image
         [HttpDelete("{id}")]
-        [Authorize("ROLE_STAFF")]
         public async Task<ActionResult> DeleteImage(Guid id)
         {
-            await _imageService.DeleteImageAsync(id);
-            return NoContent();
+            try
+            {
+                // Check if image exists
+                var existingImage = await _imageService.GetImageByIdAsync(id);
+                if (existingImage == null)
+                {
+                    _logger?.LogWarning("Cố gắng xóa hình ảnh không tồn tại với ID {ImageId}", id);
+                    return NotFound(
+                        new ApiResponse(
+                            HttpStatusCode.NotFound,
+                            false,
+                            $"Không tìm thấy hình ảnh với ID {id}"
+                        )
+                    );
+                }
+
+                await _imageService.DeleteImageAsync(id);
+                return Ok(new ApiResponse(HttpStatusCode.OK, true, "Xóa hình ảnh thành công"));
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Lỗi xóa ảnh có ID {ImageId}", id);
+                return StatusCode(
+                    500,
+                    new ApiResponse(
+                        HttpStatusCode.InternalServerError,
+                        false,
+                        $"Đã xảy ra lỗi khi xóa hình ảnh: {ex.Message}"
+                    )
+                );
+            }
         }
     }
 }

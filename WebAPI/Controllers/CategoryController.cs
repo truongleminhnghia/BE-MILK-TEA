@@ -46,7 +46,7 @@ namespace WebAPI.Controllers
 
         //CREATE
         [HttpPost]
-        [Authorize("ROLE_STAFF")]
+        //[Authorize("ROLE_STAFF")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryRequest category)
         {
             if (category == null)
