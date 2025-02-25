@@ -8,11 +8,19 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Entities;
-using Data_Access_Layer.Repositories;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Net;
+using Business_Logic_Layer.Interfaces;
+using Data_Access_Layer.Repositories;
 using System.Web;
 using System.Text.Json;
 using System.Net.Http.Headers;
+using Business_Logic_Layer.Utils;
 
 namespace Business_Logic_Layer.Services
 {
@@ -30,15 +38,16 @@ namespace Business_Logic_Layer.Services
         private string _flowNameGoogle = "flowName=GeneralOAuthFlow";
 
         private readonly IJwtService _jwtService;
-
+        private readonly Source _source;
         private readonly HttpClient _httpClient;
-        public AuthenService(IAccountRepository accountRepository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService, HttpClient httpClient)
+        public AuthenService(IAccountRepository accountRepository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService, HttpClient httpClient, Source source)
         {
             _accountRepository = accountRepository;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
             _jwtService = jwtService;
             _httpClient = httpClient;
+            _source = source;
         }
 
         public async Task<AuthenticateResponse> Login(LoginRequest _request, string _type)
@@ -48,29 +57,54 @@ namespace Business_Logic_Layer.Services
                 AuthenticateResponse _authenticateResponse = null;
                 Account _account;
                 string _token = "";
+
                 if (_type.Trim().IsNullOrEmpty() || _type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
                     _account = await _accountRepository.GetByEmail(_request.Email);
                     if (_account == null)
                     {
-                        throw new Exception("Account do not existing");
+                        throw new Exception("Account does not exist");
                     }
                     bool checkPassword = _passwordHasher.VerifyPassword(_request.Password, _account.Password);
                     if (checkPassword)
                     {
                         _token = _jwtService.GenerateJwtToken(_account);
                     }
-                    AccountResponse _accountResponse = _mapper.Map<AccountResponse>(_account);
-                    _authenticateResponse = new AuthenticateResponse(
-                        _token,
-                        _accountResponse
-                    );
+                    else
+                    {
+                        throw new Exception("Invalid password");
+                    }
                 }
                 else if (_type.Trim().Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {
-                    throw new Exception("Chua DEMO");
+                    // Assuming _request.Email is already verified by Google
+                    _account = await _accountRepository.GetByEmail(_request.Email);
+                    if (_account == null)
+                    {
+                        // Register new account if it doesn't exist
+                        var registerRequest = new RegisterRequest
+                        {
+                            Email = _request.Email,
+                            FirstName = "GoogleUser", // Default value, should be replaced with actual data
+                            LastName = "GoogleUser",  // Default value, should be replaced with actual data
+                            Password = Guid.NewGuid().ToString(), // Random password, not used
+                        };
+                        _account = _mapper.Map<Account>(registerRequest);
+                        _account.AccountStatus = AccountStatus.ACTIVE;
+                        _account.RoleName = RoleName.ROLE_CUSTOMER;
+                        await _accountRepository.Create(_account);
+                    }
+                    _token = _jwtService.GenerateJwtToken(_account);
                 }
-                return _authenticateResponse ?? new AuthenticateResponse("", new AccountResponse());
+                else
+                {
+                    throw new Exception("Invalid login type");
+                }
+
+                AccountResponse _accountResponse = _mapper.Map<AccountResponse>(_account);
+                _authenticateResponse = new AuthenticateResponse(_token, _accountResponse);
+
+                return _authenticateResponse;
             }
             catch (Exception ex)
             {
@@ -79,24 +113,45 @@ namespace Business_Logic_Layer.Services
             }
         }
 
-        public async Task<AccountResponse> Register(RegisterRequest _request)
+        public async Task<AccountResponse> Register(RegisterRequest request)
         {
-            // bool isAdmin = false;
-            // if (isAdmin)
-            // {
-                    var existingEmail = await _accountRepository.GetByEmail(_request.Email);
+            try
+            {
+                var existingEmail = await _accountRepository.GetByEmail(request.Email);
                     if (existingEmail != null)
                     {
                         throw new Exception("Email đã tồn tại.");
                     }
-                    Account _account = _mapper.Map<Account>(_request);
-                    _account.Password = _passwordHasher.HashPassword(_request.Password);
-                    _account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
-                    _account.RoleName = RoleName.ROLE_CUSTOMER;
-                    await _accountRepository.Create(_account);
-                    return _mapper.Map<AccountResponse>(_account);
-            // }
-            // throw new Exception("Đăng ký thất bại");
+                    Account account = _mapper.Map<Account>(request);
+                    account.Password = _passwordHasher.HashPassword(request.Password);
+                    account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
+
+                //var currentAccount = await _accountRepository.GetById(_source.GetCurrentAccount());
+                //if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
+                //{ 
+                //    //dien role name cho account moi
+                //    if (account.RoleName == RoleName.ROLE_STAFF || account.RoleName == RoleName.ROLE_MANAGER || account.RoleName == RoleName.ROLE_ADMIN)
+                //    {
+                //        account.AccountStatus = AccountStatus.ACTIVE;
+                //    }
+                //}
+                //else
+                //{
+                //    account.RoleName = RoleName.ROLE_CUSTOMER;
+                //}
+                account.RoleName = RoleName.ROLE_CUSTOMER;
+
+                await _accountRepository.Create(account);
+                    return _mapper.Map<AccountResponse>(account);           
+            }
+            catch(Exception ex)
+            {
+                //Console.WriteLine("Error: " + ex.Message);
+                //return new AccountResponse();
+
+                throw new Exception("Đăng ký thất bại");
+            }
+            
         }
 
 

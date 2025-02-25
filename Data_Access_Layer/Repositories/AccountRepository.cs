@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
-using Data_Access_Layer.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
@@ -21,7 +20,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Account> Create(Account _account)
         {
-            _context.Accounts.Add(_account);
+            _context.Accounts.AddAsync(_account);
             await _context.SaveChangesAsync();
             return _account;
         }
@@ -37,9 +36,14 @@ namespace Data_Access_Layer.Repositories
             return await _context.Accounts.FirstOrDefaultAsync(a => a.Email == _email);
         }
 
-        public async Task<Account?> GetById(string _id)
+        public async Task<Account?> GetById(Guid _id)
         {
             return await _context.Accounts.FirstAsync(a => a.Id.Equals(_id));
+        }
+
+        public async Task<Account> GetByPhoneNumber(string phoneNumber)
+        {
+            return await _context.Accounts.FirstOrDefaultAsync(a => a.Phone == phoneNumber);
         }
     }
 }

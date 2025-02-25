@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Business_Logic_Layer.Interfaces;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
@@ -26,8 +28,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(
-            [FromBody] RegisterRequest _request) // Cho phép null
+        public async Task<IActionResult> Register([FromBody] RegisterRequest _request) // Cho phép null
         {
             try
             {
@@ -55,7 +56,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (_typeLogin == null || _typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
+                if (_typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
                     var _loginSuccess = await _authenService.Login(_request, _typeLogin);
                     return Ok(new ApiResponse(
@@ -63,7 +64,7 @@ namespace WebAPI.Controllers
                         true,
                         "Đăng nhập thành công",
                         _loginSuccess
-                        ));
+                    ));
                 }
                 else if (_typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {

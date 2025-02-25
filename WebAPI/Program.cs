@@ -12,6 +12,7 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Business_Logic_Layer.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -132,6 +133,9 @@ builder.Services.AddScoped<IIngredientProductRepository, IngredientProductReposi
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();
+
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<Source>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
