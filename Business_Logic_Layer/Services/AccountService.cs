@@ -9,6 +9,7 @@ using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Entities;
 using Business_Logic_Layer.Interfaces;
+using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Repositories;
 using System.Text.Unicode;
 using System.Web;
@@ -19,11 +20,13 @@ namespace Business_Logic_Layer.Services
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
+        private readonly Source _source;
 
-        public AccountService(IAccountRepository accountRepository, IMapper mapper)
+        public AccountService(IAccountRepository accountRepository, IMapper mapper, Source source)
         {
             _accountRepository = accountRepository;
             _mapper = mapper;
+            _source = source;
         }
 
         public async Task<Account?> GetByEmail(string _email)
@@ -48,7 +51,7 @@ namespace Business_Logic_Layer.Services
             }
         }
 
-        public async Task<Account?> GetById(string _id)
+        public async Task<Account?> GetById(Guid _id)
         {
             try
             {
@@ -83,8 +86,25 @@ namespace Business_Logic_Layer.Services
                 }
                 var account = _mapper.Map<Account>(createAccountRequest);
                 account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
-                account.RoleName = RoleName.ROLE_CUSTOMER;
-                var result = await _accountRepository.Create(account);
+
+                var currentAccount = await _accountRepository.GetById(_source.GetCurrentAccount());
+                if (currentAccount == null)
+                {
+                    throw new Exception("Account do not exist");
+                }
+                else if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
+                {
+                    //dien role name cho account moi
+                    if (account.RoleName == RoleName.ROLE_STAFF || account.RoleName == RoleName.ROLE_MANAGER || account.RoleName == RoleName.ROLE_ADMIN)
+                    {
+                        account.AccountStatus = AccountStatus.ACTIVE;
+                    }
+                }
+                else
+                {
+                    account.RoleName = RoleName.ROLE_CUSTOMER;
+                }
+                    var result = await _accountRepository.Create(account);
                 if (result == null)
                 {
                     throw new Exception("Create account failed");
@@ -98,29 +118,28 @@ namespace Business_Logic_Layer.Services
                 return null;
             }
         }
-         
-        
+              
 
-        public async Task<Employee> CreateStaff(CreateStaffRequest createEmployeeRequest)
-        {
-            try
-            {
-                if (createEmployeeRequest == null)
-                {
-                    throw new Exception("Request do not null!");
-                }
-                var _account = _mapper.Map<Account>(createEmployeeRequest);
-                _account.RoleName = RoleName.ROLE_STAFF;
-                _account.AccountStatus = AccountStatus.ACTIVE;
-                var _result = await _accountRepository.Create(_account);
-                return _result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("error: " + ex.Message);
-                return null;
-            }
-        }
+        //public async Task<Employee> CreateStaff(CreateStaffRequest createEmployeeRequest)
+        //{
+        //    try
+        //    {
+        //        if (createEmployeeRequest == null)
+        //        {
+        //            throw new Exception("Request do not null!");
+        //        }
+        //        var _account = _mapper.Map<Account>(createEmployeeRequest);
+        //        _account.RoleName = RoleName.ROLE_STAFF;
+        //        _account.AccountStatus = AccountStatus.ACTIVE;
+        //        var _result = await _accountRepository.Create(_account);
+        //        return _result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("error: " + ex.Message);
+        //        return null;
+        //    }
+        //}
 
         //public async Task<Account> CreateManager(CreateManagerRequest createManagerRequest)
         //{

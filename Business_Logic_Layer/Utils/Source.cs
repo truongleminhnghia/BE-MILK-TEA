@@ -2,8 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Business_Logic_Layer.Interfaces;
+using Data_Access_Layer.Repositories;
+using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Http;
+using AutoMapper;
 
 namespace Business_Logic_Layer.Utils
 {
@@ -12,10 +17,15 @@ namespace Business_Logic_Layer.Utils
         /// nơi tập hợp các hàm viết chung của project
         /// 
         private readonly IJwtService _jwtService;
-
-        public Source(IJwtService jwtService)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IAccountRepository _accountRepository;
+        private readonly IMapper _mapper;
+        public Source(IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IAccountRepository accountRepository, IMapper mapper)
         {
             _jwtService = jwtService;
+            _httpContextAccessor = httpContextAccessor;
+            _accountRepository = accountRepository;
+            _mapper = mapper;
         }
 
         public string CheckRoleName()
@@ -47,6 +57,43 @@ namespace Business_Logic_Layer.Utils
             }
             result = true;
             return result;
+        }
+
+        // 2 ham nay dung de lay thong tin cua user dang dang nhap: GetCurrentAccount va CheckCurrentUser
+        public Guid GetCurrentAccount()
+        {
+            var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token.");
+            }
+
+            if (!Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                throw new UnauthorizedAccessException("Invalid User ID format in token.");
+            }
+
+            return userId;
+        }
+        public bool CheckCurrentUser()
+        {
+            try
+            {
+                var userId = GetCurrentAccount();
+
+                var userExists = _accountRepository.GetById(userId);
+
+                if(userExists == null)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public string GenerateRandom8Digits()

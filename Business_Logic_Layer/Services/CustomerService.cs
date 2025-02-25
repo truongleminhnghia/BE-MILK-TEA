@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Business_Logic_Layer.Services
 {
-    public class CustomerService : ICustomerRepository
+    public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly IAccountRepository _accountRepository;
@@ -42,9 +42,7 @@ namespace Business_Logic_Layer.Services
                 }
                 var customer = _mapper.Map<Customer>(createCustomerRequest);
 
-                account.AccountStatus = AccountStatus.ACTIVE;
-
-                var result = await _customerRepository.Create(account);
+                var result = await _customerRepository.Create(customer);
                 return result;
             }
             catch (Exception ex)

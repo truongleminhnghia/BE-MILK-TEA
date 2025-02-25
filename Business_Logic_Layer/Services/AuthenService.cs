@@ -15,12 +15,12 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using Google.Apis.Auth;
 using Business_Logic_Layer.Interfaces;
 using Data_Access_Layer.Repositories;
 using System.Web;
 using System.Text.Json;
 using System.Net.Http.Headers;
+using Business_Logic_Layer.Utils;
 
 namespace Business_Logic_Layer.Services
 {
@@ -38,15 +38,16 @@ namespace Business_Logic_Layer.Services
         private string _flowNameGoogle = "flowName=GeneralOAuthFlow";
 
         private readonly IJwtService _jwtService;
-
+        private readonly Source _source;
         private readonly HttpClient _httpClient;
-        public AuthenService(IAccountRepository accountRepository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService, HttpClient httpClient)
+        public AuthenService(IAccountRepository accountRepository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService, HttpClient httpClient, Source source)
         {
             _accountRepository = accountRepository;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
             _jwtService = jwtService;
             _httpClient = httpClient;
+            _source = source;
         }
 
         public async Task<AuthenticateResponse> Login(LoginRequest _request, string _type)
@@ -115,8 +116,7 @@ namespace Business_Logic_Layer.Services
 
         public async Task<AccountResponse> Register(RegisterRequest _request)
         {
-            bool isAdmin = false;
-            if (isAdmin)
+            try
             {
                     var existingEmail = await _accountRepository.GetByEmail(_request.Email);
                     if (existingEmail != null)
@@ -126,11 +126,19 @@ namespace Business_Logic_Layer.Services
                     Account _account = _mapper.Map<Account>(_request);
                     _account.Password = _passwordHasher.HashPassword(_request.Password);
                     _account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
+                if(_source.CheckAccountId() )
                     _account.RoleName = RoleName.ROLE_CUSTOMER;
                     await _accountRepository.Create(_account);
                     return _mapper.Map<AccountResponse>(_account);
             }
-            throw new Exception("Đăng ký thất bại");
+            catch(Exception ex)
+            {
+                //Console.WriteLine("Error: " + ex.Message);
+                //return new AccountResponse();
+
+                throw new Exception("Đăng ký thất bại");
+            }
+            
         }
 
 

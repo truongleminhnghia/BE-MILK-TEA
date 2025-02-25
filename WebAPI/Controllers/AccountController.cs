@@ -27,25 +27,6 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost("staff")]
-        public async Task<IActionResult> CreateStaff([FromBody] CreateStaffRequest request)
-        {
-            try
-            {
-                var account = await _accountService.GetByEmail(request.Email);
-                if (account == null)
-                {
-                    return NotFound();
-                }
-                var response = _mapper.Map<AccountResponse>(account);
-                await _accountService.CreateStaff(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
+        
     }
 }

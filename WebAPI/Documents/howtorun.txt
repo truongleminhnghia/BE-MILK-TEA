@@ -35,7 +35,7 @@ và thực hiện các lệnh bên dưới để khởi tạo biến môi trư�
                 $env:JWT_ISSUER="https://localhost:7190"
                 $env:JWT_AUDIENCE="https://localhost:7190"
                 $env:JWT_EXPIRY_MINUTES = "30"
-                $env:ClientId = "313624382767-3vtph8lr7jkkvsv30ghg8degm56ds7f8.apps.googleusercontent.com",
+                $env:ClientId = "313624382767-3vtph8lr7jkkvsv30ghg8degm56ds7f8.apps.googleusercontent.com"
                 $env:ClientSecret = "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"
 sau khi nạp từng lệnh biến môi trường ở trên chạy lệnh update lại database: 
  << dotnet ef database update --project ./Data_Access_Layer --startup-project ./WebAPI >>

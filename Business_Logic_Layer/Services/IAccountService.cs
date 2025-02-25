@@ -10,7 +10,11 @@ namespace Business_Logic_Layer.Interfaces
 {
     public interface IAccountService
     {
-        public Task<Account?> GetById(string _id);
+        public Task<Account?> GetById(Guid _id);
         public Task<Account?> GetByEmail(string _email);
+        Task<Account> CreateAccount(CreateAccountRequest createAccountRequest);
+
+
+
     }
 }
