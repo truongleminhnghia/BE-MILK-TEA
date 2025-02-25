@@ -57,16 +57,15 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (_typeLogin == null)
+                if (_typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
-                    _typeLogin = TypeLogin.LOGIN_LOCAL.ToString();
                     var _loginSuccess = await _authenService.Login(_request, _typeLogin);
                     return Ok(new ApiResponse(
                         HttpStatusCode.OK,
                         true,
                         "Đăng nhập thành công",
                         _loginSuccess
-                        ));
+                    ));
                 }
                 else if (_typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {

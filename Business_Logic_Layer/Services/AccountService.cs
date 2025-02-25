@@ -78,13 +78,6 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
-                foreach (var item in createAccountRequest.GetType().GetProperties())
-                {
-                    if (item.GetValue(createAccountRequest) == null)
-                    {
-                        throw new Exception("Request do not null!");
-                    }
-                }
                 var existingEmail = await _accountRepository.GetByEmail(createAccountRequest.Email);
                 if (existingEmail != null)
                 {
@@ -95,11 +88,7 @@ namespace Business_Logic_Layer.Services
                 account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
 
                 var currentAccount = await _accountRepository.GetById(_source.GetCurrentAccount());
-                if (currentAccount == null)
-                {
-                    throw new Exception("Account do not exist");
-                }
-                else if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
+                if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
                 {
                     //dien role name cho account moi
                     if (account.RoleName == RoleName.ROLE_STAFF || account.RoleName == RoleName.ROLE_MANAGER || account.RoleName == RoleName.ROLE_ADMIN)

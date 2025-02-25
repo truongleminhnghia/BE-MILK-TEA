@@ -88,7 +88,6 @@ namespace Business_Logic_Layer.Services
                             FirstName = "GoogleUser", // Default value, should be replaced with actual data
                             LastName = "GoogleUser",  // Default value, should be replaced with actual data
                             Password = Guid.NewGuid().ToString(), // Random password, not used
-                            PhoneNumber = "0000000000" // Default value, should be replaced with actual data
                         };
                         _account = _mapper.Map<Account>(registerRequest);
                         _account.AccountStatus = AccountStatus.ACTIVE;
@@ -118,13 +117,6 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
-                foreach (var item in request.GetType().GetProperties())
-                {
-                    if (item.GetValue(request) == null)
-                    {
-                        throw new Exception("Request do not null!");
-                    }
-                }
                 var existingEmail = await _accountRepository.GetByEmail(request.Email);
                     if (existingEmail != null)
                     {
@@ -134,25 +126,22 @@ namespace Business_Logic_Layer.Services
                     account.Password = _passwordHasher.HashPassword(request.Password);
                     account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
 
-                var currentAccount = await _accountRepository.GetById(_source.GetCurrentAccount());
-                if (currentAccount == null)
-                {
-                    throw new Exception("Account do not exist");
-                }
-                else if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
-                {
-                    //dien role name cho account moi
-                    if (account.RoleName == RoleName.ROLE_STAFF || account.RoleName == RoleName.ROLE_MANAGER || account.RoleName == RoleName.ROLE_ADMIN)
-                    {
-                        account.AccountStatus = AccountStatus.ACTIVE;
-                    }
-                }
-                else
-                {
-                    account.RoleName = RoleName.ROLE_CUSTOMER;
-                }
+                //var currentAccount = await _accountRepository.GetById(_source.GetCurrentAccount());
+                //if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
+                //{ 
+                //    //dien role name cho account moi
+                //    if (account.RoleName == RoleName.ROLE_STAFF || account.RoleName == RoleName.ROLE_MANAGER || account.RoleName == RoleName.ROLE_ADMIN)
+                //    {
+                //        account.AccountStatus = AccountStatus.ACTIVE;
+                //    }
+                //}
+                //else
+                //{
+                //    account.RoleName = RoleName.ROLE_CUSTOMER;
+                //}
+                account.RoleName = RoleName.ROLE_CUSTOMER;
 
-                    await _accountRepository.Create(account);
+                await _accountRepository.Create(account);
                     return _mapper.Map<AccountResponse>(account);           
             }
             catch(Exception ex)
@@ -232,20 +221,5 @@ namespace Business_Logic_Layer.Services
                      );
             return _authenticateResponse;
         }
-        //public async Task InvalidateUserTokensAsync(Guid userId)
-        //{
-        //    var activeTokens = await .Tokens
-        //        .Where(t => t.UserId == userId &&
-        //                   t.ExpiryDate > DateTime.UtcNow &&
-        //                   !t.IsInvalidated)
-        //        .ToListAsync();
-
-        //    foreach (var token in activeTokens)
-        //    {
-        //        token.IsInvalidated = true;
-        //    }
-
-        //    await _context.SaveChangesAsync();
-        //}
     }
 }

@@ -12,9 +12,5 @@ namespace Business_Logic_Layer.Models.Requests
         public string Password { get; set; } = string.Empty;
 
     }
-
-    public class GoogleLoginModel
-    {
-        public string GoogleToken { get; set; }
-    }
+    
 }
