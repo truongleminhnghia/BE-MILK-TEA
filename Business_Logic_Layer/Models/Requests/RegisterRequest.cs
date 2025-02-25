@@ -14,6 +14,6 @@ namespace Business_Logic_Layer.Models.Requests
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string Role { get; set; }
+        public string RoleName { get; set; }
     }
 }

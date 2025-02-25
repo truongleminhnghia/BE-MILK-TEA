@@ -28,8 +28,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(
-            [FromBody] RegisterRequest _request) // Cho phép null
+        public async Task<IActionResult> Register([FromBody] RegisterRequest _request) // Cho phép null
         {
             try
             {
