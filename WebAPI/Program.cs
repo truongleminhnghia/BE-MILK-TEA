@@ -17,6 +17,8 @@ using System;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore;
 using Business_Logic_Layer.Interfaces;
+using Business_Logic_Layer.Utils;
+using Microsoft.AspNetCore.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +38,7 @@ var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
 var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
-// var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Nghia_2003;Database=DB_MILK_TEA;SslMode=Required;";
+//var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Pass;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -66,7 +68,7 @@ var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
-
+//muốn chạy thì comment từ đây lại, + xóa Migration
 if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
 {
     throw new InvalidOperationException("JWT environment variables are not set properly.");
@@ -92,25 +94,17 @@ builder.Services.AddAuthentication(option =>
         ValidAudience = _audience, // tương tự
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey)) // phải mã khóa serect_key lại nhé
     };
-})
-.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
- {
-     IConfigurationSection googleAuthNSection =
-         builder.Configuration.GetSection("Authentication:Google");
-     options.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
-     options.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
- });
-
-
-
-
-
+});
+// comment đến đây
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
+
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<Source>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
@@ -129,7 +123,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // Replace with your frontend URL
+            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials();

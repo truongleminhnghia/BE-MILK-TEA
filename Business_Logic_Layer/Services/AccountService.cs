@@ -13,6 +13,7 @@ using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Repositories;
 using System.Text.Unicode;
 using System.Web;
+using Azure.Core;
 
 namespace Business_Logic_Layer.Services
 {
@@ -84,6 +85,12 @@ namespace Business_Logic_Layer.Services
                         throw new Exception("Request do not null!");
                     }
                 }
+                var existingEmail = await _accountRepository.GetByEmail(createAccountRequest.Email);
+                if (existingEmail != null)
+                {
+                    throw new Exception("Email đã tồn tại.");
+                }
+
                 var account = _mapper.Map<Account>(createAccountRequest);
                 account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
 
