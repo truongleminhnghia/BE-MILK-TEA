@@ -81,9 +81,9 @@ namespace Business_Logic_Layer.Services
 
         public async Task<AccountResponse> Register(RegisterRequest _request)
         {
-            bool isAdmin = false;
-            if (isAdmin)
-            {
+            // bool isAdmin = false;
+            // if (isAdmin)
+            // {
                     var existingEmail = await _accountRepository.GetByEmail(_request.Email);
                     if (existingEmail != null)
                     {
@@ -95,8 +95,8 @@ namespace Business_Logic_Layer.Services
                     _account.RoleName = RoleName.ROLE_CUSTOMER;
                     await _accountRepository.Create(_account);
                     return _mapper.Map<AccountResponse>(_account);
-            }
-            throw new Exception("Đăng ký thất bại");
+            // }
+            // throw new Exception("Đăng ký thất bại");
         }
 
 

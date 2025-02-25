@@ -56,7 +56,7 @@ namespace WebAPI.Controllers
 
         //CREATE
         [HttpPost]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryRequest category)
         {
             if (category == null)
@@ -85,7 +85,7 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
 
         public async Task<IActionResult> UpdateCategory(
             Guid id,
@@ -119,7 +119,7 @@ namespace WebAPI.Controllers
 
         //DELETE
         [HttpDelete("{id}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
 
         public async Task<IActionResult> DeleteCategory(Guid id)
         {

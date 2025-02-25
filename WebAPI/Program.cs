@@ -60,6 +60,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 var _secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
 var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+Console.WriteLine("au" + _audience);
 
 // kiểm tra xem, nó có tồn tai hay khoong
 //muốn chạy thì comment từ đây lại, + xóa Migration
@@ -81,6 +82,7 @@ builder
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
+            RoleClaimType = "roleName",
             ValidateIssuer = true, // người, chỗ, nơi phát hành, tức là tk cho tạo token
             ValidateAudience = true, // đối tượng sử dụng token
             ValidateLifetime = true, // kiểm tra thời gian hết hạn
@@ -99,7 +101,7 @@ builder
     .Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 builder.Services.AddAutoMapper(
