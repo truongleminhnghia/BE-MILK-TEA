@@ -12,7 +12,7 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Business_Logic_Layer.Middleware;
+using Business_Logic_Layer.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
