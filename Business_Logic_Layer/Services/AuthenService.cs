@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using Business_Logic_Layer.Interfaces;
 using Data_Access_Layer.Repositories;
 using System.Web;
 using System.Text.Json;
@@ -146,10 +145,7 @@ namespace Business_Logic_Layer.Services
             }
             catch(Exception ex)
             {
-                //Console.WriteLine("Error: " + ex.Message);
-                //return new AccountResponse();
-
-                throw new Exception("Đăng ký thất bại");
+                throw new Exception("Error: " + ex.Message);
             }
             
         }

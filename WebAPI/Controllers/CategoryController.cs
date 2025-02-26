@@ -31,7 +31,7 @@ namespace WebAPI.Controllers
             var category = await _categoryService.GetAllCategoriesAsync();
             var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(category);
             return Ok(new ApiResponse
-                (HttpStatusCode.OK,
+                (HttpStatusCode.OK.GetHashCode(),
                 true,
                 "Thành công",
                 categoryRes));
@@ -44,11 +44,11 @@ namespace WebAPI.Controllers
             var category = await _categoryService.GetByIdAsync(id);
             var categoryRes = _mapper.Map<CategoryResponse>(category);
             if (category == null) return NotFound(new ApiResponse
-                                                    (HttpStatusCode.NotFound,
+                                                    (HttpStatusCode.NotFound.GetHashCode(),
                                                     false,
                                                     "Không tìm thấy"));
             return Ok(new ApiResponse
-                (HttpStatusCode.OK,
+                (HttpStatusCode.OK.GetHashCode(),
                 true,
                 "Tìm thành công",
                 categoryRes));
@@ -62,7 +62,7 @@ namespace WebAPI.Controllers
             if (category == null)
             {
                 return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
+                    HttpStatusCode.BadRequest.GetHashCode(),
                     false,
                     "Data không hợp lệ"));
             }
@@ -70,14 +70,14 @@ namespace WebAPI.Controllers
             if (existingCategory != null)
             {
                 return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
+                    HttpStatusCode.BadRequest.GetHashCode(),
                     false,
                     "Tên danh mục đã tồn tại"));
             }
 
             var createdCategory = await _categoryService.CreateAsync(_mapper.Map<Category>(category));
             return Ok(new ApiResponse(
-                HttpStatusCode.OK,
+                HttpStatusCode.OK.GetHashCode(),
                 true,
                 "Tạo thành công"
                 ));
@@ -95,7 +95,7 @@ namespace WebAPI.Controllers
             if (categoryRequest == null)
             {
                 return BadRequest(new ApiResponse
-                    (HttpStatusCode.BadRequest,
+                    (HttpStatusCode.BadRequest.GetHashCode(),
                     false,
                     "Data không hợp lệ"));
             }
@@ -106,13 +106,13 @@ namespace WebAPI.Controllers
             if (updatedCategory == null)
             {
                 return NotFound(new ApiResponse
-                    (HttpStatusCode.NotFound,
+                    (HttpStatusCode.NotFound.GetHashCode(),
                     false,
                     "Không tìm thấy"));
             }
 
             return Ok(new ApiResponse
-                (HttpStatusCode.OK,
+                (HttpStatusCode.OK.GetHashCode(),
                 true,
                 "Cập nhật thành công"));
         }
@@ -128,13 +128,13 @@ namespace WebAPI.Controllers
             if (!result)
             {
                 return NotFound(new ApiResponse
-                    (HttpStatusCode.NotFound,
+                    (HttpStatusCode.NotFound.GetHashCode(),
                     false,
                     "Không tìm thấy"));
             }
 
             return Ok(new ApiResponse
-                (HttpStatusCode.OK,
+                (HttpStatusCode.OK.GetHashCode(),
                 true,
                 "Xoá thành công"));
         }
