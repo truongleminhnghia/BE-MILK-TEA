@@ -26,10 +26,22 @@ namespace WebAPI.Controllers
 
         //GET ALL
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int page = 1,                   // Required first
+            [FromQuery] int pageSize = 10,              // Required second
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] int? categoryStatus = null,
+            [FromQuery] int? categoryType = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+
         {
-            var category = await _categoryService.GetAllCategoriesAsync();
-            var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(category);
+            var categories = await _categoryService.GetAllCategoriesAsync(
+        search, sortBy, isDescending, categoryStatus, categoryType, startDate, endDate, page, pageSize);
+
+            var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(categories);
             return Ok(new ApiResponse
                 (HttpStatusCode.OK,
                 true,
@@ -86,7 +98,6 @@ namespace WebAPI.Controllers
         //UPDATE
         [HttpPut("{id}")]
         [Authorize("ROLE_STAFF")]
-
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryRequest categoryRequest
@@ -119,24 +130,33 @@ namespace WebAPI.Controllers
 
         //DELETE
         [HttpDelete("{id}")]
-        [Authorize("ROLE_STAFF")]
-
+        
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
-            var result = await _categoryService.DeleteAsync(id);
-
-            if (!result)
+            try
             {
-                return NotFound(new ApiResponse
-                    (HttpStatusCode.NotFound,
-                    false,
-                    "Không tìm thấy"));
-            }
+                var result = await _categoryService.DeleteAsync(id);
 
-            return Ok(new ApiResponse
-                (HttpStatusCode.OK,
-                true,
-                "Xoá thành công"));
+                if (!result)
+                {
+                    return NotFound(new ApiResponse
+                        (HttpStatusCode.NotFound,
+                        false,
+                        "Không tìm thấy"));
+                }
+
+                return Ok(new ApiResponse
+                    (HttpStatusCode.OK,
+                    true,
+                    "Tắt thành công"));
+            } catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, false, ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, false, ex.Message));
+            }
         }
     }
 }

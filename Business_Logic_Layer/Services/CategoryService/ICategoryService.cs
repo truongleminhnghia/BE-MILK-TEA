@@ -5,7 +5,11 @@ namespace Business_Logic_Layer.Services
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<IEnumerable<Category>> GetAllCategoriesAsync(
+            string? search, string? sortBy, bool isDescending,
+            int? categoryStatus, int? categoryType,
+            DateTime? startDate, DateTime? endDate,
+            int page, int pageSize);
         Task<Category?> GetByIdAsync(Guid id);
         Task<Category> CreateAsync(Category category);
         Task<Category?> GetByNameAsync(string name);

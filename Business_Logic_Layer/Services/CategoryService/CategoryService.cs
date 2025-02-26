@@ -11,9 +11,14 @@ namespace Business_Logic_Layer.Services.CategoryService
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(
+                    string? search, string? sortBy, bool isDescending,
+                    int? categoryStatus, int? categoryType,
+                    DateTime? startDate, DateTime? endDate,
+                    int page, int pageSize)
         {
-            return await _categoryRepository.GetAllCategoriesAsync();
+            return await _categoryRepository.GetAllCategoriesAsync(
+                search, sortBy, isDescending, categoryStatus, categoryType, startDate, endDate, page, pageSize);
         }
         public async Task<Category?> GetByIdAsync(Guid id)
         {
