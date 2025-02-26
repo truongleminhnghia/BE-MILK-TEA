@@ -36,10 +36,26 @@ namespace Business_Logic_Layer.Services
         }
         public async Task<OrderResponse> CreateAsync(OrderRequest orderRequest)
         {
+            //Kiểm tra promotion code đã được sử dụng hay còn hạn không
+            // double promotionPrice = 0.0;
+            // Promotion promotion = _protionService.getByPromotionCode(orderRequest.PromotionCode);
+            // if (promotion == null)
+            // {
+            //     //Bắt lỗi và trả về kết quả của promotion (là không tồn tại);
+            // }
+            //
+            // if (promotion != null)
+            // {
+            //     if (promotion.IsActive == true && promotion.EndDate > DateTime.Now &&
+            //         promotion.StartDate < DateTime.Now)
+            //     {
+            //         promotionPrice = ??
+            //     }
+            // }
             
             var order = _mapper.Map<Order>(orderRequest);
             order.OrderDate = DateTime.Now;
-            order.Id = Guid.NewGuid();
+            // order.PriceAfterPromotion = order.TotalPrice - promotionPrice;
             var createdOrder= await _orderRepository.CreateAsync(order);
             return _mapper.Map<OrderResponse>(createdOrder);
         }

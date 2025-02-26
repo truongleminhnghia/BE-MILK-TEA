@@ -49,7 +49,7 @@ namespace WebAPI.Controllers
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetById(Guid orderId)
         {
-            var orders = await _orderService.GetByIdAsync(orderId);
+            OrderResponse orders = await _orderService.GetByIdAsync(orderId);
             if (orders == null)
             {
                 return Ok(new ApiResponse(

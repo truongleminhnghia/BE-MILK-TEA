@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Data_Access_Layer.Entities
 {
-    [Table("order_detail_info")]
+    [Table("order_detail")]
     public class OrderDetail
     {
         [Key]

@@ -21,6 +21,9 @@ namespace Business_Logic_Layer.Models.Requests
         public int Quantity { get; set; }
         public double TotalPrice { get; set; }
         public string RefCode { get; set; } = string.Empty;
+        
+        //Người dùng nhập promotion code ở đây
+        public string PromotionCode { get; set; } = string.Empty;
         public Guid AccountId { get; set; }
         public List<CartDetailDTO> cartDetailList { get; set; } =new List<CartDetailDTO>() ;
       

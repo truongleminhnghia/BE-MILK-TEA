@@ -8,7 +8,8 @@ namespace Business_Logic_Layer.Models.Responses
 {
     public class OrderResponse
     {
-        String address { get; set; }
+        String AddressShipping { get; set; }
         List<OrderDetailResponse> orderDetailResponses { get; set; }
+        
     }
 }
