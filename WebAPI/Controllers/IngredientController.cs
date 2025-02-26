@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿
 using AutoMapper;
-using Business_Logic_Layer.Models;
 using Business_Logic_Layer.Models.Requests;
-using Business_Logic_Layer.Services;
-using Business_Logic_Layer.Services.CategoryService;
+using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace WebAPI.Controllers
 {
@@ -34,7 +29,12 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var ingredients = await _ingredientService.GetAllIngredientsAsync();
-            return Ok(ingredients);
+            var ingreReponse = _mapper.Map<CategoryResponse>(ingredients);
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK.GetHashCode(),
+                true,
+                "Thành công",
+                ingreReponse));
         }
 
         //Lấy một nguyên liệu theo ID
@@ -42,18 +42,27 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> Get(Guid id)
         {
             var ingredient = await _ingredientService.GetIngredientByIdAsync(id);
+            var ingreReponse = _mapper.Map<CategoryResponse>(ingredient);
+
             if (ingredient == null)
             {
-                return NotFound(new { message = "Ingredient not found" });
+                return NotFound(new ApiResponse(
+                    HttpStatusCode.NotFound.GetHashCode(),
+                    false,
+                    "Không tìm thấy"));
             }
-            return Ok(ingredient);
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK.GetHashCode(),
+                true,
+                "Thành công",
+                ingreReponse));
         }
 
         //Thêm mới nguyên liệu
         [HttpPost]
         //[Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Add(
-            [FromBody] Business_Logic_Layer.Models.Ingredient ingredient
+            [FromBody] IngredientRequest ingredient
         )
         {
             if (ingredient == null)
@@ -68,7 +77,7 @@ namespace WebAPI.Controllers
             var createdIngredient = await _ingredientService.CreateIngredientAsync(
                 ingredientEntity
             );
-            var createdIngredientModel = _mapper.Map<Business_Logic_Layer.Models.Ingredient>(
+            var createdIngredientModel = _mapper.Map<Ingredient>(
                 createdIngredient
             );
 
@@ -84,7 +93,7 @@ namespace WebAPI.Controllers
         //[Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Update(
             Guid id,
-            [FromBody] Business_Logic_Layer.Models.Ingredient ingredient
+            [FromBody] IngredientRequest ingredient
         )
         {
             if (ingredient == null || id == Guid.Empty)
@@ -105,7 +114,7 @@ namespace WebAPI.Controllers
                 id,
                 ingredientEntity
             );
-            var updatedIngredientModel = _mapper.Map<Business_Logic_Layer.Models.Ingredient>(
+            var updatedIngredientModel = _mapper.Map<Ingredient>(
                 updatedIngredient
             );
 

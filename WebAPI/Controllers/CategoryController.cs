@@ -43,11 +43,12 @@ namespace WebAPI.Controllers
         search, sortBy, isDescending, categoryStatus, categoryType, startDate, endDate, page, pageSize);
 
             var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(categories);
-            return Ok(new ApiResponse
-                (HttpStatusCode.OK,
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK.GetHashCode(),
                 true,
                 "Thành công",
-                categoryRes));
+                categoryRes
+            ));
         }
 
         //GET BY ID
@@ -149,22 +150,22 @@ namespace WebAPI.Controllers
                 if (!result)
                 {
                     return NotFound(new ApiResponse
-                        (HttpStatusCode.NotFound,
+                        (HttpStatusCode.NotFound.GetHashCode(),
                         false,
                         "Không tìm thấy"));
                 }
 
                 return Ok(new ApiResponse
-                    (HttpStatusCode.OK,
+                    (HttpStatusCode.OK.GetHashCode(),
                     true,
                     "Tắt thành công"));
             } catch (KeyNotFoundException ex)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, false, ex.Message));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, ex.Message));
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, false, ex.Message));
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, ex.Message));
             }
         }
     }
