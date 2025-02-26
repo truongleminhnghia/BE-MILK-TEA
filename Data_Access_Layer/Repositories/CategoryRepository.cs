@@ -109,11 +109,16 @@ namespace Data_Access_Layer.Repositories
             {
                 throw new KeyNotFoundException("Không tìm thấy.");
             }
+
             if (existingCategory.CategoryStatus == CategoryStatus.NO_ACTIVE)
             {
                 throw new InvalidOperationException("Danh mục đang không hoạt động.");
             }
-
+            bool hasIngredients = await _context.Ingredients.AnyAsync(i => i.CategoryId == id);
+            if (hasIngredients)
+            {
+                throw new InvalidOperationException("Không thể tắt danh mục vì có nguyên liệu liên quan.");
+            }
             existingCategory.CategoryStatus = CategoryStatus.NO_ACTIVE;
 
             await _context.SaveChangesAsync();
