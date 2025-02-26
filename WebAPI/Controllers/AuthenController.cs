@@ -4,7 +4,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Business_Logic_Layer.Interfaces;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
@@ -35,7 +34,7 @@ namespace WebAPI.Controllers
                 var account = await _authenService.Register(_request);
 
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    HttpStatusCode.OK.GetHashCode(),
                     true,
                     "Đăng ký thành công",
                     account
@@ -44,9 +43,9 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(
-                    HttpStatusCode.InternalServerError,
+                    HttpStatusCode.InternalServerError.GetHashCode(),
                     false,
-                    "An error occurred during registration. Please try again."
+                    ex.Message
                 ));
             }
         }
@@ -60,7 +59,7 @@ namespace WebAPI.Controllers
                 {
                     var _loginSuccess = await _authenService.Login(_request, _typeLogin);
                     return Ok(new ApiResponse(
-                        HttpStatusCode.OK,
+                        HttpStatusCode.OK.GetHashCode(),
                         true,
                         "Đăng nhập thành công",
                         _loginSuccess
@@ -70,14 +69,14 @@ namespace WebAPI.Controllers
                 {
                     var urlLogin = _authenService.GenerateUrl(TypeLogin.LOGIN_GOOGLE.ToString());
                     return Ok(new ApiResponse(
-                        HttpStatusCode.OK,
+                        HttpStatusCode.OK.GetHashCode(),
                         true,
                         "Create URL successfull",
                         urlLogin
                         ));
                 }
                 return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
+                    HttpStatusCode.BadRequest.GetHashCode(),
                     false,
                     "Failed"
                     ));
@@ -85,7 +84,7 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError,
+                    HttpStatusCode.InternalServerError.GetHashCode(),
                     false,
                     ex.Message
                 ));
@@ -100,7 +99,7 @@ namespace WebAPI.Controllers
                 var infoUser = await _authenService.AuthenticateAndFetchProfile(code, type_login);
                 if (infoUser == null)
                 {
-                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, false, "failed", null));
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "failed", null));
                 }
                 if (type_login.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {
@@ -113,13 +112,13 @@ namespace WebAPI.Controllers
                         PhoneNumber = "",
                     };
                     var result = await _authenService.LoginOauth2(oauth2);
-                    return Ok(new ApiResponse(HttpStatusCode.OK, true, "success", result));
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "success", result));
                 }
-                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, false, "failed", null));
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "failed", null));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(HttpStatusCode.InternalServerError, false, ex.Message, null));
+                return StatusCode(500, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
             }
 
         }
