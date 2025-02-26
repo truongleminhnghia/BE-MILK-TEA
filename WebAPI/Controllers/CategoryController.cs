@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
-using Microsoft.AspNetCore.Mvc;
-using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
@@ -86,7 +86,6 @@ namespace WebAPI.Controllers
         //UPDATE
         [HttpPut("{id}")]
         [Authorize(Roles = "ROLE_STAFF")]
-
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryRequest categoryRequest
@@ -120,23 +119,16 @@ namespace WebAPI.Controllers
         //DELETE
         [HttpDelete("{id}")]
         [Authorize(Roles = "ROLE_STAFF")]
-
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             var result = await _categoryService.DeleteAsync(id);
 
             if (!result)
             {
-                return NotFound(new ApiResponse
-                    (HttpStatusCode.NotFound.GetHashCode(),
-                    false,
-                    "Không tìm thấy"));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, false, "Không tìm thấy"));
             }
 
-            return Ok(new ApiResponse
-                (HttpStatusCode.OK.GetHashCode(),
-                true,
-                "Xoá thành công"));
+            return Ok(new ApiResponse(HttpStatusCode.OK, true, "Xoá thành công"));
         }
     }
 }

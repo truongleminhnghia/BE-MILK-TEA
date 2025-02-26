@@ -8,10 +8,10 @@ namespace Business_Logic_Layer.Services
 {
     public interface IImageService
     {
-        Task<IEnumerable<Image>> GetAllImagesAsync();
-        Task<Image> GetImageByIdAsync(Guid id);
-        Task AddImageAsync(Image image);
-        Task UpdateImageAsync(Guid id, Image image);
+        Task<IEnumerable<ImageRespone>> GetAllImagesAsync();
+        Task<ImageRespone> GetImageByIdAsync(Guid id);
+        Task AddImageAsync(ImageRespone image);
+        Task UpdateImageAsync(Guid id, ImageRespone imageResponse);
         Task DeleteImageAsync(Guid id);
     }
 }
