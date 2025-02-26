@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Entities;
@@ -16,47 +17,31 @@ namespace Business_Logic_Layer.Services
     {
         public Task<OrderResponse> CreateAsync(OrderRequest order);
         //public Task<Order> EditAsync();
-        public Task<List<Order>> GetAllAsync();
-        public Task<Order> GetByIdAsync(Guid orderId); 
+        public Task<List<OrderResponse>> GetAllAsync();
+        public Task<OrderResponse> GetByIdAsync(Guid orderId); 
         public Task<bool> DeleteByIdAsync(Guid orderId);
     }
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
         private readonly OrderDetailService _orderDetailService;
+        private readonly CartRepository _cartRepository;
+        private readonly CartItemService _cartItemService;
+        private readonly IMapper _mapper;
 
-        public Task<OrderResponse> CreateAsync(OrderRequest order)
+        public OrderService(IOrderRepository orderRepository, IMapper mapper)
         {
-            //Tạo order
-            Cart cart = _cartRepo.GetByIdAsync();
-            List<CartItem> cartItemList = new List<CartItem>();
-            foreach (CartDetailDTO cartDetailDTO : order.cartDetailList) {
-                CartItem cartItem = _cartItemService.GetById();
-                cartItemList.Add(cartItem);
-            }
-            Order order = new Order();
-            foreach (CartItem item in cartItemList) {
-                OrderDetail orderDetail = _orderDetailService.CreateAsync(item);
-                order.OrderDetails.Add(orderDetail);
-            }
-            _orderService.SaveOrder(order);
-
-            //Trả response
-            OrderResponse orderResponse = new OrderResponse();
-
-            //Thêm thông tin vào orderResponse
-            foreach (OrderDetail orderDetail in order.OrderDetails) {
-                OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
-                //Thêm thông tin vào OrderDetailResponse 
-                orderDetailResponse.IngredientProductId = orderDetail.IngredientProductId();
-
-                //Nhét OrderDetailResponse vào trong OrderResponse
-                orderResponse.orderDetailResponses.add(orderDetailResponse);
-            }
+            _orderRepository = orderRepository;
+            _mapper = mapper;
+        }
+        public async Task<OrderResponse> CreateAsync(OrderRequest orderRequest)
+        {
             
-
-            //Trả về kết quả
-            return orderResponse;
+            var order = _mapper.Map<Order>(orderRequest);
+            order.OrderDate = DateTime.Now;
+            order.Id = Guid.NewGuid();
+            var createdOrder= await _orderRepository.CreateAsync(order);
+            return _mapper.Map<OrderResponse>(createdOrder);
         }
 
         public async Task<bool> DeleteByIdAsync(Guid orderId)
@@ -69,14 +54,16 @@ namespace Business_Logic_Layer.Services
         //    throw new NotImplementedException();
         //}
 
-        public async Task<List<Order>> GetAllAsync()
+        public async Task<List<OrderResponse>> GetAllAsync()
         {
-            return await _orderRepository.GetAllOrdersAsync();
+            var orders = await _orderRepository.GetAllOrdersAsync();
+            return _mapper.Map<List<OrderResponse>>(orders);
         }
 
-        public async Task<Order> GetByIdAsync(Guid orderId)
+        public async Task<OrderResponse> GetByIdAsync(Guid orderId)
         {
-            return await _orderRepository.GetByIdAsync(orderId);
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            return order==null ? null : _mapper.Map<OrderResponse>(order);
         }
     }
 

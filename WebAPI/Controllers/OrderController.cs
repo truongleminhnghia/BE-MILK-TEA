@@ -28,7 +28,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            List<Order> orders = await _orderService.GetAllAsync();
+            var orders = await _orderService.GetAllAsync();
             if (orders.Count == 0)
             {
                 return Ok(new ApiResponse(

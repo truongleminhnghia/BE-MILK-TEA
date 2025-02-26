@@ -61,7 +61,7 @@ namespace Data_Access_Layer.Repositories
             existingOrder.AddressShipping = order.AddressShipping;
             existingOrder.OrderStatus = order.OrderStatus;
             existingOrder.Quantity = order.Quantity;
-            existingOrder.PriceAffterPromotion = order.PriceAffterPromotion;
+            existingOrder.PriceAfterPromotion = order.PriceAfterPromotion;
             existingOrder.AccountId = order.AccountId;
             existingOrder.ReasonCancel = order.ReasonCancel;
 

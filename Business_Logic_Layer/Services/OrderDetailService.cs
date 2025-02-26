@@ -20,17 +20,24 @@ namespace Business_Logic_Layer.Services
     public class OrderDetailService : IOrderDetailService
     {
         private readonly IOrderDetailRepository _orderDetailRepository;
-        public Task<OrderDetail> CreateAsync(OrderDetailRequest orderDetail)
-        {
-            
-        }
+      
 
         public async Task<bool> DeleteByIdAsync(Guid orderDetailId)
         {
             return await _orderDetailRepository.DeleteByIdAsync(orderDetailId);
         }
-    
-        public async Task<List<OrderDetail>> GetAllOrderDetailsAsync()
+
+      //  public async Task<OrderDetail> CreateAsync(OrderDetailRequest orderDetailRequest)
+      //  {
+      //      return await _orderDetailRepository.CreateAsync(orderDetailRequest);
+      //  }
+
+      public Task<OrderDetail> CreateAsync(OrderDetailRequest orderDetail)
+      {
+          throw new NotImplementedException();
+      }
+
+      public async Task<List<OrderDetail>> GetAllOrderDetailsAsync()
         {
             return await _orderDetailRepository.GetAllOrdersDetailAsync();
         }
