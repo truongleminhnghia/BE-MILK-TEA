@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
 
 namespace Business_Logic_Layer.Services.IngredientService
@@ -17,9 +18,9 @@ namespace Business_Logic_Layer.Services.IngredientService
             _repository = repository;
         }
 
-        public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate)
+        public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status)
         {
-            return await _repository.GetAllAsync(search, categoryId, sortBy, isDescending, page, pageSize, startDate, endDate);
+            return await _repository.GetAllAsync(search, categoryId, sortBy, isDescending, page, pageSize, startDate, endDate, status);
         }
 
         public async Task<Ingredient> GetIngredientByIdAsync(Guid id)

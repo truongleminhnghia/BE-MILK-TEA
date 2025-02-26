@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
@@ -24,7 +25,7 @@ namespace Data_Access_Layer.Repositories
         }
 
         public async Task<IEnumerable<Ingredient>> GetAllAsync(
-            string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate)
+            string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status)
         {
             var query = _context.Ingredients
                 .Include(i => i.Category)
@@ -38,6 +39,11 @@ namespace Data_Access_Layer.Repositories
             if (categoryId.HasValue)
             {
                 query = query.Where(i => i.CategoryId == categoryId.Value);
+            }
+
+            if (status.HasValue)
+            {
+                query = query.Where(i => i.IngredientStatus == status.Value);
             }
 
             if (startDate.HasValue && endDate.HasValue)

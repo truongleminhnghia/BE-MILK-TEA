@@ -4,6 +4,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -30,15 +31,17 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetAll(
                         [FromQuery] string? search,
                         [FromQuery] Guid? categoryId,
+                        [FromQuery] IngredientStatus? status,
                         [FromQuery] string? sortBy,
                         [FromQuery] bool isDescending = false,
                         [FromQuery] int page = 1,
                         [FromQuery] int pageSize = 10,
                         [FromQuery] DateTime? startDate = null,
-                        [FromQuery] DateTime? endDate = null)
+                        [FromQuery] DateTime? endDate = null
+                        )
 
         {
-            var ingredients = await _ingredientService.GetAllIngredientsAsync(search, categoryId, sortBy, isDescending, page, pageSize, startDate, endDate);
+            var ingredients = await _ingredientService.GetAllIngredientsAsync(search, categoryId, sortBy, isDescending, page, pageSize, startDate, endDate, status);
             var ingredientResponses = _mapper.Map<List<IngredientResponse>>(ingredients);
             return Ok(new ApiResponse(
                 HttpStatusCode.OK.GetHashCode(),

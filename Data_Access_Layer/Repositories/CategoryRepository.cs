@@ -16,7 +16,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync(
             string? search, string? sortBy, bool isDescending,
-            int? categoryStatus, int? categoryType,
+            CategoryStatus? categoryStatus, CategoryType? categoryType,
             DateTime? startDate, DateTime? endDate,
             int page, int pageSize)
         {
@@ -31,13 +31,13 @@ namespace Data_Access_Layer.Repositories
             // **Filtering by CategoryStatus**
             if (categoryStatus.HasValue)
             {
-                query = query.Where(c => c.CategoryStatus == (CategoryStatus)categoryStatus.Value);
+                query = query.Where(c => c.CategoryStatus == categoryStatus.Value);
             }
 
             // **Filtering by CategoryType**
             if (categoryType.HasValue)
             {
-                query = query.Where(c => c.CategoryType == (CategoryType)categoryType.Value);
+                query = query.Where(c => c.CategoryType == categoryType.Value);
             }
 
             // **Filtering by date range (CreateAt)**

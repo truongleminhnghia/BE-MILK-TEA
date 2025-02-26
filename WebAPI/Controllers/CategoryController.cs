@@ -7,6 +7,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,13 +29,13 @@ namespace WebAPI.Controllers
         //GET ALL
         [HttpGet]
         public async Task<IActionResult> GetAll(
-            [FromQuery] int page = 1,                   // Required first
-            [FromQuery] int pageSize = 10,              // Required second
+            [FromQuery] CategoryStatus? categoryStatus,
+            [FromQuery] CategoryType? categoryType,
+            [FromQuery] int page = 1,              
+            [FromQuery] int pageSize = 10,             
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool isDescending = false,
-            [FromQuery] int? categoryStatus = null,
-            [FromQuery] int? categoryType = null,
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
 
