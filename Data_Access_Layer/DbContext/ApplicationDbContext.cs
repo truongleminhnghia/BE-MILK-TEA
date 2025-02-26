@@ -1,5 +1,6 @@
 ﻿
 using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -93,6 +94,13 @@ namespace Data_Access_Layer.Data
                 .WithOne(pd => pd.Promotion)
                 .HasForeignKey<PromotionDetail>(pd => pd.PromotionId)
                 .IsRequired();
+            modelBuilder.Entity<IngredientProduct>()
+                .Property(a => a.ProductType)
+                .HasConversion<string>();
+            modelBuilder.Entity<Ingredient>()
+                .Property(a => a.IngredientType)
+                .HasConversion<string>();
+
 
         }
 

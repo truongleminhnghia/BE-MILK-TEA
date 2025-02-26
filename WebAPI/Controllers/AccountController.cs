@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
-using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Business_Logic_Layer.Models;
+using Business_Logic_Layer.Services;
 
 namespace WebAPI.Controllers
 {
@@ -27,6 +28,5 @@ namespace WebAPI.Controllers
         }
 
         
-
     }
 }
