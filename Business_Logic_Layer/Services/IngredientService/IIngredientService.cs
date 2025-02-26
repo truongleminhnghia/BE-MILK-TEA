@@ -10,7 +10,7 @@ namespace Business_Logic_Layer.Services.IngredientService
 {
     public interface IIngredientService
     {
-        Task<IEnumerable<Ingredient>> GetAllIngredientsAsync();
+        Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate);
         Task<Ingredient> GetIngredientByIdAsync(Guid id);
         Task<Ingredient> CreateIngredientAsync(Ingredient ingredient);
         Task<Ingredient> UpdateIngredientAsync(Guid id, Ingredient ingredient);

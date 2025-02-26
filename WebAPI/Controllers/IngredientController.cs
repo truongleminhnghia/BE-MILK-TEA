@@ -27,9 +27,18 @@ namespace WebAPI.Controllers
         // pagesize, currentPage, total, conditionm,
         // Get All, GET (bybId, email, code)
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+                        [FromQuery] string? search,
+                        [FromQuery] Guid? categoryId,
+                        [FromQuery] string? sortBy,
+                        [FromQuery] bool isDescending = false,
+                        [FromQuery] int page = 1,
+                        [FromQuery] int pageSize = 10,
+                        [FromQuery] DateTime? startDate = null,
+                        [FromQuery] DateTime? endDate = null)
+
         {
-            var ingredients = await _ingredientService.GetAllIngredientsAsync();
+            var ingredients = await _ingredientService.GetAllIngredientsAsync(search, categoryId, sortBy, isDescending, page, pageSize, startDate, endDate);
             var ingredientResponses = _mapper.Map<List<IngredientResponse>>(ingredients);
             return Ok(new ApiResponse(
                 HttpStatusCode.OK.GetHashCode(),

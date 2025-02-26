@@ -9,7 +9,7 @@ namespace Data_Access_Layer.Repositories
 {
     public interface IIngredientRepository
     {
-        Task<IEnumerable<Ingredient>> GetAllAsync();
+        Task<IEnumerable<Ingredient>> GetAllAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate);
         Task<Ingredient> GetByIdAsync(Guid id);
         Task<Ingredient> CreateAsync(Ingredient ingredient);
         Task<Ingredient> UpdateAsync(Ingredient ingredient);

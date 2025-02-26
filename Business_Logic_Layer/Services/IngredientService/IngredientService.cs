@@ -17,9 +17,9 @@ namespace Business_Logic_Layer.Services.IngredientService
             _repository = repository;
         }
 
-        public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync()
+        public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate)
         {
-            return await _repository.GetAllAsync();
+            return await _repository.GetAllAsync(search, categoryId, sortBy, isDescending, page, pageSize, startDate, endDate);
         }
 
         public async Task<Ingredient> GetIngredientByIdAsync(Guid id)

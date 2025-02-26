@@ -56,11 +56,7 @@ namespace Data_Access_Layer.Repositories
                     ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
                     : query.OrderBy(e => EF.Property<object>(e, sortBy));
             }
-            else
-            {
-                // Default sorting by CreateAt descending (latest first)
-                query = query.OrderByDescending(c => c.CreateAt);
-            }
+            
 
             // **Pagination**
             query = query.Skip((page - 1) * pageSize).Take(pageSize);
