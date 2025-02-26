@@ -15,7 +15,6 @@ namespace Business_Logic_Layer.AutoMappers
     {
         public IngredientMapper()
         {
-            CreateMap<Ingredient, Data_Access_Layer.Entities.Ingredient>().ReverseMap();
             CreateMap<IngredientRequest, Ingredient>().ReverseMap();
             CreateMap<IngredientResponse, Ingredient>().ReverseMap();
         }

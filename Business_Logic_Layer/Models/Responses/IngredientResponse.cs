@@ -10,7 +10,7 @@ namespace Business_Logic_Layer.Models.Responses
 {
     public class IngredientResponse
     {
-        [JsonIgnore]
+
         public Guid Id { get; set; }
         public string IngredientCode { get; set; }
         public string Supplier { get; set; }
@@ -21,11 +21,10 @@ namespace Business_Logic_Layer.Models.Responses
         public IngredientStatus IngredientStatus { get; set; }
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
-        public int Unit { get; set; }
+        public string Unit { get; set; }
         public double PriceOrigin { get; set; }
         public double PricePromotion { get; set; }
         public Guid CategoryId { get; set; }
-        public int Quantity { get; set; }
         public bool IsSale { get; set; }
 
         [JsonIgnore]

@@ -4,6 +4,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -29,12 +30,12 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var ingredients = await _ingredientService.GetAllIngredientsAsync();
-            var ingreReponse = _mapper.Map<CategoryResponse>(ingredients);
+            var ingredientResponses = _mapper.Map<List<IngredientResponse>>(ingredients);
             return Ok(new ApiResponse(
                 HttpStatusCode.OK.GetHashCode(),
                 true,
                 "Thành công",
-                ingreReponse));
+                ingredientResponses));
         }
 
         //Lấy một nguyên liệu theo ID
@@ -60,37 +61,32 @@ namespace WebAPI.Controllers
 
         //Thêm mới nguyên liệu
         [HttpPost]
-        //[Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> Add(
-            [FromBody] IngredientRequest ingredient
+            [FromBody] IngredientRequest ingredientRequest
         )
         {
-            if (ingredient == null)
+            if (ingredientRequest == null)
             {
-                return BadRequest(new { message = "Invalid ingredient data" });
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    false,
+                    "Data không hợp lệ"));
             }
 
-            // Generate new Id for the ingredient
-            ingredient.Id = Guid.NewGuid();
+            var ingredient = _mapper.Map<Ingredient>(ingredientRequest);
+            await _ingredientService.CreateIngredientAsync(ingredient);
 
-            var ingredientEntity = _mapper.Map<Data_Access_Layer.Entities.Ingredient>(ingredient);
-            var createdIngredient = await _ingredientService.CreateIngredientAsync(
-                ingredientEntity
-            );
-            var createdIngredientModel = _mapper.Map<Ingredient>(
-                createdIngredient
-            );
 
-            return CreatedAtAction(
-                nameof(Get),
-                new { id = createdIngredientModel.Id },
-                createdIngredientModel
-            );
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK.GetHashCode(),
+                true,
+                "Tạo thành công"));
         }
 
         //Cập nhật nguyên liệu
         [HttpPut("{id}")]
-        //[Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> Update(
             Guid id,
             [FromBody] IngredientRequest ingredient
@@ -98,16 +94,22 @@ namespace WebAPI.Controllers
         {
             if (ingredient == null || id == Guid.Empty)
             {
-                return BadRequest(new { message = "Invalid ingredient data" });
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    false,
+                    "Data không hợp lệ"));
             }
 
             var existingIngredient = await _ingredientService.GetIngredientByIdAsync(id);
             if (existingIngredient == null)
             {
-                return NotFound(new { message = "Ingredient not found" });
+                return NotFound(new ApiResponse(
+                    HttpStatusCode.NotFound.GetHashCode(),
+                    false,
+                    "Không tìm thấy nguyên liệu"));
             }
 
-            var ingredientEntity = _mapper.Map<Data_Access_Layer.Entities.Ingredient>(ingredient);
+            var ingredientEntity = _mapper.Map<Ingredient>(ingredient);
             ingredientEntity.Id = id;
 
             var updatedIngredient = await _ingredientService.UpdateIngredientAsync(
@@ -118,13 +120,16 @@ namespace WebAPI.Controllers
                 updatedIngredient
             );
 
-            return Ok(updatedIngredientModel);
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK.GetHashCode(),
+                true,
+                "Cập nhật thành công"));
         }
 
         //  Xóa nguyên liệu
         // id nhận về là string
         [HttpDelete("{id}")]
-        //[Authorize("ROLE_STAFF")]
+        [Authorize("ROLE_STAFF")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var ingredient = await _ingredientService.GetIngredientByIdAsync(id);
@@ -134,7 +139,10 @@ namespace WebAPI.Controllers
             }
 
             await _ingredientService.DeleteIngredientAsync(id);
-            return NoContent();
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK.GetHashCode(),
+                true,
+                "Xoá thành công"));
         }
     }
 }

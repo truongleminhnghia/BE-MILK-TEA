@@ -17,11 +17,10 @@ namespace Business_Logic_Layer.Models.Requests
         public IngredientStatus IngredientStatus { get; set; }
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
-        public int Unit { get; set; }
+        public string Unit { get; set; }
         public double PriceOrigin { get; set; }
         public double PricePromotion { get; set; }
         public Guid CategoryId { get; set; }
-        public int Quantity { get; set; }
         public bool IsSale { get; set; }
 
         [JsonIgnore]
