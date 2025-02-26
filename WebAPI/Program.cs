@@ -12,6 +12,7 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Business_Logic_Layer.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +31,9 @@ var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
 var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
-var connectionString = $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+var connectionString =
+    $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+
 //var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Pass;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
@@ -81,6 +84,7 @@ builder
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
+            RoleClaimType = "roleName",
             ValidateIssuer = true, // người, chỗ, nơi phát hành, tức là tk cho tạo token
             ValidateAudience = true, // đối tượng sử dụng token
             ValidateLifetime = true, // kiểm tra thời gian hết hạn
@@ -99,7 +103,7 @@ builder
     .Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 builder.Services.AddAutoMapper(
@@ -107,12 +111,15 @@ builder.Services.AddAutoMapper(
     typeof(CategoryMapper),
     typeof(IngredientMapper),
     typeof(ImageMapper),
-    typeof(IngredientProductMapper)
+    typeof(IngredientProductMapper),
+    typeof(AccountMapper),
+    typeof(CategoryMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
     () => provider.GetService<ICategoryService>()
 );
+
 // comment đến đây
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
@@ -130,10 +137,12 @@ builder.Services.AddScoped<IIngredientProductRepository, IngredientProductReposi
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<Source>();
+
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAutoMapper(typeof(AccountMapper), typeof(CategoryMapper));
 
 // config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
@@ -144,7 +153,6 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
-
             policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
                   .AllowAnyMethod()
                   .AllowAnyHeader()

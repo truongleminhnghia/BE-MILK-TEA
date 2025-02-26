@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Business_Logic_Layer.Models;
+using Business_Logic_Layer.Models.Requests;
+using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
-using Data_Access_Layer.Entities;
-using Data_Access_Layer.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Controllers
 {
@@ -15,70 +18,142 @@ namespace WebAPI.Controllers
     public class ImageController : ControllerBase
     {
         private readonly IImageService _imageService;
-        private readonly IImageRepository _imageRepository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<ImageController> _logger;
 
-        public ImageController(IImageService imageService, IImageRepository imageRepository)
+        public ImageController(
+            IImageService imageService,
+            IMapper mapper,
+            ILogger<ImageController> logger = null
+        )
         {
             _imageService = imageService;
-            _imageRepository = imageRepository;
+            _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<
-            ActionResult<IEnumerable<Business_Logic_Layer.Models.Image>>
-        > GetAllImages()
+        public async Task<ActionResult> GetAllImages()
         {
             var images = await _imageService.GetAllImagesAsync();
-            return Ok(images);
+            var imageResponses = _mapper.Map<IEnumerable<ImageRespone>>(images);
+            return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Thành công", imageResponses));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Business_Logic_Layer.Models.Image>> GetImageById(Guid id)
+        public async Task<ActionResult> GetImageById(Guid id)
         {
             var image = await _imageService.GetImageByIdAsync(id);
             if (image == null)
             {
-                return NotFound();
+                _logger?.LogWarning("Không tìm thấy hình ảnh có ID {ImageId}", id);
+                return NotFound(
+                    new ApiResponse(
+                        (int)HttpStatusCode.NotFound,
+                        false,
+                        $"Không tìm thấy hình ảnh với ID {id}"
+                    )
+                );
             }
-            return Ok(image);
+            var imageResponse = _mapper.Map<ImageRespone>(image);
+            return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Thành công", imageResponse));
         }
 
+        //Add Image
         [HttpPost]
-        public async Task<ActionResult> AddImage([FromBody] Business_Logic_Layer.Models.Image image)
+        [Authorize("ROLE_STAFF")]
+        public async Task<ActionResult> AddImage([FromBody] ImageRequest imageRequest)
         {
-            if (image == null)
+            if (imageRequest == null)
             {
-                return BadRequest(new { message = "Invalid image data" });
+                return BadRequest(
+                    new ApiResponse((int)HttpStatusCode.BadRequest, false, "Data không hợp lệ")
+                );
             }
-
-            // Generate new Id for the image
-            image.Id = Guid.NewGuid();
-
-            await _imageService.AddImageAsync(image);
-            return CreatedAtAction(nameof(GetImageById), new { id = image.Id }, image);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(
+                    new ApiResponse(
+                        (int)HttpStatusCode.BadRequest,
+                        false,
+                        "Dữ liệu không đúng định dạng"
+                    )
+                );
+            }
+            var imageResponse = _mapper.Map<ImageRespone>(imageRequest);
+            await _imageService.AddImageAsync(imageResponse);
+            return CreatedAtAction(
+                nameof(GetImageById),
+                new { id = imageResponse.Id },
+                new ApiResponse(
+                    (int)HttpStatusCode.Created,
+                    true,
+                    "Thêm hình ảnh thành công",
+                    imageRequest
+                )
+            );
         }
 
+        //Update Image
         [HttpPut("{id}")]
-        public async Task UpdateImageAsync(Guid id, Business_Logic_Layer.Models.Image image)
+        [Authorize("ROLE_STAFF")]
+        public async Task<IActionResult> UpdateImage(Guid id, [FromBody] ImageRequest imageRequest)
         {
-            var existingImage = await _imageRepository.GetImageByIdAsync(id);
+            if (imageRequest == null)
+            {
+                return BadRequest(
+                    new ApiResponse((int)HttpStatusCode.BadRequest, false, "Dữ liệu không hợp lệ")
+                );
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(
+                    new ApiResponse(
+                        (int)HttpStatusCode.BadRequest,
+                        false,
+                        "Dữ liệu không đúng định dạng"
+                    )
+                );
+            }
+            var existingImage = await _imageService.GetImageByIdAsync(id);
             if (existingImage == null)
             {
-                throw new Exception("Image not found.");
+                _logger?.LogWarning("Cố gắng cập nhật hình ảnh không tồn tại với ID {ImageId}", id);
+                return NotFound(
+                    new ApiResponse(
+                        (int)HttpStatusCode.NotFound,
+                        false,
+                        $"Không tìm thấy hình ảnh với ID {id}"
+                    )
+                );
             }
-
-            // Update the existing image's properties
-            existingImage.ImageUrl = image.ImageUrl;
-            existingImage.IngredientId = image.IngredientId;
-
-            await _imageRepository.UpdateImageAsync(existingImage);
+            // Map and update
+            var imageResponse = _mapper.Map<ImageRespone>(imageRequest);
+            await _imageService.UpdateImageAsync(id, imageResponse);
+            return Ok(
+                new ApiResponse((int)HttpStatusCode.OK, true, "Cập nhật hình ảnh thành công")
+            );
         }
 
+        //Delete Image
         [HttpDelete("{id}")]
+        [Authorize("ROLE_STAFF")]
         public async Task<ActionResult> DeleteImage(Guid id)
         {
+            var existingImage = await _imageService.GetImageByIdAsync(id);
+            if (existingImage == null)
+            {
+                _logger?.LogWarning("Cố gắng xóa hình ảnh không tồn tại với ID {ImageId}", id);
+                return NotFound(
+                    new ApiResponse(
+                        (int)HttpStatusCode.NotFound,
+                        false,
+                        $"Không tìm thấy hình ảnh với ID {id}"
+                    )
+                );
+            }
             await _imageService.DeleteImageAsync(id);
-            return NoContent();
+            return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Xóa hình ảnh thành công"));
         }
     }
 }
