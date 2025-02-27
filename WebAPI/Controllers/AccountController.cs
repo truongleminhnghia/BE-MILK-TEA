@@ -4,6 +4,7 @@ using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -11,7 +12,7 @@ namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/accounts")]
-    //[Authorize]
+    
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
@@ -30,14 +31,23 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("customers")]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllCustomers()
         {
-            var customers = await _customerService.GetAllCustomer();
-            var customerResponses = _mapper.Map<IEnumerable<CustomerResponse>>(customers);
-            return Ok(customerResponses);
+            try
+            {
+                var customers = await _customerService.GetAllCustomer();
+                var customerResponses = _mapper.Map<IEnumerable<CustomerResponse>>(customers);
+                return Ok(customerResponses);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
         }
 
         [HttpPost("customers")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> CreateCustomer([FromBody] CreateCustomerRequest request)
         {
             try
@@ -53,6 +63,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("customers/{id}")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] UpdateCustomerRequest request)
         {
             try
@@ -68,38 +79,59 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("customers/{id}")]
+        [Authorize(Roles = "ROLE_CUSTOMER, ROLE_ADMIM")]
         public async Task<IActionResult> GetCustomerById(Guid id)
         {
-            var customer = await _customerService.GetById(id);
-            if (customer == null)
+            try
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Cannot be found!"));
+                var customer = await _customerService.GetById(id);
+                if (customer == null)
+                {
+                    return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy!"));
+                }
+                var customerResponse = _mapper.Map<CustomerResponse>(customer);
+                return Ok(customerResponse);
             }
-            var customerResponse = _mapper.Map<CustomerResponse>(customer);
-            return Ok(customerResponse);
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
         }
 
         [HttpGet]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllAccount()
         {
-            var accounts = await _accountService.GetAllAccount();
-            var accountResponses = _mapper.Map<IEnumerable<AccountResponse>>(accounts);
-            return Ok(accountResponses);
+            try
+            {
+                var accounts = await _accountService.GetAllAccount();                
+                return Ok(accounts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
         }
 
-        [HttpGet("account/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetAccountById(Guid id)
         {
-            var account = await _accountService.GetById(id);
-            if (account == null)
+            try
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Cannot be found!"));
+                var account = await _accountService.GetById(id);
+                if (account == null)
+                {
+                    return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy!"));
+                }
+                return Ok(account);
             }
-            var accountResponse = _mapper.Map<AccountResponse>(account);
-            return Ok(accountResponse);
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
         }
 
-        [HttpPut("account/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAccount(Guid id, [FromBody] UpdateAccountRequest request)
         {
             try

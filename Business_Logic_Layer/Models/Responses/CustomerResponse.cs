@@ -16,5 +16,7 @@ namespace Business_Logic_Layer.Models.Responses
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public AccountLevelEnum AccountLevel { get; set; }
+
+        public bool Purchased { get; set; }
     }
 }

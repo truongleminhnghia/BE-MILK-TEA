@@ -36,12 +36,12 @@ namespace Business_Logic_Layer.Services
             {
                 if (_email == null)
                 {
-                    throw new Exception("Id do not null");
+                    throw new Exception("Id bị thiếu");
                 }
                 var _account = await _accountRepository.GetByEmail(_email);
                 if (_account == null)
                 {
-                    throw new Exception("Account do not exits");
+                    throw new Exception("Tài khoản không tồn tại");
                 }
                 return _account;
             }
@@ -52,20 +52,20 @@ namespace Business_Logic_Layer.Services
             }
         }
 
-        public async Task<Account?> GetById(Guid _id)
+        public async Task<AccountResponse?> GetById(Guid _id)
         {
             try
             {
                 if (_id == null)
                 {
-                    throw new Exception("Id do not null");
+                    throw new Exception("Id bị thiếu");
                 }
                 var _account = await _accountRepository.GetById(_id);
                 if (_account == null)
                 {
-                    throw new Exception("Account do not exits");
+                    throw new Exception("Tài khoản không tồn tại");
                 }
-                return _account;
+                return MapToAccountResponse.ComplexAccountResponse(_account);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace Business_Logic_Layer.Services
                 var result = await _accountRepository.Create(account);
                 if (result == null)
                 {
-                    throw new Exception("Create account failed");
+                    throw new Exception("Tạo tài khoản thất bại");
                 }
 
                 return account;
@@ -166,7 +166,7 @@ namespace Business_Logic_Layer.Services
                 var account = await _accountRepository.GetById(id);
                 if (account == null)
                 {
-                    throw new Exception("Account do not exits");
+                    throw new Exception("Tài khoản không tồn tại");
                 }
                 account.FirstName = updateAccountRequest.FirstName;
                 account.LastName = updateAccountRequest.LastName;
@@ -183,12 +183,31 @@ namespace Business_Logic_Layer.Services
         }
 
 
-        public async Task<IEnumerable<Account>> GetAllAccount()
+        public async Task<IEnumerable<AccountResponse>> GetAllAccount()
         {
             try
             {
                 var accounts = await _accountRepository.GetAllAccount();
-                return accounts;
+                var accountResponses = accounts.Select(account =>
+                {
+                    var response = _mapper.Map<AccountResponse>(account);
+
+                    // Ánh xạ Employee nếu có
+                    if (account.Employee != null)
+                    {
+                        response.Employee = _mapper.Map<EmployeeResponse>(account.Employee);
+                    }
+
+                    // Ánh xạ Customer nếu có
+                    if (account.Customer != null)
+                    {
+                        response.Customer = _mapper.Map<CustomerResponse>(account.Customer);
+                    }
+
+                    return response;
+                });
+
+                return accountResponses;
             }
             catch (Exception ex)
             {

@@ -50,7 +50,7 @@ namespace Business_Logic_Layer.Services
                 var customer = await _customerRepository.GetByAccountId(id);
                 if (customer == null)
                 {
-                    throw new Exception("Account do not exits");
+                    throw new Exception("Tài khoản không tồn tại");
                 }
                 customer.UpdateAt = DateTime.Now;
                 customer.TaxCode = updateCustomerRequest.TaxCode;

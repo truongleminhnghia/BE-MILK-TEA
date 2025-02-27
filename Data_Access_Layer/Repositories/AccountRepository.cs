@@ -38,7 +38,10 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Account?> GetById(Guid _id)
         {
-            return await _context.Accounts.FirstAsync(a => a.Id.Equals(_id));
+            return await _context.Accounts
+                .Include(a => a.Employee)
+                .Include(a => a.Customer)
+                .FirstOrDefaultAsync(a => a.Id == _id);
         }
 
         public async Task<Account> GetByPhoneNumber(string phoneNumber)
@@ -55,7 +58,10 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<IEnumerable<Account>> GetAllAccount()
         {
-            return await Task.FromResult(_context.Accounts.ToList());
+            return await _context.Accounts
+                .Include(a => a.Employee) // Join v?i b?ng Employee (n?u có)
+                .Include(a => a.Customer) // Join v?i b?ng Customer (n?u có)
+                .ToListAsync();
         }
     }
 }

@@ -46,7 +46,7 @@ namespace Business_Logic_Layer.Services
                 var employee = await _employeeRepository.GetById(id);
                 if (employee == null)
                 {
-                    throw new Exception("Account do not exits");
+                    throw new Exception("Tài khoản không tồn tại");
                 }
                 employee.UpdateAt = DateTime.Now;
                 employee.RefCode = updateStaffRequest.RefCode;

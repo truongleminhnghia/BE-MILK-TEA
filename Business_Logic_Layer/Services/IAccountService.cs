@@ -10,12 +10,12 @@ namespace Business_Logic_Layer.Services
 {
     public interface IAccountService
     {
-        public Task<Account?> GetById(Guid _id);
+        public Task<AccountResponse?> GetById(Guid _id);
         public Task<Account?> GetByEmail(string _email);
         Task<Account> CreateAccount(CreateAccountRequest createAccountRequest);
 
         Task<Account> UpdateAccount(Guid id, UpdateAccountRequest updateAccountRequest);
-        Task<IEnumerable<Account>> GetAllAccount();
+        Task<IEnumerable<AccountResponse>> GetAllAccount();
 
 
     }
