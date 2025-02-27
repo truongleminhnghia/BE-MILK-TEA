@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
@@ -49,19 +50,59 @@ namespace Data_Access_Layer.Repositories
             return await _context.Accounts.FirstOrDefaultAsync(a => a.Phone == phoneNumber);
         }
 
-        public async Task<Account> UpdateAccount(Account account)
+        public async Task UpdateAccount(Account account)
         {
             _context.Accounts.Update(account);
             await _context.SaveChangesAsync();
-            return account;
         }
 
-        public async Task<IEnumerable<Account>> GetAllAccount()
+        //public async Task<IEnumerable<Account>> GetAllAccount()
+        //{
+        //    return await _context.Accounts
+        //        .Include(a => a.Employee) // Join v?i b?ng Employee (n?u có)
+        //        .Include(a => a.Customer) // Join v?i b?ng Customer (n?u có)
+        //        .ToListAsync();
+        //}
+
+        public async Task<IEnumerable<Account>> GetAllAccounts (
+    string? search, string? sortBy, bool isDescending,
+    AccountStatus? accountStatus, RoleName? role, int page, int pageSize)
         {
-            return await _context.Accounts
-                .Include(a => a.Employee) // Join v?i b?ng Employee (n?u c�)
-                .Include(a => a.Customer) // Join v?i b?ng Customer (n?u c�)
-                .ToListAsync();
+            var query = _context.Accounts
+                .Include(a => a.Employee)
+                .Include(a => a.Customer)
+                .AsQueryable();
+
+            // **Tìm kiếm theo Email hoặc Username**
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(a => a.Email.Contains(search) || a.FirstName.Contains(search) || a.LastName.Contains(search));
+            }
+
+            // **Lọc theo trạng thái tài khoản**
+            if (accountStatus.HasValue)
+            {
+                query = query.Where(a => a.AccountStatus == accountStatus.Value);
+            }
+
+            if (role != null)
+            {
+                query = query.Where(a => a.RoleName == role.Value);
+            }
+
+            // **Sắp xếp**
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                query = isDescending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
+                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
+            }
+
+            // **Phân trang**
+            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+            return await query.ToListAsync();
         }
+
     }
 }

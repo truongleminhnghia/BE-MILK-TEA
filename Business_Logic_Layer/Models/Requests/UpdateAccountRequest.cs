@@ -4,11 +4,13 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class UpdateAccountRequest
     {
-        public string Email { get; set; }
         public string Password { get; set; }
         public string LastName { get; set; }
         public string FirstName { get; set; }
         public string PhoneNumber { get; set; }
+
+        public UpdateCustomerRequest? Customer { get; set; }
+        public UpdateStaffRequest? Employee { get; set; }
     }
 
     public class UpdateCustomerRequest
