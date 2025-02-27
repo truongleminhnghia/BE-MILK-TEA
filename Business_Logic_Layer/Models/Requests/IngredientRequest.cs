@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Data_Access_Layer.Enum;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using Data_Access_Layer.Enum;
 
-namespace Business_Logic_Layer.Models
+
+namespace Business_Logic_Layer.Models.Requests
 {
-    public class Ingredient
+    public class IngredientRequest
     {
         [JsonIgnore]
         public Guid Id { get; set; }
@@ -21,11 +17,10 @@ namespace Business_Logic_Layer.Models
         public IngredientStatus IngredientStatus { get; set; }
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
-        public int Unit { get; set; }
+        public string Unit { get; set; }
         public double PriceOrigin { get; set; }
         public double PricePromotion { get; set; }
         public Guid CategoryId { get; set; }
-        public int Quantity { get; set; }
         public bool IsSale { get; set; }
 
         [JsonIgnore]

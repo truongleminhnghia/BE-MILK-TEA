@@ -14,9 +14,54 @@ namespace Data_Access_Layer.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(
+            string? search, string? sortBy, bool isDescending,
+            CategoryStatus? categoryStatus, CategoryType? categoryType,
+            DateTime? startDate, DateTime? endDate,
+            int page, int pageSize)
         {
-            return await _context.Categories.ToListAsync();
+            var query = _context.Categories.AsQueryable();
+
+            // **Filtering by name**
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(c => c.CategoryName.Contains(search));
+            }
+
+            // **Filtering by CategoryStatus**
+            if (categoryStatus.HasValue)
+            {
+                query = query.Where(c => c.CategoryStatus == categoryStatus.Value);
+            }
+
+            // **Filtering by CategoryType**
+            if (categoryType.HasValue)
+            {
+                query = query.Where(c => c.CategoryType == categoryType.Value);
+            }
+
+            // **Filtering by date range (CreateAt)**
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1); // Includes full day
+
+                query = query.Where(c => c.CreateAt >= startDate.Value && c.CreateAt <= adjustedEndDate);
+            }
+
+
+            // **Sorting**
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                query = isDescending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
+                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
+            }
+            
+
+            // **Pagination**
+            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+            return await query.ToListAsync();
         }
 
         public async Task<Category?> GetByIdAsync(Guid id)
@@ -61,12 +106,22 @@ namespace Data_Access_Layer.Repositories
         {
             var existingCategory = await _context.Categories.FindAsync(id);
             if (existingCategory == null)
-        {
-                return false; 
-        }
+            {
+                throw new KeyNotFoundException("Không tìm thấy.");
+            }
 
-            _context.Categories.Remove(existingCategory);
-            await _context.SaveChangesAsync(); 
+            if (existingCategory.CategoryStatus == CategoryStatus.NO_ACTIVE)
+            {
+                throw new InvalidOperationException("Danh mục đang không hoạt động.");
+            }
+            bool hasIngredients = await _context.Ingredients.AnyAsync(i => i.CategoryId == id);
+            if (hasIngredients)
+            {
+                throw new InvalidOperationException("Không thể tắt danh mục vì có nguyên liệu liên quan.");
+            }
+            existingCategory.CategoryStatus = CategoryStatus.NO_ACTIVE;
+
+            await _context.SaveChangesAsync();
 
             return true;
         }
