@@ -15,6 +15,7 @@ namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/auths")]
+    [AllowAnonymous]
     public class AuthenController : ControllerBase
     {
         private readonly IAuthenService _authenService;

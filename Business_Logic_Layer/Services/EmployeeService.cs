@@ -27,18 +27,6 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
-                foreach (var item in createStaffRequest.GetType().GetProperties())
-                {
-                    if (item.GetValue(createStaffRequest) == null)
-                    {
-                        throw new Exception("Request do not null!");
-                    }
-                }
-                var employee = await _employeeRepository.GetById(createStaffRequest.AccountId);
-                if (employee == null)
-                {
-                    throw new Exception("Account do not exits");
-                }
                 var customer = _mapper.Map<Employee>(createStaffRequest);
 
                 var result = await _employeeRepository.Create(customer);
@@ -55,13 +43,14 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
-                var customer = await _employeeRepository.GetById(id);
-                if (customer == null)
+                var employee = await _employeeRepository.GetById(id);
+                if (employee == null)
                 {
                     throw new Exception("Account do not exits");
                 }
-                var updatedCustomer = _mapper.Map<Employee>(updateStaffRequest);
-                var result = await _employeeRepository.UpdateEmployee(updatedCustomer);
+                employee.UpdateAt = DateTime.Now;
+                employee.RefCode = updateStaffRequest.RefCode;
+                var result = await _employeeRepository.UpdateEmployee(employee);
                 return result;
             }
             catch (Exception ex)

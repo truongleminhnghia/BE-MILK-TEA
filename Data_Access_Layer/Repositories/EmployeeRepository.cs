@@ -1,5 +1,6 @@
 ﻿using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Employee> GetById(Guid _id)
         {
-            return await _context.Employees.FindAsync(_id);
+            return await _context.Employees.FirstOrDefaultAsync(s => s.AccountId == _id) ;
         }
 
         public async Task<Employee> UpdateEmployee(Employee _employee)

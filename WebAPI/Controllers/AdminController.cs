@@ -64,9 +64,11 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetStaffById(Guid id)
         {
             var employee = await _employeeService.GetById(id);
-            var employeeResponse = _mapper.Map<EmployeeResponse>(employee);
             if (employee == null)
                 return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Cannot found"));
+
+            var employeeResponse = _mapper.Map<EmployeeResponse>(employee);
+            
             return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Successfull", employeeResponse));
         }
     }
