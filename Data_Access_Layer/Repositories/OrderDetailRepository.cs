@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
 {
-    public class OrderDetailRepository
+    public class OrderDetailRepository : IOrderDetailRepository
     {
         private readonly ApplicationDbContext _context;
 
@@ -17,7 +17,7 @@ namespace Data_Access_Layer.Repositories
         {
             _context = context;
         }
-        public async Task<List<OrderDetail>> GetOrderDetailsAsync()
+        public async Task<List<OrderDetail>> GetAllOrdersDetailAsync()
         {
             try
             {
@@ -50,6 +50,23 @@ namespace Data_Access_Layer.Repositories
             _context.OrderDetails.Remove(existingOrderDetail);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<OrderDetail?> GetByIdAsync(Guid id)
+        {
+            return await _context.OrderDetails.FirstOrDefaultAsync(c => c.Id == id);
+        }
+       public async Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail)
+        {
+            var existingOrderDetail = await _context.OrderDetails.FindAsync(id);
+            if (existingOrderDetail == null)
+            {
+                return null;
+            }
+
+            existingOrderDetail.Quantity = orderDetail.Quantity;
+            await _context.SaveChangesAsync();
+            return existingOrderDetail;
         }
     }
 }

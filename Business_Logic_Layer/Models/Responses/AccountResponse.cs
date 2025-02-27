@@ -20,5 +20,9 @@ namespace Business_Logic_Layer.Models.Responses
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public RoleName RoleName { get; set; }
+
+        public EmployeeResponse? Employee { get; set; }
+        public CustomerResponse? Customer { get; set; }
+
     }
 }

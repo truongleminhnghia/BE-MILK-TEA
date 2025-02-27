@@ -30,14 +30,14 @@ namespace WebAPI.Controllers
             if (carts == null)
             {
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    ((int)HttpStatusCode.OK),
                     true,
                     "Không có cart nào có ID đó cả.",
                     null
                 ));
             }
             return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    ((int)HttpStatusCode.OK),
                     true,
                     "Lấy dữ liệu thành công!",
                     carts

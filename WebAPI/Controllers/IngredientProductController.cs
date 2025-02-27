@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
                 if (ingredientReq == null)
                 {
                     return BadRequest(new ApiResponse(
-                        HttpStatusCode.BadRequest,
+                        HttpStatusCode.BadRequest.GetHashCode(),
                         false,
                         "Dữ liệu không hợp lệ"));
                 }
@@ -39,7 +39,7 @@ namespace WebAPI.Controllers
             if (!ingredientExists)
             {
                 return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
+                    HttpStatusCode.BadRequest.GetHashCode(),
                     false,
                     "Nguyên liệu không tồn tại"));
             }
@@ -49,7 +49,7 @@ namespace WebAPI.Controllers
             await _ingredientProductService.CreateAsync(ingredientProduct);
 
             return Ok(new ApiResponse(
-                        HttpStatusCode.OK,
+                        HttpStatusCode.OK.GetHashCode(),
                         true,
                         "Thêm nguyên liệu vào sản phẩm thành công"));
         }

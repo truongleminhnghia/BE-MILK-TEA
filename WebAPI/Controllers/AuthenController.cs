@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/auths")]
+    [AllowAnonymous]
     public class AuthenController : ControllerBase
     {
         private readonly IAuthenService _authenService;
@@ -26,15 +28,14 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(
-            [FromBody] RegisterRequest _request) // Cho phép null
+        public async Task<IActionResult> Register([FromBody] RegisterRequest _request) // Cho phép null
         {
             try
             {
                 var account = await _authenService.Register(_request);
 
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    HttpStatusCode.OK.GetHashCode(),
                     true,
                     "Đăng ký thành công",
                     account
@@ -43,9 +44,9 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(
-                    HttpStatusCode.InternalServerError,
+                    HttpStatusCode.InternalServerError.GetHashCode(),
                     false,
-                    "An error occurred during registration. Please try again."
+                    ex.Message
                 ));
             }
         }
@@ -55,28 +56,28 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (_typeLogin == null || _typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
+                if (_typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
                     var _loginSuccess = await _authenService.Login(_request, _typeLogin);
                     return Ok(new ApiResponse(
-                        HttpStatusCode.OK,
+                        HttpStatusCode.OK.GetHashCode(),
                         true,
                         "Đăng nhập thành công",
                         _loginSuccess
-                        ));
+                    ));
                 }
                 else if (_typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {
                     var urlLogin = _authenService.GenerateUrl(TypeLogin.LOGIN_GOOGLE.ToString());
                     return Ok(new ApiResponse(
-                        HttpStatusCode.OK,
+                        HttpStatusCode.OK.GetHashCode(),
                         true,
                         "Create URL successfull",
                         urlLogin
                         ));
                 }
                 return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
+                    HttpStatusCode.BadRequest.GetHashCode(),
                     false,
                     "Failed"
                     ));
@@ -84,7 +85,7 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError,
+                    HttpStatusCode.InternalServerError.GetHashCode(),
                     false,
                     ex.Message
                 ));
@@ -99,7 +100,7 @@ namespace WebAPI.Controllers
                 var infoUser = await _authenService.AuthenticateAndFetchProfile(code, type_login);
                 if (infoUser == null)
                 {
-                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, false, "failed", null));
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "failed", null));
                 }
                 if (type_login.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {
@@ -112,13 +113,13 @@ namespace WebAPI.Controllers
                         PhoneNumber = "",
                     };
                     var result = await _authenService.LoginOauth2(oauth2);
-                    return Ok(new ApiResponse(HttpStatusCode.OK, true, "success", result));
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "success", result));
                 }
-                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, false, "failed", null));
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "failed", null));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(HttpStatusCode.InternalServerError, false, ex.Message, null));
+                return StatusCode(500, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
             }
 
         }

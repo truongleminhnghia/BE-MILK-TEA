@@ -32,14 +32,14 @@ namespace WebAPI.Controllers
             if (orders.Count == 0)
             {
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    ((int)HttpStatusCode.OK),
                     true,
                     "Không có đơn hàng nào cả.",
                     null
                 ));
             }
             return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    ((int)HttpStatusCode.OK),
                     true,
                     "Lấy dữ liệu thành công!",
                     orders
@@ -53,14 +53,14 @@ namespace WebAPI.Controllers
             if (orders == null)
             {
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    ((int)HttpStatusCode.OK),
                     true,
                     "Không có đơn hàng nào có ID đó cả.",
                     null
                 ));
             }
             return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    ((int)HttpStatusCode.OK),
                     true,
                     "Lấy dữ liệu thành công!",
                     orders
