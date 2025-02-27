@@ -11,5 +11,8 @@ namespace Business_Logic_Layer.Services
     public interface ICustomerService
     {
         Task<Customer> CreateCustomer(CreateCustomerRequest createCustomerRequest);
+        Task<Customer> UpdateCustomer(Guid id, UpdateCustomerRequest updateCustomerRequest);
+        Task<Customer> GetById(Guid _id);
+        Task<IEnumerable<Customer>> GetAllCustomer();
     }
 }

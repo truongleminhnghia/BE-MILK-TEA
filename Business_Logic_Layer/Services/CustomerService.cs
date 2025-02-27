@@ -28,19 +28,10 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
-                foreach (var item in createCustomerRequest.GetType().GetProperties())
-                {
-                    if (item.GetValue(createCustomerRequest) == null)
-                    {
-                        throw new Exception("Request do not null!");
-                    }
-                }
-                var account = await _accountRepository.GetById(createCustomerRequest.AccountId);
-                if(account == null)
-                {
-                    throw new Exception("Account do not exits");
-                }
                 var customer = _mapper.Map<Customer>(createCustomerRequest);
+                customer.AccountLevel = AccountLevelEnum.NORMAL;
+                customer.Purchased = false;
+                customer.CreateAt = DateTime.Now;
 
                 var result = await _customerRepository.Create(customer);
                 return result;
@@ -48,6 +39,57 @@ namespace Business_Logic_Layer.Services
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<Customer> UpdateCustomer(Guid id, UpdateCustomerRequest updateCustomerRequest)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetByAccountId(id);
+                if (customer == null)
+                {
+                    throw new Exception("Account do not exits");
+                }
+                customer.UpdateAt = DateTime.Now;
+                customer.TaxCode = updateCustomerRequest.TaxCode;
+                customer.Address = updateCustomerRequest.Address;
+                customer.AccountLevel = AccountLevelEnum.NORMAL;
+                var result = await _customerRepository.UpdateCustomer(customer);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<Customer>> GetAllCustomer()
+        {
+            try
+            {
+                var result = await _customerRepository.GetAllCustomer();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<Customer> GetById(Guid _id)
+        {
+            try
+            {
+                var result = await _customerRepository.GetByAccountId(_id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
                 return null;
             }
         }

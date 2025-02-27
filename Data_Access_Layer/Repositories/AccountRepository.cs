@@ -45,5 +45,17 @@ namespace Data_Access_Layer.Repositories
         {
             return await _context.Accounts.FirstOrDefaultAsync(a => a.Phone == phoneNumber);
         }
+
+        public async Task<Account> UpdateAccount(Account account)
+        {
+            _context.Accounts.Update(account);
+            await _context.SaveChangesAsync();
+            return account;
+        }
+
+        public async Task<IEnumerable<Account>> GetAllAccount()
+        {
+            return await Task.FromResult(_context.Accounts.ToList());
+        }
     }
 }

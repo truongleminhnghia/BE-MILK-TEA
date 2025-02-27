@@ -14,6 +14,8 @@ namespace Business_Logic_Layer.Services
         public Task<Account?> GetByEmail(string _email);
         Task<Account> CreateAccount(CreateAccountRequest createAccountRequest);
 
+        Task<Account> UpdateAccount(Guid id, UpdateAccountRequest updateAccountRequest);
+        Task<IEnumerable<Account>> GetAllAccount();
 
 
     }

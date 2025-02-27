@@ -123,9 +123,9 @@ namespace Business_Logic_Layer.Services
                     }
                     Account account = _mapper.Map<Account>(request);
                     account.Password = _passwordHasher.HashPassword(request.Password);
-                    account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
+                    account.AccountStatus = AccountStatus.ACTIVE;
 
-                //var currentAccount = await _accountRepository.GetById(_source.GetCurrentAccount());
+                //var currentAccount = await _accountRepository.GetByAccountId(_source.GetCurrentAccount());
                 //if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
                 //{ 
                 //    //dien role name cho account moi

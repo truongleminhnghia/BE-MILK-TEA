@@ -13,6 +13,7 @@ using Data_Access_Layer.Repositories;
 using System.Text.Unicode;
 using System.Web;
 using Azure.Core;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
 
 namespace Business_Logic_Layer.Services
 {
@@ -84,7 +85,7 @@ namespace Business_Logic_Layer.Services
                 }
 
                 var account = _mapper.Map<Account>(createAccountRequest);
-                account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
+                account.AccountStatus = AccountStatus.ACTIVE;
 
                 var currentAccount = await _accountRepository.GetById(_source.GetCurrentAccount());
                 if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
@@ -99,7 +100,7 @@ namespace Business_Logic_Layer.Services
                 {
                     account.RoleName = RoleName.ROLE_CUSTOMER;
                 }
-                    var result = await _accountRepository.Create(account);
+                var result = await _accountRepository.Create(account);
                 if (result == null)
                 {
                     throw new Exception("Create account failed");
@@ -113,7 +114,7 @@ namespace Business_Logic_Layer.Services
                 return null;
             }
         }
-              
+
 
         //public async Task<Employee> CreateStaff(CreateStaffRequest createEmployeeRequest)
         //{
@@ -126,8 +127,8 @@ namespace Business_Logic_Layer.Services
         //        var _account = _mapper.Map<Account>(createEmployeeRequest);
         //        _account.RoleName = RoleName.ROLE_STAFF;
         //        _account.AccountStatus = AccountStatus.ACTIVE;
-        //        var _result = await _accountRepository.Create(_account);
-        //        return _result;
+        //        var result = await _accountRepository.Create(_account);
+        //        return result;
         //    }
         //    catch (Exception ex)
         //    {
@@ -148,8 +149,8 @@ namespace Business_Logic_Layer.Services
         //        _account.RoleName = RoleName.ROLE_MANAGER;
         //        _account.AccountStatus = AccountStatus.ACTIVE;
         //        _account
-        //        var _result = await _accountRepository.Create(_account);
-        //        return _result;
+        //        var result = await _accountRepository.Create(_account);
+        //        return result;
         //    }
         //    catch (Exception ex)
         //    {
@@ -157,6 +158,45 @@ namespace Business_Logic_Layer.Services
         //        return null;
         //    }
         //}
+
+        public async Task<Account> UpdateAccount(Guid id, UpdateAccountRequest updateAccountRequest)
+        {
+            try
+            {
+                var account = await _accountRepository.GetById(id);
+                if (account == null)
+                {
+                    throw new Exception("Account do not exits");
+                }
+                account.FirstName = updateAccountRequest.FirstName;
+                account.LastName = updateAccountRequest.LastName;
+                account.Phone = updateAccountRequest.PhoneNumber;
+                account.Password = updateAccountRequest.Password;
+                var result = await _accountRepository.UpdateAccount(account);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
+                return null;
+            }
+        }
+
+
+        public async Task<IEnumerable<Account>> GetAllAccount()
+        {
+            try
+            {
+                var accounts = await _accountRepository.GetAllAccount();
+                return accounts;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
+                return null;
+            }
+        }
+
     }
 }
 
