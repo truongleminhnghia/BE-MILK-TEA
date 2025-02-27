@@ -1,28 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<script>
-    const socket = new WebSocket('wss://localhost:7190/api/ws')
+  </head>
+  <script>
+    const socket = new WebSocket('wss://localhost:7190/api/ws?categoryStatus=ACTIVE&categoryType=CATEGORY_PRODUCT&page=1');
     socket.onopen = () => {
-        console.log('Connected to the server via WebSocket');
+        console.log ("Connected to the server via WebSocket");
     };
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        const x = data.x ?? 0;
-        const y = data.y ?? 0;
-        console.log(`x = ${x}, y = ${y}`)
-        // hiển thị giá trị biến x và y trên gia diện
-        document.getElementById('x-value').innerText = `X: ${x}`;
-        document.getElementById('y-value').innerText = `Y: ${y}`;
+        var tableBody = document.getElementById("table-body");
+        while(tableBody.firstChild) {
+            tableBody.removeChild(tableBody.firstChild);
+        }
+        data.forEach(function (item) {
+            var row = document.createElement("tr");
+            var itemId = document.createElement("td");
+            itemId.textContent = item.CategoryName;
+            row.appendChild(itemId);
+            tableBody.appendChild(row);
+        })
     }
-</script>
-<body>
+
+    socket.onclose = () => {
+        console.log('Connection close');
+    }
+  </script>
+  <body>
     <h1>Test websocker, show x, y realtime</h1>
-    <p id="x-value"></p>
-    <p id="y-value"></p>
-</body>
+    <!-- <p id="x-value"></p>
+    <p id="y-value"></p> -->
+    <table id="table-body"></table>
+    <style>
+      table {
+          border-collapse: collapse;
+      }
+      table td {
+          border: 1px solid black;
+          padding: 8px;
+      }
+    </style>
+  </body>
 </html>

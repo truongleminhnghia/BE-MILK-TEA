@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Data_Access_Layer.Entities;
+﻿using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
 
 namespace Business_Logic_Layer.Services.CategoryService
@@ -13,9 +15,14 @@ namespace Business_Logic_Layer.Services.CategoryService
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(
+                    string? search, string? sortBy, bool isDescending,
+                    CategoryStatus? categoryStatus, CategoryType? categoryType,
+                    DateTime? startDate, DateTime? endDate,
+                    int page, int pageSize)
         {
-            return await _categoryRepository.GetAllCategoriesAsync();
+            return await _categoryRepository.GetAllCategoriesAsync(
+                search, sortBy, isDescending, categoryStatus, categoryType, startDate, endDate, page, pageSize);
         }
         public async Task<Category?> GetByIdAsync(Guid id)
         {
