@@ -30,35 +30,6 @@ namespace WebAPI.Controllers
             _employeeService = employeeService;
         }
 
-        [HttpPost("staff")]
-        public async Task<IActionResult> CreateStaff([FromBody] CreateStaffRequest request)
-        {
-            try
-            {
-                var employee = await _employeeService.CreateEmployee(request);
-                var employeeResponse = _mapper.Map<EmployeeResponse>(employee);
-                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", employeeResponse));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
-            }
-        }
-
-        [HttpPut("staff/{id}")]
-        public async Task<IActionResult> UpdateStaff(Guid id, [FromBody] UpdateStaffRequest request)
-        {
-            try
-            {
-                var employee = await _employeeService.UpdateEmployee(id, request);
-                var employeeResponse = _mapper.Map<EmployeeResponse>(employee);
-                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Successfull", employeeResponse));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
-            }
-        }
 
         [HttpGet("staff/{id}")]
         public async Task<IActionResult> GetStaffById(Guid id)

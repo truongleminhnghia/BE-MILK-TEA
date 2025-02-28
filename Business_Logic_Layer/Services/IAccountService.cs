@@ -13,7 +13,6 @@ namespace Business_Logic_Layer.Services
     {
         public Task<AccountResponse?> GetById(Guid _id);
         public Task<Account?> GetByEmail(string _email);
-        Task<Account> CreateAccount(CreateAccountRequest createAccountRequest);
 
         Task<Account> UpdateAccount(Guid id, UpdateAccountRequest updateAccountRequest);
         Task<IEnumerable<Account>> GetAllAccounts(string? search, string? sortBy, bool isDescending, AccountStatus? accountStatus, RoleName? role, int page, int pageSize);

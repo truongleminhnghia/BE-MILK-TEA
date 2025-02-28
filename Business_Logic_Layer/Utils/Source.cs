@@ -58,41 +58,24 @@ namespace Business_Logic_Layer.Utils
             return result;
         }
 
-        // 2 ham nay dung de lay thong tin cua user dang dang nhap: GetCurrentAccount va CheckCurrentUser
-        public Guid GetCurrentAccount()
+        // ham nay dung de lay thong tin cua user dang dang nhap
+        public Account GetCurrentAccount()
         {
             var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
 
             if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
             {
-                throw new UnauthorizedAccessException("User ID not found in token.");
+                throw new UnauthorizedAccessException("Tài khoản không hợp lệ.");
             }
 
             if (!Guid.TryParse(userIdClaim.Value, out var userId))
             {
-                throw new UnauthorizedAccessException("Invalid User ID format in token.");
+                throw new UnauthorizedAccessException("Định dạng token không hợp lệ");
             }
 
-            return userId;
-        }
-        public bool CheckCurrentUser()
-        {
-            try
-            {
-                var userId = GetCurrentAccount();
+            var userExists = _accountRepository.GetById(userId);
 
-                var userExists = _accountRepository.GetById(userId);
-
-                if(userExists == null)
-                {
-                    return false;
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return userExists.Result;
         }
 
         public string GenerateRandom8Digits()

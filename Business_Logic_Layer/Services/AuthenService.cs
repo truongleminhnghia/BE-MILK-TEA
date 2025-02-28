@@ -20,6 +20,8 @@ using System.Web;
 using System.Text.Json;
 using System.Net.Http.Headers;
 using Business_Logic_Layer.Utils;
+using Data_Access_Layer.Data;
+using System.Security.Principal;
 
 namespace Business_Logic_Layer.Services
 {
@@ -28,6 +30,9 @@ namespace Business_Logic_Layer.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly ApplicationDbContext _context;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IEmployeeRepository _employeeRepository;
 
         private string _clientIdGoogle = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
         private string _clientSecretGoogle = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET_KEY");
@@ -39,7 +44,7 @@ namespace Business_Logic_Layer.Services
         private readonly IJwtService _jwtService;
         private readonly Source _source;
         private readonly HttpClient _httpClient;
-        public AuthenService(IAccountRepository accountRepository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService, HttpClient httpClient, Source source)
+        public AuthenService(IAccountRepository accountRepository, IMapper mapper, IPasswordHasher passwordHasher, IJwtService jwtService, HttpClient httpClient, Source source, ApplicationDbContext applicationDbContext, ICustomerRepository customerRepository, IEmployeeRepository employeeRepository)
         {
             _accountRepository = accountRepository;
             _mapper = mapper;
@@ -47,63 +52,45 @@ namespace Business_Logic_Layer.Services
             _jwtService = jwtService;
             _httpClient = httpClient;
             _source = source;
+            _context = applicationDbContext;
+            _customerRepository = customerRepository;
+            _employeeRepository = employeeRepository;
         }
 
-        public async Task<AuthenticateResponse> Login(LoginRequest _request, string _type)
+        public async Task<AuthenticateResponse> LoginLocal(LoginRequest request, string type)
         {
             try
             {
-                AuthenticateResponse _authenticateResponse = null;
-                Account _account;
-                string _token = "";
+                AuthenticateResponse authenticateResponse = null;
+                Account account;
+                string token = "";
 
-                if (_type.Trim().IsNullOrEmpty() || _type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
+                if (type.Trim().IsNullOrEmpty() || type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
-                    _account = await _accountRepository.GetByEmail(_request.Email);
-                    if (_account == null)
+                    account = await _accountRepository.GetByEmail(request.Email);
+                    if (account == null)
                     {
                         throw new Exception("Account does not exist");
                     }
-                    bool checkPassword = _passwordHasher.VerifyPassword(_request.Password, _account.Password);
+                    bool checkPassword = _passwordHasher.VerifyPassword(request.Password, account.Password);
                     if (checkPassword)
                     {
-                        _token = _jwtService.GenerateJwtToken(_account);
+                        token = _jwtService.GenerateJwtToken(account);
                     }
                     else
                     {
                         throw new Exception("Invalid password");
                     }
                 }
-                else if (_type.Trim().Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
-                {
-                    // Assuming _request.Email is already verified by Google
-                    _account = await _accountRepository.GetByEmail(_request.Email);
-                    if (_account == null)
-                    {
-                        // Register new account if it doesn't exist
-                        var registerRequest = new RegisterRequest
-                        {
-                            Email = _request.Email,
-                            FirstName = "GoogleUser", // Default value, should be replaced with actual data
-                            LastName = "GoogleUser",  // Default value, should be replaced with actual data
-                            Password = Guid.NewGuid().ToString(), // Random password, not used
-                        };
-                        _account = _mapper.Map<Account>(registerRequest);
-                        _account.AccountStatus = AccountStatus.ACTIVE;
-                        _account.RoleName = RoleName.ROLE_CUSTOMER;
-                        await _accountRepository.Create(_account);
-                    }
-                    _token = _jwtService.GenerateJwtToken(_account);
-                }
                 else
                 {
                     throw new Exception("Invalid login type");
                 }
 
-                AccountResponse _accountResponse = _mapper.Map<AccountResponse>(_account);
-                _authenticateResponse = new AuthenticateResponse(_token, _accountResponse);
+                AccountResponse _accountResponse = _mapper.Map<AccountResponse>(account);
+                authenticateResponse = new AuthenticateResponse(token, _accountResponse);
 
-                return _authenticateResponse;
+                return authenticateResponse;
             }
             catch (Exception ex)
             {
@@ -114,62 +101,58 @@ namespace Business_Logic_Layer.Services
 
         public async Task<AccountResponse> Register(RegisterRequest request)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             try
             {
+
+                var currentUser = _source.GetCurrentAccount();
+
                 var existingEmail = await _accountRepository.GetByEmail(request.Email);
-                    if (existingEmail != null)
-                    {
-                        throw new Exception("Email đã tồn tại.");
-                    }
-                    Account account = _mapper.Map<Account>(request);
+                if (existingEmail != null)
+                {
+                    throw new Exception("Email đã tồn tại.");
+                }
+                Account account = _mapper.Map<Account>(request);
+                if (currentUser == null)
+                {                    
                     account.Password = _passwordHasher.HashPassword(request.Password);
                     account.AccountStatus = AccountStatus.ACTIVE;
+                    account.RoleName = RoleName.ROLE_CUSTOMER;
+                    await _accountRepository.Create(account);
 
-                //var currentAccount = await _accountRepository.GetByAccountId(_source.GetCurrentAccount());
-                //if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
-                //{ 
-                //    //dien role name cho account moi
-                //    if (account.RoleName == RoleName.ROLE_STAFF || account.RoleName == RoleName.ROLE_MANAGER || account.RoleName == RoleName.ROLE_ADMIN)
-                //    {
-                //        account.AccountStatus = AccountStatus.ACTIVE;
-                //    }
-                //}
-                //else
-                //{
-                //    account.RoleName = RoleName.ROLE_CUSTOMER;
-                //}
-                account.RoleName = RoleName.ROLE_CUSTOMER;
+                    account.Customer.AccountId = account.Id;
+                    account.Customer.TaxCode = null;
+                    account.Customer.Address = null;
+                    await _customerRepository.Create(account.Customer);
+                }
 
-                await _accountRepository.Create(account);
-                    return _mapper.Map<AccountResponse>(account);           
+                if(currentUser.RoleName == RoleName.ROLE_ADMIN)
+                {
+                    account.Password = _passwordHasher.HashPassword(request.Password);
+                    account.AccountStatus = AccountStatus.ACTIVE;
+                    await _accountRepository.Create(account);
+
+                    account.Employee.AccountId = account.Id;
+                    bool isUniqueRefCode; // bool isUniqueRefCode = true;
+                    do
+                    {
+                        account.Employee.RefCode = account.Employee.RefCode = _source.GenerateRandom8Digits().ToString();
+                        isUniqueRefCode = await _employeeRepository.CheckRefCode(account.Employee.RefCode);
+                    }
+                    while (!isUniqueRefCode);
+                    await _employeeRepository.Create(account.Employee);
+                }
+
+                await transaction.CommitAsync();
+
+                return MapToAccountResponse.ComplexAccountResponse(account);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception("Error: " + ex.Message);
             }
-            
-        }
 
-
-        public string GenerateUrl(string _type)
-        {
-            if (_type.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
-            {
-                string _state = Guid.NewGuid().ToString();
-                string _nonce = Guid.NewGuid().ToString();
-                string _encodestate = HttpUtility.UrlEncode(_state);
-                string _encodeNonce = HttpUtility.UrlEncode(_nonce);
-
-                string _url = "https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?" +
-                                "response_type=code&" +
-                                "client_id=" + _clientIdGoogle + "&" +
-                                "scope=" + _scopesGoogle + "&" +
-                                "state=" + _encodestate + "&" +
-                                "nonce=" + _encodeNonce + "&" +
-                                "redirect_uri=" + _redirectUriGoogle + "&" + _flowNameGoogle;
-                return _url;
-            }
-            return null;
         }
 
         public async Task<Dictionary<string, object>> AuthenticateAndFetchProfile(string code, string type)

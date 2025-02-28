@@ -12,7 +12,7 @@ namespace Data_Access_Layer.Repositories
         Task<Employee> Create(Employee _employee);
         Task<Employee> GetById(Guid _id);
         Task<Employee> UpdateEmployee(Employee _employee);
-
         Task<IEnumerable<Employee>> GetAllEmployee();
+        Task<bool> CheckRefCode(string refCode);
     }
 }

@@ -34,63 +34,51 @@ namespace WebAPI.Controllers
             {
                 var account = await _authenService.Register(_request);
 
-                return Ok(new ApiResponse(
-                    HttpStatusCode.OK.GetHashCode(),
-                    true,
-                    "Đăng ký thành công",
-                    account
-                ));
+                return Ok(new ApiResponse (HttpStatusCode.OK.GetHashCode(), true, "Đăng ký thành công", account));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(
-                    HttpStatusCode.InternalServerError.GetHashCode(),
-                    false,
-                    ex.Message
-                ));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse( HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
             }
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest? _request, [FromQuery] string _typeLogin)
+        public async Task<IActionResult> Login([FromBody] LoginRequest? request, [FromQuery] string typeLogin, [FromQuery] string? code = null)
         {
             try
             {
-                if (_typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
+                if (typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
-                    var _loginSuccess = await _authenService.Login(_request, _typeLogin);
-                    return Ok(new ApiResponse(
-                        HttpStatusCode.OK.GetHashCode(),
-                        true,
-                        "Đăng nhập thành công",
-                        _loginSuccess
-                    ));
+                    var loginSuccess = await _authenService.LoginLocal(request, typeLogin);
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Đăng nhập thành công", loginSuccess));
                 }
-                else if (_typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+                else if (typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {
-                    var urlLogin = _authenService.GenerateUrl(TypeLogin.LOGIN_GOOGLE.ToString());
-                    return Ok(new ApiResponse(
-                        HttpStatusCode.OK.GetHashCode(),
-                        true,
-                        "Create URL successfull",
-                        urlLogin
-                        ));
+                    var infoUser = await _authenService.AuthenticateAndFetchProfile(code, typeLogin);
+                    if (infoUser == null)
+                    {
+                        return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại", null));
+                    }
+                    var oauth2 = new Oauth2Request
+                    {
+                        FullName = infoUser.ContainsKey("name") ? infoUser["name"].ToString() : "",
+                        GoogleAccountId = infoUser.ContainsKey("sub") ? infoUser["sub"].ToString() : "",
+                        Email = infoUser.ContainsKey("email") ? infoUser["email"].ToString() : "",
+                        Avatar = infoUser.ContainsKey("picture") ? infoUser["picture"].ToString() : "",
+                        PhoneNumber = "",
+                    };
+                    var result = await _authenService.LoginOauth2(oauth2);
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Đăng nhập thành công", result));
+
                 }
-                return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest.GetHashCode(),
-                    false,
-                    "Failed"
-                    ));
+                return BadRequest(new ApiResponse (HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại" ));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError.GetHashCode(),
-                    false,
-                    ex.Message
-                ));
+                return StatusCode(500, new ApiResponse (HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
             }
         }
+
 
         [HttpGet("callback")]
         public async Task<IActionResult> CallbackAuthenticate([FromQuery] string code, [FromQuery] string type_login)

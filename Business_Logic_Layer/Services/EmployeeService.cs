@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
+using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Repositories;
 using System;
@@ -15,21 +16,29 @@ namespace Business_Logic_Layer.Services
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
+        private readonly Source _source;
 
-        public EmployeeService(IEmployeeRepository employeeRepository, IMapper mapper, IAccountRepository accountRepository)
+        public EmployeeService(IEmployeeRepository employeeRepository, IMapper mapper, IAccountRepository accountRepository, Source soure)
         {
             _employeeRepository = employeeRepository;
             _mapper = mapper;
             _accountRepository = accountRepository;
+            _source = soure;
         }
 
         public async Task<Employee> CreateEmployee(CreateStaffRequest createStaffRequest)
         {
             try
             {
-                var customer = _mapper.Map<Employee>(createStaffRequest);
-
-                var result = await _employeeRepository.Create(customer);
+                var employee = _mapper.Map<Employee>(createStaffRequest);
+                bool isUniqueRefCode; // bool isUniqueRefCode = true;
+                do
+                {
+                    employee.RefCode = employee.RefCode = _source.GenerateRandom8Digits().ToString();
+                    isUniqueRefCode = await _employeeRepository.CheckRefCode(employee.RefCode);
+                }
+                while (!isUniqueRefCode);
+                var result = await _employeeRepository.Create(employee);
                 return result;
             }
             catch (Exception ex)

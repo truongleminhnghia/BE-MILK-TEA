@@ -56,14 +56,6 @@ namespace Data_Access_Layer.Repositories
             await _context.SaveChangesAsync();
         }
 
-        //public async Task<IEnumerable<Account>> GetAllAccount()
-        //{
-        //    return await _context.Accounts
-        //        .Include(a => a.Employee) // Join v?i b?ng Employee (n?u có)
-        //        .Include(a => a.Customer) // Join v?i b?ng Customer (n?u có)
-        //        .ToListAsync();
-        //}
-
         public async Task<IEnumerable<Account>> GetAllAccounts (
     string? search, string? sortBy, bool isDescending,
     AccountStatus? accountStatus, RoleName? role, int page, int pageSize)

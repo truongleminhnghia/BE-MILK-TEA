@@ -31,22 +31,6 @@ namespace WebAPI.Controllers
             _customerService = customerService;
         }       
 
-        [HttpPost("customers")]
-        [Authorize(Roles = "ROLE_CUSTOMER")]
-        public async Task<IActionResult> CreateCustomer([FromBody] CreateCustomerRequest request)
-        {
-            try
-            {
-                var customer = await _customerService.CreateCustomer(request);
-                var customerResponse = _mapper.Map<CustomerResponse>(customer);
-                return Ok(customerResponse);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
-            }
-        }
-
         
         [HttpGet]
         [Authorize(Roles = "ROLE_ADMIN")]

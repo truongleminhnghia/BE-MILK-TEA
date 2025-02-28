@@ -10,8 +10,7 @@ namespace Business_Logic_Layer.Services
     public interface IAuthenService
     {
         Task<AccountResponse> Register(RegisterRequest _request);
-        Task<AuthenticateResponse> Login(LoginRequest _request, string _type);
-        public string GenerateUrl(string type);
+        Task<AuthenticateResponse> LoginLocal(LoginRequest _request, string _type);
 
         public Task<Dictionary<string, object>> AuthenticateAndFetchProfile(string code, string type);
 
