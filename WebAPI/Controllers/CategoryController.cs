@@ -107,10 +107,10 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
-            [FromBody] CategoryRequest categoryRequest
+            [FromBody] CategoryUpdateRequest categoryRequest
         )
         {
             if (categoryRequest == null)
