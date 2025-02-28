@@ -83,7 +83,7 @@ namespace Business_Logic_Layer.Utils
 
                 var userExists = _accountRepository.GetById(userId);
 
-                if(userExists == null)
+                if (userExists == null)
                 {
                     return false;
                 }
@@ -98,6 +98,25 @@ namespace Business_Logic_Layer.Utils
         public string GenerateRandom8Digits()
         {
             return new Random().Next(10000000, 99999999).ToString();
+        }
+
+        public int CheckDate(DateTime input)
+        {
+            // Lấy ngày hiện tại
+            DateTime today = DateTime.Now;
+            int daysRemaining = (input - today).Days;
+            if (daysRemaining < 0)
+            {
+                return -1; // hết date
+            }
+            else if (daysRemaining <= 10)
+            {
+                return 1; // còn dưới 10 ngày
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

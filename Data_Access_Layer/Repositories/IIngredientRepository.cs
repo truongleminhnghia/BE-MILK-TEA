@@ -16,7 +16,7 @@ namespace Data_Access_Layer.Repositories
         Task<Ingredient> UpdateAsync(Ingredient ingredient);
         Task<bool> DeleteAsync(Guid id);
         Task<Ingredient> GetLastIngredientCode();
-        Task<bool> CategoryExistsAsync(Guid categoryId);
-        Task GetIngredientByIdAsync(Guid ingredientId);
+        Task<bool> CheckCode(string code);
+        Task<Ingredient> GetIngredientByIdAsync(Guid ingredientId);
     }
 }

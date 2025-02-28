@@ -46,31 +46,11 @@ namespace Data_Access_Layer.Repositories
             }
         }
 
-        public async Task AddImageAsync(Image image)
+        public async Task<Image> AddImageAsync(Image image)
         {
-            try
-            {
-                if (image == null)
-                {
-                    throw new ArgumentNullException(nameof(image), "Hình ảnh không được rỗng");
-                }
-
-                await _context.Set<Image>().AddAsync(image);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger?.LogError(ex, "Đã xảy ra lỗi cơ sở dữ liệu khi thêm hình ảnh");
-                throw new Exception(
-                    "Không thể thêm hình ảnh vào cơ sở dữ liệu. Đã xảy ra lỗi cơ sở dữ liệu",
-                    ex
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Lỗi thêm hình ảnh");
-                throw new Exception("Không thể thêm hình ảnh", ex);
-            }
+            _context.Images.AddAsync(image);
+            await _context.SaveChangesAsync();
+            return image;
         }
 
         public async Task UpdateImageAsync(Image image)
@@ -166,5 +146,11 @@ namespace Data_Access_Layer.Repositories
                 throw new Exception($"Không thể xóa hình ảnh với ID {id}", ex);
             }
         }
+
+        public async Task<bool> CheckImageUrl(string url)
+        {
+            return !await _context.Images.AnyAsync(img => img.ImageUrl == url);
+        }
+
     }
 }

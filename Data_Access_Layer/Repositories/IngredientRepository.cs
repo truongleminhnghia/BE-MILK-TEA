@@ -19,10 +19,10 @@ namespace Data_Access_Layer.Repositories
             _context = context;
         }
 
-        public async Task<bool> CategoryExistsAsync(Guid categoryId)
-        {
-            return await _context.Categories.AnyAsync(c => c.Id == categoryId);
-        }
+        // public async Task<bool> CategoryExistsAsync(Guid categoryId)
+        // {
+        //     return await _context.Categories.AnyAsync(c => c.Id == categoryId);
+        // }
 
         public async Task<IEnumerable<Ingredient>> GetAllAsync(
             string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status)
@@ -65,10 +65,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Ingredient> GetByIdAsync(Guid id)
         {
-            return await _context
-                .Ingredients.Include(i => i.Category)
-                .Include(i => i.Images)
-                .FirstOrDefaultAsync(i => i.Id == id);
+            return await _context.Ingredients.FirstAsync(a => a.Id.Equals(id));
         }
 
         public async Task<Ingredient> CreateAsync(Ingredient ingredient)
@@ -109,9 +106,14 @@ namespace Data_Access_Layer.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        Task IIngredientRepository.GetIngredientByIdAsync(Guid ingredientId)
+        public async Task<Ingredient> GetIngredientByIdAsync(Guid ingredientId)
         {
-            throw new NotImplementedException();
+            return await _context.Ingredients.FirstAsync(a => a.Id.Equals(ingredientId));
+        }
+
+        public async Task<bool> CheckCode(string code)
+        {
+            return !await _context.Ingredients.AnyAsync(a => a.IngredientCode.Equals(code));
         }
     }
 }

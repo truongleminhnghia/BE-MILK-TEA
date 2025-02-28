@@ -9,8 +9,9 @@ namespace Data_Access_Layer.Repositories
     {
         Task<IEnumerable<Image>> GetAllImagesAsync();
         Task<Image> GetImageByIdAsync(Guid id);
-        Task AddImageAsync(Image image);
+        Task<Image> AddImageAsync(Image image);
         Task UpdateImageAsync(Image image); // Changed to accept only one parameter
         Task DeleteImageAsync(Guid id);
+        Task<bool> CheckImageUrl(string url);
     }
 }

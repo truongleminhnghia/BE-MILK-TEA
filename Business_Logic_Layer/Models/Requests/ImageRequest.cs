@@ -9,9 +9,6 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class ImageRequest
     {
-        public required string ImageUrl { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "ImageUrl is required")]
-        public Guid IngredientId { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
     }
 }
