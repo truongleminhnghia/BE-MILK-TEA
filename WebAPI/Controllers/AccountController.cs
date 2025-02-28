@@ -29,23 +29,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _source = source;
             _customerService = customerService;
-        }
-
-        //[HttpGet("customers")]
-        //[Authorize(Roles = "ROLE_ADMIN")]
-        //public async Task<IActionResult> GetAllCustomers()
-        //{
-        //    try
-        //    {
-        //        var customers = await _customerService.GetAllCustomer();
-        //        var customerResponses = _mapper.Map<IEnumerable<CustomerResponse>>(customers);
-        //        return Ok(customerResponses);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
-        //    }
-        //}
+        }       
 
         [HttpPost("customers")]
         [Authorize(Roles = "ROLE_CUSTOMER")]
@@ -63,42 +47,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        //[HttpPut("customers/{id}")]
-        //[Authorize(Roles = "ROLE_CUSTOMER")]
-        //public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] UpdateCustomerRequest request)
-        //{
-        //    try
-        //    {
-        //        var customer = await _customerService.UpdateCustomer(id, request);
-        //        var customerResponse = _mapper.Map<CustomerResponse>(customer);
-        //        return Ok(customerResponse);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
-        //    }
-        //}
-
-        //[HttpGet("customers/{id}")]
-        //[Authorize(Roles = "ROLE_CUSTOMER, ROLE_ADMIM")]
-        //public async Task<IActionResult> GetCustomerById(Guid id)
-        //{
-        //    try
-        //    {
-        //        var customer = await _customerService.GetById(id);
-        //        if (customer == null)
-        //        {
-        //            return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy!"));
-        //        }
-        //        var customerResponse = _mapper.Map<CustomerResponse>(customer);
-        //        return Ok(customerResponse);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
-        //    }
-        //}
-
+        
         [HttpGet]
         [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllAccounts(
