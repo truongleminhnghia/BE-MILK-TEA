@@ -1,17 +1,17 @@
-﻿using Data_Access_Layer.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Data_Access_Layer.Enum;
 
 namespace Business_Logic_Layer.Models.Responses
 {
     public class IngredientResponse
     {
-
         public Guid Id { get; set; }
+        public string ImageUrl { get; set; }
         public string IngredientCode { get; set; }
         public string Supplier { get; set; }
         public string IngredientName { get; set; }

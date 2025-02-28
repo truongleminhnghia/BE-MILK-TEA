@@ -1,6 +1,6 @@
-﻿using Data_Access_Layer.Enum;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-
+using Data_Access_Layer.Enum;
 
 namespace Business_Logic_Layer.Models.Requests
 {
@@ -8,6 +8,11 @@ namespace Business_Logic_Layer.Models.Requests
     {
         [JsonIgnore]
         public Guid Id { get; set; }
+
+        [Required(ErrorMessage = "ImageUrl is required")]
+        public required string ImageUrl { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "IngredientCode is required")]
         public string IngredientCode { get; set; }
         public string Supplier { get; set; }
         public string IngredientName { get; set; }
@@ -21,6 +26,7 @@ namespace Business_Logic_Layer.Models.Requests
         public double PriceOrigin { get; set; }
         public double PricePromotion { get; set; }
         public Guid CategoryId { get; set; }
+
         public bool IsSale { get; set; }
 
         [JsonIgnore]

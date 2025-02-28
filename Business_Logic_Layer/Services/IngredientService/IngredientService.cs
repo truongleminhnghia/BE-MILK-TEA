@@ -18,9 +18,29 @@ namespace Business_Logic_Layer.Services.IngredientService
             _repository = repository;
         }
 
-        public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status)
+        public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(
+            string? search,
+            Guid? categoryId,
+            string? sortBy,
+            bool isDescending,
+            int page,
+            int pageSize,
+            DateTime? startDate,
+            DateTime? endDate,
+            IngredientStatus? status
+        )
         {
-            return await _repository.GetAllAsync(search, categoryId, sortBy, isDescending, page, pageSize, startDate, endDate, status);
+            return await _repository.GetAllAsync(
+                search,
+                categoryId,
+                sortBy,
+                isDescending,
+                page,
+                pageSize,
+                startDate,
+                endDate,
+                status
+            );
         }
 
         public async Task<Ingredient> GetIngredientByIdAsync(Guid id)
@@ -40,6 +60,11 @@ namespace Business_Logic_Layer.Services.IngredientService
             if (!categoryExists)
             {
                 throw new ArgumentException("Invalid CategoryId");
+            }
+
+            if (string.IsNullOrWhiteSpace(ingredient.ImageUrl))
+            {
+                throw new ArgumentException("ImageUrl không hợp lệ");
             }
 
             // Generate ingredient code (PCxxxxx)
