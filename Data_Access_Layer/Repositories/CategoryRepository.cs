@@ -43,10 +43,20 @@ namespace Data_Access_Layer.Repositories
             // **Filtering by date range (CreateAt)**
             if (startDate.HasValue && endDate.HasValue)
             {
-                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1); // Includes full day
-
+                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
                 query = query.Where(c => c.CreateAt >= startDate.Value && c.CreateAt <= adjustedEndDate);
             }
+            else if (startDate.HasValue)
+            {
+                query = query.Where(c => c.CreateAt >= startDate.Value);
+            }
+            else if (endDate.HasValue)
+            {
+                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(c => c.CreateAt <= adjustedEndDate);
+                isDescending = true; // Force descending order if only endDate is provided
+            }
+
 
 
             // **Sorting**
@@ -56,7 +66,11 @@ namespace Data_Access_Layer.Repositories
                     ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
                     : query.OrderBy(e => EF.Property<object>(e, sortBy));
             }
-            
+            else
+            {
+                query = query.OrderByDescending(c => c.CreateAt); // Default sorting by CreateAt descending
+            }
+
 
             // **Pagination**
             query = query.Skip((page - 1) * pageSize).Take(pageSize);
