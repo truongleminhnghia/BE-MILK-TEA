@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250224155634_init")]
-    partial class init
+    [Migration("20250301084253_InitCreate")]
+    partial class InitCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace Data_Access_Layer.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("Data_Access_Layer.Entities.AccountResponse", b =>
+            modelBuilder.Entity("Data_Access_Layer.Entities.Account", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -812,13 +812,13 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Cart", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Entities.AccountResponse", "AccountResponse")
+                    b.HasOne("Data_Access_Layer.Entities.Account", "Account")
                         .WithOne("Cart")
                         .HasForeignKey("Data_Access_Layer.Entities.Cart", "AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AccountResponse");
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.CartItem", b =>
@@ -842,24 +842,24 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Customer", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Entities.AccountResponse", "AccountResponse")
+                    b.HasOne("Data_Access_Layer.Entities.Account", "Account")
                         .WithOne("Customer")
                         .HasForeignKey("Data_Access_Layer.Entities.Customer", "AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AccountResponse");
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Employee", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Entities.AccountResponse", "AccountResponse")
+                    b.HasOne("Data_Access_Layer.Entities.Account", "Account")
                         .WithOne("Employee")
                         .HasForeignKey("Data_Access_Layer.Entities.Employee", "AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AccountResponse");
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Image", b =>
@@ -935,7 +935,7 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.IngredientReview", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Entities.AccountResponse", "AccountResponse")
+                    b.HasOne("Data_Access_Layer.Entities.Account", "Account")
                         .WithMany("IngredientReviews")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -947,20 +947,20 @@ namespace Data_Access_Layer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AccountResponse");
+                    b.Navigation("Account");
 
                     b.Navigation("Ingredient");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Order", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Entities.AccountResponse", "AccountResponse")
+                    b.HasOne("Data_Access_Layer.Entities.Account", "Account")
                         .WithMany("Orders")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AccountResponse");
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.OrderDetail", b =>
@@ -1034,7 +1034,7 @@ namespace Data_Access_Layer.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Data_Access_Layer.Entities.AccountResponse", b =>
+            modelBuilder.Entity("Data_Access_Layer.Entities.Account", b =>
                 {
                     b.Navigation("Cart");
 
