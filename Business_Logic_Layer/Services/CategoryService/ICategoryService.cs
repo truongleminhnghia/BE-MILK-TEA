@@ -1,11 +1,16 @@
 ﻿using Data_Access_Layer.Entities;
 using Business_Logic_Layer.Models.Requests;
+using Data_Access_Layer.Enum;
 
 namespace Business_Logic_Layer.Services
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<IEnumerable<Category>> GetAllCategoriesAsync(
+            string? search, string? sortBy, bool isDescending,
+            CategoryStatus? categoryStatus, CategoryType? categoryType,
+            DateTime? startDate, DateTime? endDate,
+            int page, int pageSize);
         Task<Category?> GetByIdAsync(Guid id);
         Task<Category> CreateAsync(Category category);
         Task<Category?> GetByNameAsync(string name);

@@ -7,6 +7,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,13 +28,28 @@ namespace WebAPI.Controllers
 
         //GET ALL
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] CategoryStatus? categoryStatus,
+            [FromQuery] CategoryType? categoryType,
+            [FromQuery] int page = 1,              
+            [FromQuery] int pageSize = 10,             
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+
         {
-            var category = await _categoryService.GetAllCategoriesAsync();
-            var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(category);
-            return Ok(
-                new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categoryRes)
-            );
+            var categories = await _categoryService.GetAllCategoriesAsync(
+        search, sortBy, isDescending, categoryStatus, categoryType, startDate, endDate, page, pageSize);
+
+            var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(categories);
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK.GetHashCode(),
+                true,
+                "Thành công",
+                categoryRes
+            ));
         }
 
         //GET BY ID
@@ -91,10 +107,10 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
-            [FromBody] CategoryRequest categoryRequest
+            [FromBody] CategoryUpdateRequest categoryRequest
         )
         {
             if (categoryRequest == null)
@@ -128,16 +144,30 @@ namespace WebAPI.Controllers
         [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
-            var result = await _categoryService.DeleteAsync(id);
-
-            if (!result)
+            try
             {
-                return NotFound(
-                    new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
-                );
-            }
+                var result = await _categoryService.DeleteAsync(id);
 
-            return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Xoá thành công"));
+                if (!result)
+                {
+                    return NotFound(new ApiResponse
+                        (HttpStatusCode.NotFound.GetHashCode(),
+                        false,
+                        "Không tìm thấy"));
+                }
+
+                return Ok(new ApiResponse
+                    (HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Tắt thành công"));
+            } catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, ex.Message));
+            }
         }
     }
 }
