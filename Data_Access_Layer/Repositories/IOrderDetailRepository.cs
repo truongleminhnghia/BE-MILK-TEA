@@ -9,7 +9,7 @@ namespace Data_Access_Layer.Repositories
 {
     public interface IOrderDetailRepository
     {
-        Task<List<OrderDetail>> GetAllOrdersDetailAsync();
+        Task<List<OrderDetail>> GetAllOrdersDetailAsync(Guid orderId, string? search, string? sortBy, bool isDescending, int page, int pageSize);
         Task<OrderDetail?> GetByIdAsync(Guid id);
         Task<OrderDetail> CreateAsync(OrderDetail orderDetail);
         Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail);

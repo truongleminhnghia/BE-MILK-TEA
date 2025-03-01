@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
@@ -17,67 +18,113 @@ namespace Data_Access_Layer.Repositories
         {
             _context = context;
         }
-        public async Task<List<Order>> GetAllOrdersAsync()
+
+        public async Task<Order?> GetByIdAsync(Guid id)
         {
-            try { 
-                var response = await _context.Orders.ToListAsync();
-                return response;
+            try
+            {
+                return await _context.Orders.Include(o => o.OrderDetails)
+                                            .Include(o => o.Payments)
+                                            .Include(o => o.OrderPromotions)
+                                            .FirstOrDefaultAsync(o => o.Id == id);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                // Log the exception (if using logging)
+                Console.WriteLine($"loi o GetByIdAsync: {ex.Message}");
+                return null;
             }
-        }
-        public async Task<Order?> GetByIdAsync(Guid id)
-        {
-            return await _context.Orders.Include(o => o.OrderDetails)
-                                        .Include(o => o.Payments)
-                                        .Include(o => o.OrderPromotions)
-                                        .FirstOrDefaultAsync(o => o.Id == id) ?? null;
         }
         public async Task<Order> CreateAsync(Order order)
         {
-            order.Id = Guid.NewGuid();
-            order.OrderDate = DateTime.Now;
-
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-            return order;
-        }
-
-        public async Task<Order> UpdateAsync(Guid id, Order order)
-        {
-            var existingOrder = await _context.Orders.FindAsync(id);
-            if (existingOrder == null)
+            try
             {
+                order.Id = Guid.NewGuid();
+                order.OrderCode = Guid.NewGuid().ToString();
+                order.OrderDate = DateTime.Now;
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+                return order;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (if using logging)
+                Console.WriteLine($"Error in CreateAsync: {ex.Message}");
                 return null;
             }
-            existingOrder.OrderCode = order.OrderCode;
-            existingOrder.OrderDate = order.OrderDate;
-            existingOrder.FullNameShipping = order.FullNameShipping;
-            existingOrder.PhoneShipping = order.PhoneShipping;
-            existingOrder.EmailShipping = order.EmailShipping;
-            existingOrder.NoteShipping = order.NoteShipping;
-            existingOrder.AddressShipping = order.AddressShipping;
-            existingOrder.OrderStatus = order.OrderStatus;
-            existingOrder.Quantity = order.Quantity;
-            existingOrder.PriceAfterPromotion = order.PriceAfterPromotion;
-            existingOrder.AccountId = order.AccountId;
-            existingOrder.ReasonCancel = order.ReasonCancel;
-
-            //Sua sau
-            return null;
         }
-        public async Task<bool> DeleteByIdAsync(Guid id)
+
+        //public async Task<Order> UpdateAsync(Guid id, Order order)
+        //{
+        //    var existingOrder = await _context.Orders.FindAsync(id);
+        //    if (existingOrder == null)
+        //    {
+        //        return null;
+        //    }
+        //    existingOrder.OrderDate = order.OrderDate;
+        //    existingOrder.FullNameShipping = order.FullNameShipping;
+        //    existingOrder.PhoneShipping = order.PhoneShipping;
+        //    existingOrder.EmailShipping = order.EmailShipping;
+        //    existingOrder.NoteShipping = order.NoteShipping;
+        //    existingOrder.AddressShipping = order.AddressShipping;
+        //    existingOrder.OrderStatus = order.OrderStatus;
+        //    existingOrder.Quantity = order.Quantity;
+        //    existingOrder.PriceAfterPromotion = order.PriceAfterPromotion;
+        //    existingOrder.AccountId = order.AccountId;
+        //    existingOrder.ReasonCancel = order.ReasonCancel;
+
+        //    return null;
+        //}
+        //public async Task<bool> DeleteByIdAsync(Guid id)
+        //{
+        //    var existingOrder = await _context.Orders.FindAsync(id);
+        //    if (existingOrder == null)
+        //    {
+        //        return false;
+        //    }
+
+        //    existingOrder.OrderStatus =OrderStatus.CONFIRM;
+        //    await _context.SaveChangesAsync();
+        //    return true;
+        //}
+
+        public async Task<List<Order>> GetAllOrdersAsync(Guid accountId, string? search, string? sortBy, bool isDescending, OrderStatus? orderStatus, DateTime? orderDate, int page, int pageSize)
         {
-            var existingOrder = await _context.Orders.FindAsync(id);
-            if (existingOrder == null)
+            try
             {
-                return false;
+                var query = _context.Orders.AsQueryable();
+                query = query.Where(o => o.AccountId == accountId);
+                // Filtering by search term (case-insensitive)
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(o => o.OrderCode.ToLower().Contains(search.ToLower()));
+                }
+
+                if (orderStatus.HasValue)
+                {
+                    query = query.Where(o => o.OrderStatus == orderStatus.Value);
+                }
+
+                if (orderDate.HasValue)
+                {
+                    query = query.Where(o => o.OrderDate.Date == orderDate.Value.Date);
+                }
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    query = isDescending
+                        ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
+                        : query.OrderBy(e => EF.Property<object>(e, sortBy));
+                }
+
+                query = query.Skip((Math.Max(1, page) - 1) * pageSize).Take(pageSize);
+
+                return await query.ToListAsync();
             }
-            _context.Orders.Remove(existingOrder);
-            await _context.SaveChangesAsync();
-            return true;
+            catch (Exception ex)
+            {
+                throw new Exception($"Không thể lọc được order: {ex.Message}", ex);
+            }
         }
     }
 }

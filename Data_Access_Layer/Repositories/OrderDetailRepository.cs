@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Microsoft.EntityFrameworkCore;
+using Mysqlx.Crud;
 
 namespace Data_Access_Layer.Repositories
 {
@@ -17,21 +18,36 @@ namespace Data_Access_Layer.Repositories
         {
             _context = context;
         }
-        public async Task<List<OrderDetail>> GetAllOrdersDetailAsync()
+        public async Task<List<OrderDetail>> GetAllOrdersDetailAsync(Guid orderId, string? search, string? sortBy, bool isDescending, int page, int pageSize)
         {
             try
             {
-                var response = await _context.OrderDetails.ToListAsync();
-                return response;
-            }catch (Exception ex)
+                var query = _context.OrderDetails.AsQueryable();
+
+                query = query.Where(od => od.OrderId == orderId);
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(od => od.IngredientProductId.ToString().Contains(search));
+                }
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    query = isDescending
+                        ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
+                        : query.OrderBy(e => EF.Property<object>(e, sortBy));
+                }
+
+                query = query.Skip((Math.Max(1, page) - 1) * pageSize).Take(pageSize);
+
+                return await query.ToListAsync();
+            }
+            catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception($"Không thể lọc được order detail: {ex.Message}", ex);
             }
         }
-        //public async Task<OrderDetail?> GetByIdAsync(Guid id)
-        //{
-        //    return await _context.OrdersDetails.FirstOrDefaultAsync(o => o.Id == id) ?? null;
-        //}
+
         public async Task<OrderDetail> CreateAsync(OrderDetail orderDetail)
         {
             orderDetail.Id = Guid.NewGuid();
@@ -63,8 +79,13 @@ namespace Data_Access_Layer.Repositories
             {
                 return null;
             }
-
+            var ingredient = await _context.IngredientProducts.FirstOrDefaultAsync(i => i.Id == orderDetail.IngredientProductId);
+            if (ingredient == null)
+            {
+                throw new Exception("Ingredient not found.");
+            }
             existingOrderDetail.Quantity = orderDetail.Quantity;
+            existingOrderDetail.Price = orderDetail.Quantity * ingredient.TotalPrice;
             await _context.SaveChangesAsync();
             return existingOrderDetail;
         }
