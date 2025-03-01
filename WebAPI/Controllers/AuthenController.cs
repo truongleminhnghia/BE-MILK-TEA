@@ -43,7 +43,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest? request, [FromQuery] string typeLogin, [FromQuery] string? code = null)
+        public async Task<IActionResult> Login([FromBody] LoginRequest? request, [FromQuery] string typeLogin)
         {
             try
             {
