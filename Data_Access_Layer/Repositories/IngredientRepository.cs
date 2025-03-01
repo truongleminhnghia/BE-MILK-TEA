@@ -75,9 +75,9 @@ namespace Data_Access_Layer.Repositories
             return ingredient;
         }
 
-        public async Task<Ingredient> UpdateAsync(Ingredient ingredient)
+        public async Task<Ingredient> UpdateAsync(Guid id, Ingredient ingredient)
         {
-            var existingIngredient = await _context.Ingredients.FindAsync(ingredient.Id);
+            var existingIngredient = await GetByIdAsync(id);
             if (existingIngredient != null)
             {
                 _context.Entry(existingIngredient).State = EntityState.Detached;

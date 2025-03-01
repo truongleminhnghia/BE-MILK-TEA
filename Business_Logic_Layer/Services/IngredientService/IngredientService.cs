@@ -46,6 +46,8 @@ namespace Business_Logic_Layer.Services.IngredientService
                 }
                 var ingredient = _mapper.Map<Ingredient>(request);
                 ingredient.IngredientCode = "P" + _source.GenerateRandom8Digits();
+                ingredient.Category = categoryExists;
+                ingredient.CreateAt = DateTime.Now;
                 if (!await _ingredientRepository.CheckCode(ingredient.IngredientCode))
                 {
                     throw new Exception("Mã nguyên liệu đã tồn tại");
@@ -61,6 +63,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                     throw new Exception("Tạo nguyên liệu mới không thành công");
                 }
                 List<ImageRespone> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
+                ingredient.Images = _mapper.Map<List<Image>>(imageRespones);
                 ingredientResponse.Categories = _mapper.Map<CategoryResponse>(categoryExists);
                 ingredientResponse.Images = imageRespones;
                 return ingredientResponse;
@@ -74,12 +77,51 @@ namespace Business_Logic_Layer.Services.IngredientService
 
         public async Task<IngredientResponse> GetIngredientByIdAsync(Guid id)
         {
-            var ingredient = await _ingredientRepository.GetByIdAsync(id);
-            if (ingredient == null)
+            try
             {
-                throw new KeyNotFoundException("Ingredient not found");
+                var ingredient = await _ingredientRepository.GetByIdAsync(id);
+                if (ingredient == null)
+                {
+                    throw new KeyNotFoundException("Ingredient not found");
+                }
+                var res = _mapper.Map<IngredientResponse>(ingredient);
+                res.Categories = _mapper.Map<CategoryResponse>(await _categoryService.GetByIdAsync(ingredient.CategoryId));
+                res.Images = _mapper.Map<List<ImageRespone>>(await _imageSerivce.GetByIdAndIngredient(Guid.Empty, ingredient.Id));
+                return res;
             }
-            return _mapper.Map<IngredientResponse>(ingredient);
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: ", ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<IngredientResponse> Update(Guid id, UpdateIngredientRequest request)
+        {
+            try
+            {
+                if (_ingredientRepository.GetIngredientByIdAsync(id) == null)
+                {
+                    throw new Exception("Nguyên liệu không tồn tại");
+                }
+                var ingredient = _mapper.Map<Ingredient>(request);
+                var res = _mapper.Map<IngredientResponse>(await _ingredientRepository.UpdateAsync(id, ingredient));
+                if (res == null)
+                {
+                    throw new Exception("Cập nhật thất bại");
+                }
+                if (request.ImageRequest != null)
+                {
+                    var imageRes = await _imageSerivce.UpdateImages(request.ImageRequest, ingredient.Id);
+                    if (imageRes != null) res.Images = imageRes;
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: ", ex.Message);
+                return null;
+            }
         }
 
         // public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(

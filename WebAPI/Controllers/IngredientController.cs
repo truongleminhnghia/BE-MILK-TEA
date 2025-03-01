@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using AutoMapper;
 using Business_Logic_Layer.Models;
 using Business_Logic_Layer.Models.Requests;
@@ -19,16 +20,15 @@ namespace WebAPI.Controllers
         private readonly IIngredientService _ingredientService;
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
+        private readonly ICategoryService _categoryService;
 
-        public IngredientController(
-            IImageService imageService,
-            IIngredientService ingredientService,
-            IMapper mapper
+        public IngredientController(IImageService imageService, IIngredientService ingredientService, IMapper mapper, ICategoryService categoryService
         )
         {
             _imageService = imageService;
             _ingredientService = ingredientService;
             _mapper = mapper;
+            _categoryService = categoryService;
         }
 
         //Lấy danh sách tất cả nguyên liệu
@@ -69,23 +69,27 @@ namespace WebAPI.Controllers
         //     );
         // }
 
-        //Lấy một nguyên liệu theo ID
-        // [HttpGet("{id}")]
-        // public async Task<IActionResult> Get(Guid id)
-        // {
-        //     var ingredient = await _ingredientService.GetIngredientByIdAsync(id);
-        //     var ingreReponse = _mapper.Map<CategoryResponse>(ingredient);
-
-        //     if (ingredient == null)
-        //     {
-        //         return NotFound(
-        //             new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
-        //         );
-        //     }
-        //     return Ok(
-        //         new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", ingreReponse)
-        //     );
-        // }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            try
+            {
+                var ingreReponse = await _ingredientService.GetIngredientByIdAsync(id);
+                if (ingreReponse == null)
+                {
+                    return NotFound(
+                        new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
+                    );
+                }
+                return Ok(
+                    new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", ingreReponse)
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
+            }
+        }
 
 
         //[Authorize(Roles = "ROLE_STAFF")]

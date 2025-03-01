@@ -74,47 +74,79 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
-        public async Task DeleteImageAsync(Guid id)
+        public Task<bool> DeleteImageAsync(Guid id, Guid ingredientId)
         {
-            try
-            {
-                await _imageRepository.DeleteImageAsync(id);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Không thể xóa hình ảnh có ID {id}", ex);
-            }
+            throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<ImageRespone>> GetAllImagesAsync()
+        public async Task<List<ImageRespone>> GetByIdAndIngredient(Guid id, Guid ingredientId)
         {
             try
             {
-                var images = await _imageRepository.GetAllImagesAsync();
-                return _mapper.Map<IEnumerable<ImageRespone>>(images);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Không thể truy xuất hình ảnh", ex);
-            }
-        }
-
-        public async Task<ImageRespone> GetImageByIdAsync(Guid id)
-        {
-            try
-            {
-                var image = await _imageRepository.GetImageByIdAsync(id);
-                if (image == null)
+                if (ingredientId == null)
                 {
-                    return null;
+                    throw new Exception("idImage hoặc IdIngredient không được phép null");
                 }
-                return _mapper.Map<ImageRespone>(image);
+                else if (id.Equals("") || ingredientId != null)
+                {
+                    return _mapper.Map<List<ImageRespone>>(await _imageRepository.GetByIngredient(ingredientId));
+                }
+                return _mapper.Map<List<ImageRespone>>(await _imageRepository.GetByIdAndIngredient(id, ingredientId));
             }
             catch (Exception ex)
             {
-                throw new Exception($"Không thể truy xuất hình ảnh có ID {id}", ex);
+                Console.WriteLine("Error: ", ex.Message);
+                return null;
             }
         }
+
+        public async Task<ImageRespone> UpdateImageAsync(Guid id, Guid ingredientId, ImageRequest request)
+        {
+            try
+            {
+                bool result = await _imageRepository.Update(id, ingredientId, _mapper.Map<Image>(request));
+                if (!result)
+                {
+                    throw new Exception("Cập nhật thất bại");
+                }
+                return _mapper.Map<ImageRespone>(await _imageRepository.GetIdAndIngredient(id, ingredientId));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: ", ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<List<ImageRespone>> UpdateImages(List<ImageRequest> request, Guid ingredientId)
+        {
+            try
+            {
+                List<ImageRespone> imageRespones = new List<ImageRespone>();
+                foreach (var item in request)
+                {
+                    var imageExisting = await _imageRepository.GetIdAndIngredient(item.Id, ingredientId);
+                    if (imageExisting == null)
+                    {
+                        throw new Exception("Hình Ảnh không tồn tại");
+                    }
+                    imageExisting.ImageUrl = item.ImageUrl;
+                    var imageModified = _mapper.Map<ImageRespone>(imageExisting);
+                    imageRespones.Add(imageModified);
+                }
+                if (imageRespones == null)
+                {
+                    throw new Exception("Update thất bại");
+                }
+                return imageRespones;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: ", ex.Message);
+                return null;
+            }
+        }
+
 
         // public async Task UpdateImageAsync(Guid id, ImageRespone imageResponse)
         // {

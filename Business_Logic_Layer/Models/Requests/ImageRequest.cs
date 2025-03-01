@@ -9,6 +9,7 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class ImageRequest
     {
+        public Guid Id { get; set; }
         public string ImageUrl { get; set; } = string.Empty;
     }
 }

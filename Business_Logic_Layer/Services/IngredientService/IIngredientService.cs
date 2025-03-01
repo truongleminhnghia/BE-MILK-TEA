@@ -16,5 +16,6 @@ namespace Business_Logic_Layer.Services.IngredientService
         // Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status);
         Task<IngredientResponse> GetIngredientByIdAsync(Guid id);
         Task<IngredientResponse> CreateIngredientAsync(IngredientRequest request);
+        Task<IngredientResponse> Update(Guid id, UpdateIngredientRequest request);
     }
 }
