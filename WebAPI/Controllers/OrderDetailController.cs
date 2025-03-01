@@ -25,10 +25,17 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
         //Get all
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("GetByOrderId/{orderId}")]
+        public async Task<IActionResult> GetAll(
+            Guid orderId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false)
+
         {
-            List<OrderDetail> orderDetails = await _orderDetailService.GetAllOrderDetailsAsync();
+            List<OrderDetailResponse> orderDetails = await _orderDetailService.GetAllOrderDetailsAsync(orderId,search,sortBy,isDescending,page,pageSize);
             if (orderDetails.Count == 0)
             {
                 return Ok(new ApiResponse(
@@ -82,7 +89,7 @@ namespace WebAPI.Controllers
         }
         //UPDATE
         [HttpPut("{id}")]
- 
+
         public async Task<IActionResult> UpdateOrderDetail(
             Guid id,
             [FromBody] OrderDetailRequest orderDetailRequest

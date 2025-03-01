@@ -10,9 +10,7 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class OrderRequest
     {
-        public string OrderCode { get; set; } = string.Empty;
         public OrderStatus OrderStatus { get; set; }
-
         public string FullNameShipping { get; set; } = string.Empty;
         public string PhoneShipping { get; set; } = string.Empty;
         public string? EmailShipping { get; set; }
@@ -25,7 +23,7 @@ namespace Business_Logic_Layer.Models.Requests
         //Người dùng nhập promotion code ở đây
         public string PromotionCode { get; set; } = string.Empty;
         public Guid AccountId { get; set; }
-        public List<CartDetailResponse> cartDetailList { get; set; } =new List<CartDetailResponse>() ;
+       // public List<CartDetailResponse> cartDetailList { get; set; } =new List<CartDetailResponse>() ;
       
     }
 }
