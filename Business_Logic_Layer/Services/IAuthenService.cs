@@ -14,6 +14,7 @@ namespace Business_Logic_Layer.Services
 
         public Task<Dictionary<string, object>> AuthenticateAndFetchProfile(string code, string type);
 
+        public string GenerateUrl(string type);
         public Task<AuthenticateResponse> LoginOauth2(Oauth2Request _request);
     }
 }

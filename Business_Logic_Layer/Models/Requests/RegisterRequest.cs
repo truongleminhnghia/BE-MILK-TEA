@@ -23,5 +23,7 @@ namespace Business_Logic_Layer.Models.Requests
 
         [Required(ErrorMessage = "Số điện thoại không được bỏ trống")]
         public string PhoneNumber { get; set; }
+
+        public RoleName RoleName { get; set; }
     }
 }

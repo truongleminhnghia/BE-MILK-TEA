@@ -54,22 +54,13 @@ namespace WebAPI.Controllers
                 }
                 else if (typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {
-                    var infoUser = await _authenService.AuthenticateAndFetchProfile(code, typeLogin);
-                    if (infoUser == null)
-                    {
-                        return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại", null));
-                    }
-                    var oauth2 = new Oauth2Request
-                    {
-                        FullName = infoUser.ContainsKey("name") ? infoUser["name"].ToString() : "",
-                        GoogleAccountId = infoUser.ContainsKey("sub") ? infoUser["sub"].ToString() : "",
-                        Email = infoUser.ContainsKey("email") ? infoUser["email"].ToString() : "",
-                        Avatar = infoUser.ContainsKey("picture") ? infoUser["picture"].ToString() : "",
-                        PhoneNumber = "",
-                    };
-                    var result = await _authenService.LoginOauth2(oauth2);
-                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Đăng nhập thành công", result));
-
+                    var urlLogin = _authenService.GenerateUrl(TypeLogin.LOGIN_GOOGLE.ToString());
+                    return Ok(new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Create URL successfull",
+                        urlLogin
+                        ));
                 }
                 return BadRequest(new ApiResponse (HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại" ));
             }

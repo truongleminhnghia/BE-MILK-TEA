@@ -22,6 +22,9 @@ using System.Net.Http.Headers;
 using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
 using System.Security.Principal;
+using Azure.Core;
+using Microsoft.Identity.Client;
+using Newtonsoft.Json.Linq;
 
 namespace Business_Logic_Layer.Services
 {
@@ -81,6 +84,27 @@ namespace Business_Logic_Layer.Services
                     {
                         throw new Exception("Invalid password");
                     }
+                }
+                else if (type.Trim().Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+                {
+                    // Assuming _request.Email is already verified by Google
+                    account = await _accountRepository.GetByEmail(request.Email);
+                    if (account == null)
+                    {
+                        // Register new account if it doesn't exist
+                        var registerRequest = new RegisterRequest
+                        {
+                            Email = request.Email,
+                            FirstName = "GoogleUser", // Default value, should be replaced with actual data
+                            LastName = "GoogleUser",  // Default value, should be replaced with actual data
+                            Password = Guid.NewGuid().ToString(), // Random password, not used
+                        };
+                        account = _mapper.Map<Account>(registerRequest);
+                        account.AccountStatus = AccountStatus.ACTIVE;
+                        account.RoleName = RoleName.ROLE_CUSTOMER;
+                        await _accountRepository.Create(account);
+                    }
+                    token = _jwtService.GenerateJwtToken(account);
                 }
                 else
                 {
@@ -153,6 +177,26 @@ namespace Business_Logic_Layer.Services
                 throw new Exception("Error: " + ex.Message);
             }
 
+        }
+        public string GenerateUrl(string _type)
+        {
+            if (_type.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+            {
+                string _state = Guid.NewGuid().ToString();
+                string _nonce = Guid.NewGuid().ToString();
+                string _encodestate = HttpUtility.UrlEncode(_state);
+                string _encodeNonce = HttpUtility.UrlEncode(_nonce);
+
+                string _url = "https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?" +
+                                "response_type=code&" +
+                                "client_id=" + _clientIdGoogle + "&" +
+                                "scope=" + _scopesGoogle + "&" +
+                                "state=" + _encodestate + "&" +
+                                "nonce=" + _encodeNonce + "&" +
+                                "redirect_uri=" + _redirectUriGoogle + "&" + _flowNameGoogle;
+                return _url;
+            }
+            return null;
         }
 
         public async Task<Dictionary<string, object>> AuthenticateAndFetchProfile(string code, string type)
