@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Business_Logic_Layer.Repositories;
 using Data_Access_Layer.Repositories;
 using System.Linq.Expressions;
+using System.Net;
+
 
 
 namespace Business_Logic_Layer.Repositories
@@ -24,13 +26,15 @@ namespace Business_Logic_Layer.Repositories
         {
             try
             {
-                return await _context.CartItems.ToListAsync();
+                var cartItems = await _context.CartItems.ToListAsync();
+                return cartItems; // Không cần Ok()
             }
             catch (Exception ex)
             {
                 throw new Exception("Lỗi khi lấy danh sách CartItem", ex);
             }
         }
+        
 
         public async Task<CartItem> GetByIdAsync(Guid id)
         {
