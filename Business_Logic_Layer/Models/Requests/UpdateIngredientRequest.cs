@@ -1,34 +1,24 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
-namespace Business_Logic_Layer.Models
+namespace Business_Logic_Layer.Models.Requests
 {
-    public class Ingredient
+    public class UpdateIngredientRequest
     {
-        [JsonIgnore]
-        public Guid Id { get; set; }
-        public string IngredientCode { get; set; }
         public string Supplier { get; set; }
         public string IngredientName { get; set; }
         public string Description { get; set; }
         public string FoodSafetyCertification { get; set; }
-        public DateTime ExpiredDate { get; set; }
         public IngredientStatus IngredientStatus { get; set; }
+        [Range(0.1, float.MaxValue, ErrorMessage = "Số lượng trong mỗi túi phải lớn hơn 0")]
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
-        public int Unit { get; set; }
         public double PriceOrigin { get; set; }
-        public double PricePromotion { get; set; }
-        public Guid CategoryId { get; set; }
-        public int Quantity { get; set; }
         public bool IsSale { get; set; }
-
-        [JsonIgnore]
-        public float Rate { get; set; }
+        public List<ImageRequest>? ImageRequest { get; set; }
     }
 }

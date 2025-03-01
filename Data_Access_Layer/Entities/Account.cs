@@ -56,7 +56,7 @@ namespace Data_Access_Layer.Entities
         public virtual ICollection<IngredientReview>? IngredientReviews { get; set; }
 
         public Customer? Customer { get; set; }
-        public Employee? Empoyee { get; set; }
+        public Employee? Employee { get; set; }
         public Cart? Cart { get; set; }
 
         public Account()
