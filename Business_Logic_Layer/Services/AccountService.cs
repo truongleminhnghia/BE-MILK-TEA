@@ -21,10 +21,12 @@ namespace Business_Logic_Layer.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly Source _source;
+        private readonly ICartRepository _cartRepository;
 
-        public AccountService(IAccountRepository accountRepository, IMapper mapper, Source source)
+        public AccountService(IAccountRepository accountRepository, IMapper mapper, Source source, ICartRepository cartRepository)
         {
             _accountRepository = accountRepository;
+            _cartRepository = cartRepository;
             _mapper = mapper;
             _source = source;
         }
@@ -87,7 +89,7 @@ namespace Business_Logic_Layer.Services
                 account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
 
                 var currentAccount = await _accountRepository.GetById(_source.GetCurrentAccount());
-                if (currentAccount.RoleName == RoleName.ROLE_ADMIN)
+                if (currentAccount != null && currentAccount.RoleName == RoleName.ROLE_ADMIN)
                 {
                     //dien role name cho account moi
                     if (account.RoleName == RoleName.ROLE_STAFF || account.RoleName == RoleName.ROLE_MANAGER || account.RoleName == RoleName.ROLE_ADMIN)
@@ -104,6 +106,15 @@ namespace Business_Logic_Layer.Services
                 {
                     throw new Exception("Create account failed");
                 }
+                var cart = new Cart
+                {
+                    Id = Guid.NewGuid(),        // Tạo ID mới cho Cart
+                    AccountId = account.Id,    // Gán ID tài khoản cho Cart
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _cartRepository.Create(cart); // Lưu giỏ hàng vào database
+
 
                 return account;
             }
@@ -113,6 +124,7 @@ namespace Business_Logic_Layer.Services
                 return null;
             }
         }
+
               
 
         //public async Task<Employee> CreateStaff(CreateStaffRequest createEmployeeRequest)

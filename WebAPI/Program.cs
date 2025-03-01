@@ -13,6 +13,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Business_Logic_Layer.Utils;
+using Business_Logic_Layer.Services.Interfaces;
+using Business_Logic_Layer.Repositories;
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -117,7 +122,7 @@ builder.Services.AddAutoMapper(
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
-    () => provider.GetService<ICategoryService>()
+    () => provider.GetRequiredService<ICategoryService>()
 );
 
 // comment đến đây
@@ -132,6 +137,12 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
 builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<ICartItemService, CartItemService>();
+
+
+
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();

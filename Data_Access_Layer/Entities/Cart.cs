@@ -19,7 +19,10 @@ namespace Data_Access_Layer.Entities
         [ForeignKey("AccountId")]
         public Guid AccountId { get; set; }
 
-        public Account Account { get; set; }
+        public  Account? Account { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
 
         public ICollection<CartItem>? CartItems { get; set; }
 
