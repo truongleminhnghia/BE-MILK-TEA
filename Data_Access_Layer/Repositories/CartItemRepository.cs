@@ -6,6 +6,7 @@ using Data_Access_Layer;
 using Microsoft.EntityFrameworkCore;
 using Business_Logic_Layer.Repositories;
 using Data_Access_Layer.Repositories;
+using System.Linq.Expressions;
 
 
 namespace Business_Logic_Layer.Repositories
@@ -21,36 +22,84 @@ namespace Business_Logic_Layer.Repositories
 
         public async Task<IEnumerable<CartItem>> GetAllAsync()
         {
-            return await _context.CartItems.ToListAsync();
+            try
+            {
+                return await _context.CartItems.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi lấy danh sách CartItem", ex);
+            }
         }
 
         public async Task<CartItem> GetByIdAsync(Guid id)
         {
-            return await _context.CartItems.FindAsync(id);
+            try
+            {
+                var cartItem = await _context.CartItems.FindAsync(id);
+                if (cartItem == null)
+                {
+                    throw new KeyNotFoundException($"Không tìm thấy CartItem với ID {id}");
+                }
+                return cartItem;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy CartItem với ID {id}", ex);
+            }
         }
 
         public async Task AddAsync(CartItem cartItem)
         {
-            await _context.CartItems.AddAsync(cartItem);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.CartItems.AddAsync(cartItem);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi thêm CartItem", ex);
+            }
         }
 
         public async Task UpdateAsync(CartItem cartItem)
         {
-            _context.CartItems.Update(cartItem);
-            await _context.SaveChangesAsync();
-        }
+            try
+            {
+                var existingCartItem = await _context.CartItems.FindAsync(cartItem.Id);
+                if (existingCartItem == null)
+                {
+                    throw new KeyNotFoundException($"Không tìm thấy CartItem với ID {cartItem.Id} để cập nhật");
+                }
 
+                _context.Entry(existingCartItem).CurrentValues.SetValues(cartItem);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi cập nhật CartItem với ID {cartItem.Id}", ex);
+
+            }
+        }
         public async Task DeleteAsync(Guid id)
         {
-            var cartItem = await _context.CartItems.FindAsync(id);
-            if (cartItem != null)
+            try
             {
+                var cartItem = await _context.CartItems.FindAsync(id);
+                if (cartItem != null)
+                {
+                    throw new KeyNotFoundException($"Không tìm thấy CartItem với ID {id} để xóa");
+                }
+
                 _context.CartItems.Remove(cartItem);
                 await _context.SaveChangesAsync();
             }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi xóa CartItem với ID {id}", ex);
+            }
         }
-
+   
         public Task<IEnumerable<CartItem>> GetAll()
         {
             throw new NotImplementedException();
