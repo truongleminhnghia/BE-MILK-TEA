@@ -9,20 +9,21 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class CreateAccountRequest
     {
-        [Required(ErrorMessage = "Email is required")]
+        [Required(ErrorMessage = "Email không được bỏ trống")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Password is required")]
+        [Required(ErrorMessage = "Mật khẩu không được bỏ trống")]
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "FirstName is required")]
+        [Required(ErrorMessage = "Họ không được bỏ trống")]
         public string LastName { get; set; }
 
-        [Required(ErrorMessage = "LastName is required")]
+        [Required(ErrorMessage = "Tên không được bỏ trống")]
         public string FirstName { get; set; }
 
-        [Required(ErrorMessage = "PhoneNumber is required")]
+        [Required(ErrorMessage = "Số điện thoại không được bỏ trống")]
         public string PhoneNumber { get; set; }
+
     }
 
     public class CreateCustomerRequest
@@ -30,10 +31,8 @@ namespace Business_Logic_Layer.Models.Requests
         [Required(ErrorMessage = "Account id is required")]
         public Guid AccountId { get; set; }
 
-        [Required(ErrorMessage = "Tax code is required")]
         public string TaxCode { get; set; }
 
-        [Required(ErrorMessage = "Address is required")]
         public string Address { get; set; }
     }
 
@@ -41,8 +40,5 @@ namespace Business_Logic_Layer.Models.Requests
     {
         [Required(ErrorMessage = "Account id is required")]
         public Guid AccountId { get; set; }
-
-        [Required(ErrorMessage = "Ref code is required")]
-        public string RefCode { get; set; }
     }
 }

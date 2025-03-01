@@ -41,5 +41,10 @@ namespace Data_Access_Layer.Repositories
         {
             return await Task.FromResult(_context.Employees.ToList());
         }
+
+        public async Task<bool> CheckRefCode(string refCode)
+        {
+            return await _context.Employees.AnyAsync(e => e.RefCode == refCode);
+        }
     }
 }

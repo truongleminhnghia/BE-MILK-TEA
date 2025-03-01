@@ -127,6 +127,40 @@ builder
             ) // phải mã khóa serect_key lại nhé
             ,
         };
+
+        // cấu hình cho thông báo về JWT Token
+        // Xử lý lỗi JWT Token
+        //options.Events = new JwtBearerEvents
+        //{
+        //    OnMessageReceived = context =>
+        //    {
+        //        // Không có Token
+        //        if (string.IsNullOrEmpty(context.Token))
+        //        {
+        //            context.NoResult();
+        //            context.Response.StatusCode = 401;
+        //            context.Response.ContentType = "application/json";
+        //            return context.Response.WriteAsync("{\"message\": \"Không có token, vui lòng đăng nhập!\"}");
+        //        }
+        //        return Task.CompletedTask;
+        //    },
+        //    OnAuthenticationFailed = context =>
+        //    {
+        //        // Token không hợp lệ
+        //        context.NoResult();
+        //        context.Response.StatusCode = 401;
+        //        context.Response.ContentType = "application/json";
+        //        return context.Response.WriteAsync("{\"message\": \"Tài khoản không hợp lệ hoặc đã hết hạn!\"}");
+        //    },
+        //    OnForbidden = context =>
+        //    {
+        //        // Không có quyền truy cập (403 Forbidden)
+        //        context.NoResult();
+        //        context.Response.StatusCode = 403;
+        //        context.Response.ContentType = "application/json";
+        //        return context.Response.WriteAsync("{\"message\": \"Bạn không có quyền truy cập!\"}");
+        //    }
+        //};
     });
 
 // Add services to the container.
@@ -208,7 +242,27 @@ app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//cấu hình tự động bỏ qua xác thực đối với một số endpoint / API cụ thể ngay từ Program.cs nếu lười dùng [AllowAnonymous] cho từng API
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value.ToLower();
+
+    var publicEndpoints = new[]
+    {
+        "/api/v1/auths/register",
+        "/api/v1/auths/login",
+        "/api/v1/auths/forgot-password"
+    };
+
+    // Nếu request thuộc API công khai, bỏ qua xác thực
+    if (publicEndpoints.Any(endpoint => path.StartsWith(endpoint)))
+    {
+        await next();
+        return;
+    }
+
+    await next();
+});
 
 app.MapControllers();
 app.UseCors(MyAllowSpecificOrigins);
