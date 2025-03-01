@@ -851,7 +851,7 @@ namespace Data_Access_Layer.Migrations
             modelBuilder.Entity("Data_Access_Layer.Entities.Employee", b =>
                 {
                     b.HasOne("Data_Access_Layer.Entities.Account", "Account")
-                        .WithOne("Empoyee")
+                        .WithOne("Employee")
                         .HasForeignKey("Data_Access_Layer.Entities.Employee", "AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1037,7 +1037,7 @@ namespace Data_Access_Layer.Migrations
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Empoyee");
+                    b.Navigation("Employee");
 
                     b.Navigation("IngredientReviews");
 

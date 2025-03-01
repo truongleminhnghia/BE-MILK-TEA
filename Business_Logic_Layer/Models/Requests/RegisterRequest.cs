@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -9,11 +9,23 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class RegisterRequest
     {
-        [Required(ErrorMessage = "Not nulll")]
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public RoleName? RoleName { get; set; }
+        [Required(ErrorMessage = "Email không được bỏ trống")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Mật khẩu không được bỏ trống")]
+        public string Password { get; set; }
+
+        [Required(ErrorMessage = "Họ không được bỏ trống")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Tên không được bỏ trống")]
+        public string FirstName { get; set; }
+
+        [Required(ErrorMessage = "Số điện thoại không được bỏ trống")]
+        public string PhoneNumber { get; set; }
+
+        public RoleName RoleName { get; set; }
+
+
     }
 }

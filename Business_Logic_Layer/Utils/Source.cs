@@ -58,46 +58,40 @@ namespace Business_Logic_Layer.Utils
             return result;
         }
 
-        // 2 ham nay dung de lay thong tin cua user dang dang nhap: GetCurrentAccount va CheckCurrentUser
-        public Guid GetCurrentAccount()
+        // ham nay dung de lay thong tin cua user dang dang nhap
+        public async Task<Account?> GetCurrentAccount()
         {
             var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
-                throw new UnauthorizedAccessException("User ID not found in token.");
+                throw new UnauthorizedAccessException("Người dùng chưa đăng nhập hoặc token không hợp lệ"); ;
             }
 
-            if (!Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                throw new UnauthorizedAccessException("Invalid User ID format in token.");
-            }
-
-            return userId;
-        }
-        public bool CheckCurrentUser()
-        {
-            try
-            {
-                var userId = GetCurrentAccount();
-
-                var userExists = _accountRepository.GetById(userId);
-
-                if(userExists == null)
-                {
-                    return false;
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return await _accountRepository.GetById(userId);
         }
 
         public string GenerateRandom8Digits()
         {
             return new Random().Next(10000000, 99999999).ToString();
+        }
+
+        public int CheckDate(DateTime input)
+        {
+            // Lấy ngày hiện tại
+            DateTime today = DateTime.Now;
+            int daysRemaining = (input - today).Days;
+            if (daysRemaining < 0)
+            {
+                return -1; // hết date
+            }
+            else if (daysRemaining <= 10)
+            {
+                return 1; // còn dưới 10 ngày
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

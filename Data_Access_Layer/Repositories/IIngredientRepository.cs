@@ -13,10 +13,10 @@ namespace Data_Access_Layer.Repositories
         Task<IEnumerable<Ingredient>> GetAllAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status);
         Task<Ingredient> GetByIdAsync(Guid id);
         Task<Ingredient> CreateAsync(Ingredient ingredient);
-        Task<Ingredient> UpdateAsync(Ingredient ingredient);
+        Task<Ingredient> UpdateAsync(Guid id, Ingredient ingredient);
         Task<bool> DeleteAsync(Guid id);
         Task<Ingredient> GetLastIngredientCode();
-        Task<bool> CategoryExistsAsync(Guid categoryId);
-        Task GetIngredientByIdAsync(Guid ingredientId);
+        Task<bool> CheckCode(string code);
+        Task<Ingredient> GetIngredientByIdAsync(Guid ingredientId);
     }
 }
