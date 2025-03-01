@@ -15,6 +15,7 @@ namespace Business_Logic_Layer.AutoMappers
         {
             //chìu từ trái sang phải
             CreateMap<RegisterRequest, Account>();
+            CreateMap<CreateAccountRequest, Account>().ReverseMap();
             CreateMap<Account, AccountResponse>().ReverseMap();
             CreateMap<Account, MapToAccountResponse>().ReverseMap();
 

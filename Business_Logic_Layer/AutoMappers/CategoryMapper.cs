@@ -15,6 +15,7 @@ namespace Business_Logic_Layer.AutoMappers
         {
             CreateMap<CategoryRequest, Category>().ReverseMap();
             CreateMap<CategoryResponse, Category>().ReverseMap();
+            CreateMap<CategoryUpdateRequest, Category>().ReverseMap();
         }
     }
 }

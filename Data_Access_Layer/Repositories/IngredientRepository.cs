@@ -19,10 +19,10 @@ namespace Data_Access_Layer.Repositories
             _context = context;
         }
 
-        public async Task<bool> CategoryExistsAsync(Guid categoryId)
-        {
-            return await _context.Categories.AnyAsync(c => c.Id == categoryId);
-        }
+        // public async Task<bool> CategoryExistsAsync(Guid categoryId)
+        // {
+        //     return await _context.Categories.AnyAsync(c => c.Id == categoryId);
+        // }
 
         public async Task<IEnumerable<Ingredient>> GetAllAsync(
             string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status)
@@ -31,33 +31,51 @@ namespace Data_Access_Layer.Repositories
                 .Include(i => i.Category)
                 .Include(i => i.Images)
                 .AsQueryable();
+            // **Filtering by name**
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(i => i.IngredientName.Contains(search));
             }
 
+            // **Filtering by CategoryId**
             if (categoryId.HasValue)
             {
                 query = query.Where(i => i.CategoryId == categoryId.Value);
             }
 
+            // **Filtering by IngredientStatus**
             if (status.HasValue)
             {
                 query = query.Where(i => i.IngredientStatus == status.Value);
             }
 
+            // **Filtering by date range (CreateAt)**
             if (startDate.HasValue && endDate.HasValue)
             {
-                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1); // Includes full day
-
-                query = query.Where(c => c.CreateAt >= startDate.Value && c.CreateAt <= adjustedEndDate);
+                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(i => i.CreateAt >= startDate.Value && i.CreateAt <= adjustedEndDate);
+            }
+            else if (startDate.HasValue)
+            {
+                query = query.Where(i => i.CreateAt >= startDate.Value);
+            }
+            else if (endDate.HasValue)
+            {
+                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(i => i.CreateAt <= adjustedEndDate);
+                isDescending = true; // Force descending order if only endDate is provided
             }
 
+            // **Sorting**
             if (!string.IsNullOrEmpty(sortBy))
             {
                 query = isDescending
                     ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
                     : query.OrderBy(e => EF.Property<object>(e, sortBy));
+            }
+            else
+            {
+                query = query.OrderByDescending(i => i.CreateAt); // Default sorting by CreateAt descending
             }
 
             return await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
@@ -65,10 +83,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Ingredient> GetByIdAsync(Guid id)
         {
-            return await _context
-                .Ingredients.Include(i => i.Category)
-                .Include(i => i.Images)
-                .FirstOrDefaultAsync(i => i.Id == id);
+            return await _context.Ingredients.FirstAsync(a => a.Id.Equals(id));
         }
 
         public async Task<Ingredient> CreateAsync(Ingredient ingredient)
@@ -78,9 +93,9 @@ namespace Data_Access_Layer.Repositories
             return ingredient;
         }
 
-        public async Task<Ingredient> UpdateAsync(Ingredient ingredient)
+        public async Task<Ingredient> UpdateAsync(Guid id, Ingredient ingredient)
         {
-            var existingIngredient = await _context.Ingredients.FindAsync(ingredient.Id);
+            var existingIngredient = await GetByIdAsync(id);
             if (existingIngredient != null)
             {
                 _context.Entry(existingIngredient).State = EntityState.Detached;
@@ -109,9 +124,14 @@ namespace Data_Access_Layer.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        Task IIngredientRepository.GetIngredientByIdAsync(Guid ingredientId)
+        public async Task<Ingredient> GetIngredientByIdAsync(Guid ingredientId)
         {
-            throw new NotImplementedException();
+            return await _context.Ingredients.FirstAsync(a => a.Id.Equals(ingredientId));
+        }
+
+        public async Task<bool> CheckCode(string code)
+        {
+            return !await _context.Ingredients.AnyAsync(a => a.IngredientCode.Equals(code));
         }
     }
 }
