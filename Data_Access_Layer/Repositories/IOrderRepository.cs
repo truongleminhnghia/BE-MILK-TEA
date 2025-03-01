@@ -13,7 +13,7 @@ namespace Data_Access_Layer.Repositories
         Task<List<Order>> GetAllOrdersAsync(Guid accountId,string? search, string? sortBy, bool isDescending,OrderStatus? orderStatus, DateTime? orderDate, int page, int pageSize);
         Task<Order?> GetByIdAsync(Guid id);
         Task<Order> CreateAsync(Order order);
-        //Task<Order?> UpdateAsync(Guid id,Order order);
+        Task<Order?> UpdateAsync(Order order);
         //Task<bool> DeleteByIdAsync(Guid id);
     }
 }

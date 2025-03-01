@@ -4,6 +4,6 @@ namespace Data_Access_Layer.Enum
     {
         CONFIRM,
         PAYMENTING,
-        
+        CANCELED,
     }
 }

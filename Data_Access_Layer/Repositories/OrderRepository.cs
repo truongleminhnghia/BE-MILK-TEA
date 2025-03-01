@@ -7,6 +7,8 @@ using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+
 
 namespace Data_Access_Layer.Repositories
 {
@@ -18,7 +20,6 @@ namespace Data_Access_Layer.Repositories
         {
             _context = context;
         }
-
         public async Task<Order?> GetByIdAsync(Guid id)
         {
             try
@@ -39,42 +40,33 @@ namespace Data_Access_Layer.Repositories
         {
             try
             {
-                order.Id = Guid.NewGuid();
-                order.OrderCode = Guid.NewGuid().ToString();
-                order.OrderDate = DateTime.Now;
-                _context.Orders.Add(order);
+                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
                 return order;
             }
             catch (Exception ex)
             {
                 // Log the exception (if using logging)
-                Console.WriteLine($"Error in CreateAsync: {ex.Message}");
+                Console.WriteLine($"Lỗi tạo Order: {ex.Message}");
                 return null;
             }
         }
 
-        //public async Task<Order> UpdateAsync(Guid id, Order order)
-        //{
-        //    var existingOrder = await _context.Orders.FindAsync(id);
-        //    if (existingOrder == null)
-        //    {
-        //        return null;
-        //    }
-        //    existingOrder.OrderDate = order.OrderDate;
-        //    existingOrder.FullNameShipping = order.FullNameShipping;
-        //    existingOrder.PhoneShipping = order.PhoneShipping;
-        //    existingOrder.EmailShipping = order.EmailShipping;
-        //    existingOrder.NoteShipping = order.NoteShipping;
-        //    existingOrder.AddressShipping = order.AddressShipping;
-        //    existingOrder.OrderStatus = order.OrderStatus;
-        //    existingOrder.Quantity = order.Quantity;
-        //    existingOrder.PriceAfterPromotion = order.PriceAfterPromotion;
-        //    existingOrder.AccountId = order.AccountId;
-        //    existingOrder.ReasonCancel = order.ReasonCancel;
+        public async Task<Order> UpdateAsync(Order order)
+        {
+            var existingOrder = await _context.Orders.FindAsync(order.Id);
+            if (existingOrder == null)
+            {
+                return null;
+            }
+            existingOrder.Quantity = order.Quantity;
+            //existingOrder.PriceAfterPromotion = order.PriceAfterPromotion;
+            existingOrder.TotalPrice = order.TotalPrice;
+            existingOrder.ReasonCancel = order.ReasonCancel;
 
-        //    return null;
-        //}
+            await _context.SaveChangesAsync();
+            return existingOrder;
+        }
         //public async Task<bool> DeleteByIdAsync(Guid id)
         //{
         //    var existingOrder = await _context.Orders.FindAsync(id);

@@ -23,11 +23,13 @@ namespace Business_Logic_Layer.Services
     public class OrderDetailService : IOrderDetailService
     {
         private readonly IOrderDetailRepository _orderDetailRepository;
+        private readonly IIngredientProductRepository _ingredientProductRepository;
         private readonly IMapper _mapper;
-        public OrderDetailService(IOrderDetailRepository orderDetailRepository,IMapper mapper)
+        public OrderDetailService(IOrderDetailRepository orderDetailRepository,IMapper mapper, IIngredientProductRepository ingredientProductRepository)
         {
             _orderDetailRepository = orderDetailRepository;
             _mapper = mapper;
+            _ingredientProductRepository = ingredientProductRepository;
         }
 
         public async Task<bool> DeleteByIdAsync(Guid orderDetailId)
@@ -46,6 +48,7 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
+                orderDetail.Price = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.TotalPrice;
                 return await _orderDetailRepository.CreateAsync(orderDetail);
             }
             catch (Exception ex)

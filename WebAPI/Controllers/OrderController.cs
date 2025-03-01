@@ -12,8 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/v1/Orders")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;

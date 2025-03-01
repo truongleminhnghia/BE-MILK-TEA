@@ -51,7 +51,6 @@ namespace Data_Access_Layer.Repositories
         public async Task<OrderDetail> CreateAsync(OrderDetail orderDetail)
         {
             orderDetail.Id = Guid.NewGuid();
-
             _context.OrderDetails.Add(orderDetail);
             await _context.SaveChangesAsync();
             return orderDetail;

@@ -16,14 +16,13 @@ namespace Business_Logic_Layer.Models.Requests
         public string? EmailShipping { get; set; }
         public string? NoteShipping { get; set; }
         public string AddressShipping { get; set; } = string.Empty;
-        public int Quantity { get; set; }
-        public double TotalPrice { get; set; }
         public string RefCode { get; set; } = string.Empty;
         
         //Người dùng nhập promotion code ở đây
         public string PromotionCode { get; set; } = string.Empty;
         public Guid AccountId { get; set; }
-       // public List<CartDetailResponse> cartDetailList { get; set; } =new List<CartDetailResponse>() ;
-      
+        public List<OrderDetailRequest> orderDetailList { get; set; } =new List<OrderDetailRequest>() ;
+    
+
     }
 }
