@@ -130,37 +130,37 @@ builder
 
         // cấu hình cho thông báo về JWT Token
         // Xử lý lỗi JWT Token
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                // Không có Token
-                if (string.IsNullOrEmpty(context.Token))
-                {
-                    context.NoResult();
-                    context.Response.StatusCode = 401;
-                    context.Response.ContentType = "application/json";
-                    return context.Response.WriteAsync("{\"message\": \"Không có token, vui lòng đăng nhập!\"}");
-                }
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = context =>
-            {
-                // Token không hợp lệ
-                context.NoResult();
-                context.Response.StatusCode = 401;
-                context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync("{\"message\": \"Tài khoản không hợp lệ hoặc đã hết hạn!\"}");
-            },
-            OnForbidden = context =>
-            {
-                // Không có quyền truy cập (403 Forbidden)
-                context.NoResult();
-                context.Response.StatusCode = 403;
-                context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync("{\"message\": \"Bạn không có quyền truy cập!\"}");
-            }
-        };
+        //options.Events = new JwtBearerEvents
+        //{
+        //    OnMessageReceived = context =>
+        //    {
+        //        // Không có Token
+        //        if (string.IsNullOrEmpty(context.Token))
+        //        {
+        //            context.NoResult();
+        //            context.Response.StatusCode = 401;
+        //            context.Response.ContentType = "application/json";
+        //            return context.Response.WriteAsync("{\"message\": \"Không có token, vui lòng đăng nhập!\"}");
+        //        }
+        //        return Task.CompletedTask;
+        //    },
+        //    OnAuthenticationFailed = context =>
+        //    {
+        //        // Token không hợp lệ
+        //        context.NoResult();
+        //        context.Response.StatusCode = 401;
+        //        context.Response.ContentType = "application/json";
+        //        return context.Response.WriteAsync("{\"message\": \"Tài khoản không hợp lệ hoặc đã hết hạn!\"}");
+        //    },
+        //    OnForbidden = context =>
+        //    {
+        //        // Không có quyền truy cập (403 Forbidden)
+        //        context.NoResult();
+        //        context.Response.StatusCode = 403;
+        //        context.Response.ContentType = "application/json";
+        //        return context.Response.WriteAsync("{\"message\": \"Bạn không có quyền truy cập!\"}");
+        //    }
+        //};
     });
 
 // Add services to the container.

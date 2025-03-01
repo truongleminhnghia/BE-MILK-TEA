@@ -59,23 +59,15 @@ namespace Business_Logic_Layer.Utils
         }
 
         // ham nay dung de lay thong tin cua user dang dang nhap
-        public Account GetCurrentAccount()
+        public async Task<Account?> GetCurrentAccount()
         {
             var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
-                throw new UnauthorizedAccessException("Tài khoản không hợp lệ.");
+                throw new UnauthorizedAccessException("Người dùng chưa đăng nhập hoặc token không hợp lệ"); ;
             }
 
-            if (!Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                throw new UnauthorizedAccessException("Định dạng token không hợp lệ");
-            }
-
-            var userExists = _accountRepository.GetById(userId);
-
-            return userExists.Result;
+            return await _accountRepository.GetById(userId);
         }
 
         public string GenerateRandom8Digits()

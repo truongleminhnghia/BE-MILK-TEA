@@ -28,10 +28,10 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest _request) // Cho phép null
+        public async Task<IActionResult> Register([FromBody] CreateAccountRequest _request) // Cho phép null
         {
             try
-            {
+             {
                 var account = await _authenService.Register(_request);
 
                 return Ok(new ApiResponse (HttpStatusCode.OK.GetHashCode(), true, "Đăng ký thành công", account));

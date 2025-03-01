@@ -25,5 +25,7 @@ namespace Business_Logic_Layer.Models.Requests
         public string PhoneNumber { get; set; }
 
         public RoleName RoleName { get; set; }
+
+
     }
 }
