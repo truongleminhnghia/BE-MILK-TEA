@@ -14,6 +14,7 @@ namespace Data_Access_Layer.Repositories
         Task<Order?> GetByIdAsync(Guid id);
         Task<Order> CreateAsync(Order order);
         Task<Order?> UpdateAsync(Order order);
+        Task<Order?> UpdateStatusAsync(Guid id, Order order);
         //Task<bool> DeleteByIdAsync(Guid id);
     }
 }

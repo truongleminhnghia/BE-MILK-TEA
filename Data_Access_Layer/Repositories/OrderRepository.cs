@@ -118,5 +118,21 @@ namespace Data_Access_Layer.Repositories
                 throw new Exception($"Không thể lọc được order: {ex.Message}", ex);
             }
         }
+
+        public async Task<Order?> UpdateStatusAsync(Guid id, Order order)
+        {
+            var existingOrder = await _context.Orders.FindAsync(id);
+            if (existingOrder == null)
+            {
+                return null;
+            }
+
+            existingOrder.RefCode = order.RefCode;
+            existingOrder.ReasonCancel = order.ReasonCancel;
+            existingOrder.OrderStatus = order.OrderStatus;
+
+            await _context.SaveChangesAsync();
+            return existingOrder;
+        }
     }
 }

@@ -22,6 +22,7 @@ namespace Business_Logic_Layer.Services
         public Task<List<OrderResponse>> GetAllAsync(Guid accountId, string? search, string? sortBy, bool isDescending, OrderStatus? orderStatus, DateTime? orderDate, int page, int pageSize);
         public Task<OrderResponse> GetByIdAsync(Guid orderId);
         public Task<Order> Update(Order orderId);
+        public Task<Order> UpdateStatus(Guid id, Order order);
         //public Task<bool> DeleteByIdAsync(Guid orderId);
 
     }
@@ -48,6 +49,7 @@ namespace Business_Logic_Layer.Services
                 order.Id = Guid.NewGuid();
                 order.OrderCode = "OD" + source.GenerateRandom8Digits();
                 order.OrderDate = DateTime.Now;
+                order.OrderStatus= OrderStatus.PENDING_CONFIRMATION;
                 //order.PriceAfterPromotion = order.TotalPrice - promotionPrice;
                 var createdOrder = await _orderRepository.CreateAsync(order);
                 List<OrderDetail> a = new List<OrderDetail>();
@@ -113,6 +115,19 @@ namespace Business_Logic_Layer.Services
             try
             {
                 var rover = await _orderRepository.UpdateAsync(order);
+                return rover;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể update quantity, price", ex);
+            }
+        }
+
+        public async Task<Order> UpdateStatus(Guid id, Order order)
+        {
+            try
+            {
+                var rover = await _orderRepository.UpdateStatusAsync(id,order);
                 return rover;
             }
             catch (Exception ex)

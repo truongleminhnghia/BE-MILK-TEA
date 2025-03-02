@@ -22,8 +22,6 @@ namespace Business_Logic_Layer.Models.Responses
         public int Quantity { get; set; }
         public double TotalPrice { get; set; }
         public double? PriceAfterPromotion { get; set; }
-        public String RefCode { get; set; } = string.Empty;
-        public String? ReasonCancel { get; set; }
 
         public String AddressShipping { get; set; }
         public List<OrderDetailResponse> orderDetailResponses { get; set; }

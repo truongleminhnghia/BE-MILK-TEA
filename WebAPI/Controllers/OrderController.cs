@@ -5,6 +5,7 @@ using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
+using Business_Logic_Layer.Services.CategoryService;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Http;
@@ -76,7 +77,7 @@ namespace WebAPI.Controllers
                     orders
                 ));
         }
-        ////Create
+        //Create
         [HttpPost]
         public async Task<IActionResult> AddOrder([FromBody] OrderRequest order)
         {
@@ -88,6 +89,40 @@ namespace WebAPI.Controllers
             var createdOrder = await _orderService.CreateAsync(order);
             return Ok(createdOrder);
         }
+        //UPDATE
+        [HttpPut("{id}")]
+        //[Authorize(Roles = "ROLE_STAFF")]
+        public async Task<IActionResult> UpdateOrder(
+            Guid id,
+            [FromBody] OrderUpdateRequest orderUpdateRequest
+        )
+        {
+            if (orderUpdateRequest == null)
+            {
+                return BadRequest(
+                    new ApiResponse(
+                        HttpStatusCode.BadRequest.GetHashCode(),
+                        false,
+                        "Data không hợp lệ"
+                    )
+                );
+            }
+
+            var order = _mapper.Map<Order>(orderUpdateRequest);
+            var updatedOrder = await _orderService.UpdateStatus(id, order);
+
+            if (updatedOrder == null)
+            {
+                return NotFound(
+                    new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
+                );
+            }
+
+            return Ok(
+                new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Cập nhật thành công")
+            );
+        }
+
         //Delete by id
         //[HttpDelete("{orderId}")]
         //public async Task<IActionResult> DeleteOrder(Guid orderId)

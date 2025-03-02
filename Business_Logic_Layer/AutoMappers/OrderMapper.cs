@@ -10,6 +10,7 @@ public class OrderMapper:Profile
     public OrderMapper()
     {
         CreateMap<OrderRequest, Order>();
+        CreateMap<OrderUpdateRequest, Order>().ReverseMap();
         CreateMap<Order, OrderResponse>();
     }
 }
