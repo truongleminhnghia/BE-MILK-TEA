@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Data_Access_Layer.Entities;
-using Data_Access_Layer.Enum;
 
 namespace Data_Access_Layer.Repositories
 {
     public interface IPaymentRepository
     {
-        Task<Payment> CreatePaymentAsync(Payment payment);
-        Task<Payment?> GetPaymentByIdAsync(Guid paymentId);
-        Task UpdatePaymentStatusAsync(Guid paymentId, PaymentStatus status);
+        Task<Payment> GetByIdAsync(Guid id);
+        Task<List<Payment>> GetAllAsync();
+        Task<List<Payment>> GetByOrderIdAsync(Guid orderId);
+        Task<Payment> CreateAsync(Payment payment);
+        Task<Payment> UpdateAsync(Payment payment);
     }
 }

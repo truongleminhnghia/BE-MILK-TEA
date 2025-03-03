@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
-using Data_Access_Layer.Enum;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
 {
@@ -18,26 +17,35 @@ namespace Data_Access_Layer.Repositories
             _context = context;
         }
 
-        public async Task<Payment> CreatePaymentAsync(Payment payment)
+        public async Task<Payment> GetByIdAsync(Guid id)
         {
-            _context.Payments.Add(payment);
+            return await _context
+                .Payments.Include(p => p.Order)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<List<Payment>> GetAllAsync()
+        {
+            return await _context.Payments.Include(p => p.Order).ToListAsync();
+        }
+
+        public async Task<List<Payment>> GetByOrderIdAsync(Guid orderId)
+        {
+            return await _context.Payments.Where(p => p.OrderId == orderId).ToListAsync();
+        }
+
+        public async Task<Payment> CreateAsync(Payment payment)
+        {
+            await _context.Payments.AddAsync(payment);
             await _context.SaveChangesAsync();
             return payment;
         }
 
-        public async Task<Payment?> GetPaymentByIdAsync(Guid paymentId)
+        public async Task<Payment> UpdateAsync(Payment payment)
         {
-            return await _context.Payments.FindAsync(paymentId);
-        }
-
-        public async Task UpdatePaymentStatusAsync(Guid paymentId, PaymentStatus status)
-        {
-            var payment = await _context.Payments.FindAsync(paymentId);
-            if (payment != null)
-            {
-                payment.PaymentStatus = status;
-                await _context.SaveChangesAsync();
-            }
+            _context.Payments.Update(payment);
+            await _context.SaveChangesAsync();
+            return payment;
         }
     }
 }

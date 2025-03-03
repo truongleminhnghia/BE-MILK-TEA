@@ -5,9 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
+using Business_Logic_Layer.Services.VNPayService;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -16,83 +18,89 @@ namespace Business_Logic_Layer.Services.PaymentService
     public class PaymentService : IPaymentService
     {
         private readonly IPaymentRepository _paymentRepository;
-        private readonly IConfiguration _config;
-        private readonly HttpClient _httpClient;
+        private readonly IVNPayService _vnPayService;
 
-        public PaymentService(
-            IPaymentRepository paymentRepository,
-            IConfiguration config,
-            HttpClient httpClient
-        )
+        public PaymentService(IPaymentRepository paymentRepository, IVNPayService vnPayService)
         {
             _paymentRepository = paymentRepository;
-            _config = config;
-            _httpClient = httpClient;
+            _vnPayService = vnPayService;
         }
 
-        public async Task<PaymentResponse> CreatePaymentAsync(PaymentRequest request)
+        public async Task<PaymentResponse> CreatePaymentAsync(
+            PaymentCreateRequest request,
+            HttpContext httpContext
+        )
         {
-            var orderId = Guid.NewGuid();
+            // Create payment record in pending status
             var payment = new Payment
             {
-                Id = Guid.NewGuid(),
-                OrderId = orderId,
-                PaymentMethod = request.PaymentMethod,
-                PaymentDate = DateTime.UtcNow,
+                OrderId = request.OrderId,
+                PaymentMethod = PaymentMethod.VNPAY,
+                PaymentDate = DateTime.Now,
                 PaymentStatus = PaymentStatus.Pending,
-                TotlaPrice = request.TotalPrice,
+                TotlaPrice = request.TotalPrice, // Note the typo in your entity
                 AmountPaid = 0,
                 RemainingAmount = request.TotalPrice,
             };
 
-            await _paymentRepository.CreatePaymentAsync(payment);
+            await _paymentRepository.CreateAsync(payment);
 
-            // Gửi request đến ZaloPay
-            var paymentRequest = new
+            // Generate payment URL
+            string paymentUrl = _vnPayService.CreatePaymentUrl(request, httpContext);
+
+            return new PaymentResponse
             {
-                app_id = _config["ZaloPay:AppId"],
-                app_user = "demo_user",
-                app_time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                amount = request.TotalPrice,
-                embed_data = JsonConvert.SerializeObject(new { order_id = orderId }),
-                callback_url = _config["ZaloPay:CallbackUrl"],
-                item = "[]",
+                PaymentId = payment.Id,
+                OrderId = payment.OrderId,
+                PaymentUrl = paymentUrl,
+                Success = true,
+                Message = "URL thanh toán được tạo thành công",
             };
-
-            var response = await _httpClient.PostAsync(
-                "https://sandbox.zalopay.vn/v2/create",
-                new StringContent(
-                    JsonConvert.SerializeObject(paymentRequest),
-                    Encoding.UTF8,
-                    "application/json"
-                )
-            );
-
-            var result = await response.Content.ReadAsStringAsync();
-            var jsonResponse = JsonConvert.DeserializeObject<PaymentResponse>(result);
-
-            return jsonResponse;
         }
 
-        public async Task<bool> VerifyZaloPayCallbackAsync(ZaloPayCallback callback)
+        public async Task<PaymentResponse> ProcessPaymentCallbackAsync(IQueryCollection collections)
         {
-            var payment = await _paymentRepository.GetPaymentByIdAsync(
-                Guid.Parse(callback.OrderId)
-            );
-            if (payment != null)
+            var response = _vnPayService.ProcessPaymentCallback(collections);
+
+            if (response.Success)
             {
-                payment.PaymentStatus =
-                    callback.Status == 1 ? PaymentStatus.SUCCESS : PaymentStatus.FAILED;
-                payment.AmountPaid = callback.Amount;
-                payment.RemainingAmount = payment.TotlaPrice - callback.Amount;
-                await _paymentRepository.UpdatePaymentStatusAsync(
-                    payment.Id,
-                    payment.PaymentStatus
+                // Find the pending payment for this order
+                var payments = await _paymentRepository.GetByOrderIdAsync(response.OrderId);
+                var pendingPayment = payments.FirstOrDefault(p =>
+                    p.PaymentStatus == PaymentStatus.Pending
                 );
 
-                return payment.PaymentStatus == PaymentStatus.SUCCESS;
+                if (pendingPayment != null)
+                {
+                    // Update payment status
+                    pendingPayment.PaymentStatus = PaymentStatus.SUCCESS;
+                    pendingPayment.TranscationId = response.TransactionId;
+                    pendingPayment.AmountPaid = response.Amount;
+                    pendingPayment.RemainingAmount = pendingPayment.TotlaPrice - response.Amount;
+
+                    await _paymentRepository.UpdateAsync(pendingPayment);
+
+                    response.PaymentId = pendingPayment.Id;
+                    response.Message = "Payment completed successfully";
+                }
+                else
+                {
+                    response.Success = false;
+                    response.Message = "No pending payment found for this order";
+                }
             }
-            return false;
+
+            return response;
+        }
+
+        public async Task<Payment> GetPaymentByIdAsync(Guid paymentId)
+        {
+            return await _paymentRepository.GetByIdAsync(paymentId);
+        }
+
+        public async Task<List<Payment>> GetPaymentsByOrderIdAsync(Guid orderId)
+        {
+            return await _paymentRepository.GetByOrderIdAsync(orderId);
         }
     }
 }

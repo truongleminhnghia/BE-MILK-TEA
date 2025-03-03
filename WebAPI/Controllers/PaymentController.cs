@@ -1,5 +1,4 @@
 ﻿using Business_Logic_Layer.Models.Requests;
-using Business_Logic_Layer.Services.EmailService;
 using Business_Logic_Layer.Services.PaymentService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,42 +7,54 @@ namespace WebAPI.Controllers
 {
     [Route("api/v1/payments")]
     [ApiController]
-    public class PaymentController : ControllerBase
+    public class PaymentsController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
-        private readonly IEmailService _emailService;
 
-        public PaymentController(IPaymentService paymentService, IEmailService emailService)
+        public PaymentsController(IPaymentService paymentService)
         {
             _paymentService = paymentService;
-            _emailService = emailService;
         }
 
-        [HttpPost("pay")]
-        public async Task<IActionResult> Pay([FromBody] PaymentRequest request)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreatePayment([FromBody] PaymentCreateRequest request)
         {
-            var result = await _paymentService.CreatePaymentAsync(request);
-
-            // Gửi email sau khi thanh toán thành công
-            if (result.ReturnCode == 1)
+            if (!ModelState.IsValid)
             {
-                _emailService.SendEmailAsync(
-                    request.Email,
-                    "Thanh toán thành công",
-                    "Cảm ơn bạn đã thanh toán!"
-                );
+                return BadRequest(ModelState);
             }
 
+            var result = await _paymentService.CreatePaymentAsync(request, HttpContext);
             return Ok(result);
         }
 
-        [HttpPost("zalopay-callback")]
-        public async Task<IActionResult> ZaloPayCallback([FromBody] ZaloPayCallback callback)
+        [HttpGet("callback")]
+        public async Task<IActionResult> PaymentCallback()
         {
-            bool success = await _paymentService.VerifyZaloPayCallbackAsync(callback);
-            return success
-                ? Ok(new { message = "Thanh toán đã được xác minh" })
-                : BadRequest(new { message = "Thanh Toán Thất Bại" });
+            var result = await _paymentService.ProcessPaymentCallbackAsync(Request.Query);
+
+            // Redirect to a payment result page with the appropriate status
+            return Redirect($"/payment/result?success={result.Success}&orderId={result.OrderId}");
+        }
+
+        [HttpGet("{paymentId}")]
+        public async Task<IActionResult> GetPayment(Guid paymentId)
+        {
+            var payment = await _paymentService.GetPaymentByIdAsync(paymentId);
+
+            if (payment == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(payment);
+        }
+
+        [HttpGet("order/{orderId}")]
+        public async Task<IActionResult> GetPaymentsByOrder(Guid orderId)
+        {
+            var payments = await _paymentService.GetPaymentsByOrderIdAsync(orderId);
+            return Ok(payments);
         }
     }
 }
