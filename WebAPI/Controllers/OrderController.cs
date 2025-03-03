@@ -27,7 +27,7 @@ namespace WebAPI.Controllers
         }
 
         //Get all
-        [HttpGet("orders")] // accountId có thể NULL để tránh bắt buộc nhập
+        [HttpGet] // accountId có thể NULL để tránh bắt buộc nhập
         public async Task<IActionResult> GetOrder(
     [FromQuery] Guid? accountId,
     [FromQuery] Guid? orderId,

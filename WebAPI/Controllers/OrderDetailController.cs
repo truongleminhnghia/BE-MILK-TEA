@@ -24,15 +24,15 @@ namespace WebAPI.Controllers
             _orderDetailService = orderDetailService;
             _mapper = mapper;
         }
-        [HttpGet("order-details")]
+        [HttpGet]
         public async Task<IActionResult> GetOrderDetails(
-    [FromQuery] Guid? orderId,
-    [FromQuery] Guid? orderDetailId,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string? search = null,
-    [FromQuery] string? sortBy = null,
-    [FromQuery] bool isDescending = false)
+            [FromQuery] Guid? orderId,
+            [FromQuery] Guid? orderDetailId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false)
         {
             // Nếu nhập cả 2 ➝ Báo lỗi
             if (orderId.HasValue && orderDetailId.HasValue)
