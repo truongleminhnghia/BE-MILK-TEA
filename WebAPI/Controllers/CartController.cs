@@ -10,7 +10,7 @@ using Org.BouncyCastle.Asn1.Crmf;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/carts")]
     [ApiController]
     public class CartController : ControllerBase
     {

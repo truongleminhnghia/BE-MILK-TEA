@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/orderDetails")]
+    [Route("api/v1/orderdetails")]
     public class OrderDetailController : ControllerBase
     {
         private readonly IOrderDetailService _orderDetailService;
@@ -25,7 +25,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
         //Get all
-        [HttpGet("GetByOrderId/{orderId}")]
+        [HttpGet("{orderId}")]
         public async Task<IActionResult> GetAll(
             Guid orderId,
             [FromQuery] int page = 1,

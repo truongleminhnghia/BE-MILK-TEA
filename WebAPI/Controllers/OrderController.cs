@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/Orders")]
+    [Route("api/v1/orders")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -27,7 +27,7 @@ namespace WebAPI.Controllers
         }
 
         //Get all
-        [HttpGet("GetByAccountId/{accountId}")]
+        [HttpGet("{accountId}")]
 
         public async Task<IActionResult> GetAll(
             Guid accountId,
@@ -90,10 +90,10 @@ namespace WebAPI.Controllers
             return Ok(createdOrder);
         }
         //UPDATE
-        [HttpPut("{id}")]
+        [HttpPut("{orderId}")]
         //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateOrder(
-            Guid id,
+            Guid orderId,
             [FromBody] OrderUpdateRequest orderUpdateRequest
         )
         {
@@ -109,7 +109,7 @@ namespace WebAPI.Controllers
             }
 
             var order = _mapper.Map<Order>(orderUpdateRequest);
-            var updatedOrder = await _orderService.UpdateStatus(id, order);
+            var updatedOrder = await _orderService.UpdateStatus(orderId, order);
 
             if (updatedOrder == null)
             {

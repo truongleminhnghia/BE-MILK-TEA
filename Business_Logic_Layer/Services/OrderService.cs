@@ -132,7 +132,7 @@ namespace Business_Logic_Layer.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể update quantity, price", ex);
+                throw new Exception("Không thể update status", ex);
             }
         }
     }
