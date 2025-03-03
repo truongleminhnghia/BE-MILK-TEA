@@ -5,5 +5,6 @@ namespace Data_Access_Layer.Enum
         SUCCESS,
         FAILED,
         REFURN,
+        Pending,
     }
 }
