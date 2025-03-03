@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,10 @@ namespace Data_Access_Layer.Entities
         public virtual ICollection<Order>? Orders { get; set; }
         public virtual ICollection<IngredientReview>? IngredientReviews { get; set; }
 
+        [JsonIgnore]
         public Customer? Customer { get; set; }
+
+        [JsonIgnore]
         public Employee? Employee { get; set; }
         public Cart? Cart { get; set; }
 

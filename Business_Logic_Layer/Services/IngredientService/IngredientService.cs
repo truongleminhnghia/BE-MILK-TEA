@@ -48,7 +48,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                 ingredient.IngredientCode = "P" + _source.GenerateRandom8Digits();
                 ingredient.Category = categoryExists;
                 ingredient.CreateAt = DateTime.Now;
-                if (!await _ingredientRepository.CheckCode(ingredient.IngredientCode))
+                if (await _ingredientRepository.CheckCode(ingredient.IngredientCode))
                 {
                     throw new Exception("Mã nguyên liệu đã tồn tại");
                 }
