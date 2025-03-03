@@ -131,7 +131,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<bool> CheckCode(string code)
         {
-            return !await _context.Ingredients.AnyAsync(a => a.IngredientCode.Equals(code));
+            return await _context.Ingredients.AnyAsync(a => a.IngredientCode.Equals(code));
         }
     }
 }
