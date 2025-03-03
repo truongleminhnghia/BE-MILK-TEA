@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Microsoft.EntityFrameworkCore;
-using Mysqlx.Crud;
-using Org.BouncyCastle.Asn1.X509;
+
 
 namespace Data_Access_Layer.Repositories
 {

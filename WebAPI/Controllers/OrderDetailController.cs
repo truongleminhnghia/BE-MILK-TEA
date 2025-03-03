@@ -25,7 +25,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
         //Get all
-        [HttpGet("{orderId}")]
+        [HttpGet("orderid/{orderId}")]
         public async Task<IActionResult> GetAll(
             Guid orderId,
             [FromQuery] int page = 1,

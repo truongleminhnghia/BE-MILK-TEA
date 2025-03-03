@@ -27,7 +27,7 @@ namespace WebAPI.Controllers
         }
 
         //Get all
-        [HttpGet("{accountId}")]
+        [HttpGet("account/{accountId}")]
 
         public async Task<IActionResult> GetAll(
             Guid accountId,
