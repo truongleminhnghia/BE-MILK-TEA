@@ -19,13 +19,20 @@ namespace WebAPI.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreatePayment([FromBody] PaymentCreateRequest request)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            var result = await _paymentService.CreatePaymentAsync(request, HttpContext);
-            return Ok(result);
+                var result = await _paymentService.CreatePaymentAsync(request, HttpContext);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("callback")]

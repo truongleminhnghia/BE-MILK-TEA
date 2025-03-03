@@ -24,27 +24,36 @@ namespace Business_Logic_Layer.Services.VNPayService
 
         public string CreatePaymentUrl(PaymentCreateRequest request, HttpContext httpContext)
         {
+            string version = Environment.GetEnvironmentVariable("Version");
+            string tmnCode = Environment.GetEnvironmentVariable("TmnCode");
+            string hashSecret = Environment.GetEnvironmentVariable("HashSecret");
+            string baseUrl = Environment.GetEnvironmentVariable("BaseUrl");
+            string command = Environment.GetEnvironmentVariable("Command");
+            string currCode = Environment.GetEnvironmentVariable("CurrCode");
+            string locale = Environment.GetEnvironmentVariable("Locale");
+            string paymentBackReturnUrl = Environment.GetEnvironmentVariable(
+                "PaymentBackReturnUrl"
+            );
+            string timeZoneId = Environment.GetEnvironmentVariable("SE Asia Standard Time");
+
             var vnpay = new VNPayLibrary();
-            vnpay.AddRequestData("vnp_Version", _vnPayConfig.Version);
-            vnpay.AddRequestData("vnp_Command", _vnPayConfig.Command);
-            vnpay.AddRequestData("vnp_TmnCode", _vnPayConfig.TmnCode);
+            vnpay.AddRequestData("vnp_Version", version);
+            vnpay.AddRequestData("vnp_Command", command);
+            vnpay.AddRequestData("vnp_TmnCode", tmnCode);
             vnpay.AddRequestData("vnp_Amount", (request.TotalPrice * 100).ToString()); // Convert to VND (smallest unit)
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
-            vnpay.AddRequestData("vnp_CurrCode", _vnPayConfig.CurrCode);
+            vnpay.AddRequestData("vnp_CurrCode", currCode);
             vnpay.AddRequestData("vnp_IpAddr", GetIpAddress(httpContext));
-            vnpay.AddRequestData("vnp_Locale", _vnPayConfig.Locale);
+            vnpay.AddRequestData("vnp_Locale", locale);
             vnpay.AddRequestData(
                 "vnp_OrderInfo",
                 request.OrderDescription ?? _vnPayConfig.OrderInfo
             );
             vnpay.AddRequestData("vnp_OrderType", "other"); // Order type
-            vnpay.AddRequestData("vnp_ReturnUrl", _vnPayConfig.ReturnUrl);
+            vnpay.AddRequestData("vnp_ReturnUrl", paymentBackReturnUrl);
             vnpay.AddRequestData("vnp_TxnRef", request.OrderId.ToString()); // Your transaction ID
 
-            string paymentUrl = vnpay.CreateRequestUrl(
-                _vnPayConfig.PaymentUrl,
-                _vnPayConfig.HashSecret
-            );
+            string paymentUrl = vnpay.CreateRequestUrl(baseUrl, hashSecret);
             return paymentUrl;
         }
 
