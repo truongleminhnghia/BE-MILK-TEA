@@ -4,21 +4,25 @@ using Business_Logic_Layer.AutoMappers;
 using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
+using Business_Logic_Layer.Services.EmailService;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
+using Business_Logic_Layer.Services.PaymentService;
+using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Repositories;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Business_Logic_Layer.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddHttpClient();
 
 Env.Load();
 
@@ -131,6 +135,9 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
 
 // Register ImageRepository and ImageService
@@ -143,7 +150,6 @@ builder.Services.AddScoped<Source>();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
-
 // config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 
@@ -153,11 +159,13 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
+            policy
+                .WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        }
+    );
 });
 
 builder.Services.AddHttpClient<AuthenService>();
