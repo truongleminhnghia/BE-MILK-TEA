@@ -50,7 +50,7 @@ namespace Business_Logic_Layer.Services
             {
                 if (orderDetail == null)
                 {
-                    throw new ArgumentNullException(nameof(orderDetail), "OrderDetail cannot be null");
+                    throw new ArgumentNullException(nameof(orderDetail), "không có thông tin OrderDetail ");
                 }
 
                 // Fetch the ingredient product asynchronously
@@ -59,7 +59,7 @@ namespace Business_Logic_Layer.Services
                 // Ensure ingredientProduct is not null
                 if (ingredientProduct == null)
                 {
-                    throw new Exception($"IngredientProduct with ID {orderDetail.IngredientProductId} not found.");
+                    throw new Exception($"không tìm được nguuyen6 liệu với id{orderDetail.IngredientProductId}");
                 }
                 orderDetail.Price = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.TotalPrice;
                 orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
