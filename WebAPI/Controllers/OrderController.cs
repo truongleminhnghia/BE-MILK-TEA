@@ -117,11 +117,20 @@ namespace WebAPI.Controllers
         {
             if (order == null || order.orderDetailList == null || !order.orderDetailList.Any())
             {
-                return BadRequest(new { message = "Dữ liệu order lỗi hoặc không có OrderDetail" });
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    false,
+                    "Dữ liệu order lỗi hoặc không có OrderDetail"
+                    ));
             }
 
             var createdOrder = await _orderService.CreateAsync(order);
-            return Ok(createdOrder);
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Thêm đơn hàng thành công",
+                    createdOrder
+                    ));
         }
         //UPDATE
         [HttpPut("{orderId}")]
