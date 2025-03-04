@@ -59,7 +59,6 @@ namespace Business_Logic_Layer.Services
                     var b = new OrderDetail();
                     b.OrderId = createdOrder.Id;
                     b.IngredientProductId = orderDetail.IngredientProductId;
-                    b.Quantity = orderDetail.Quantity;
                     var createOrderDetail = await _orderDetailService.CreateAsync(b);
                     a.Add(createOrderDetail);
                     createdOrder.Quantity += createOrderDetail.Quantity;

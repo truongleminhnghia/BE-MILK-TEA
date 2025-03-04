@@ -49,6 +49,7 @@ namespace Business_Logic_Layer.Services
             try
             {
                 orderDetail.Price = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.TotalPrice;
+                orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
                 return await _orderDetailRepository.CreateAsync(orderDetail);
             }
             catch (Exception ex)
