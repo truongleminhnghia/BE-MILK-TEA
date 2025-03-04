@@ -14,6 +14,7 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,32 +24,36 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddHttpClient();
 
-    // Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
-//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//    {
-//        Name = "Authorization",
-//        Type = SecuritySchemeType.Http,
-//        Scheme = "Bearer",
-//        BearerFormat = "JWT",
-//        In = ParameterLocation.Header,
-//        Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
-//    });
+builder.Services.AddSwaggerGen(c =>
+{
 
-//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            Array.Empty<string>()
-//        }
-//    });
-//});
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    // Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+{
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    Scheme = "Bearer",
+    BearerFormat = "JWT",
+    In = ParameterLocation.Header,
+    Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
+});
+
+c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 
 Env.Load();
@@ -226,13 +231,12 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
-            policy
-                .WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
+            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app",
+                "http://127.0.0.1:5500") // Replace with your frontend URL
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
-        }
-    );
+        });
 });
 
 builder.Services.AddHttpClient<AuthenService>();
