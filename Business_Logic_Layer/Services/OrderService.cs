@@ -46,7 +46,6 @@ namespace Business_Logic_Layer.Services
             {
                 var source = new Source();
                 var order = _mapper.Map<Order>(orderRequest);
-                order.Id = Guid.NewGuid();
                 order.OrderCode = "OD" + source.GenerateRandom8Digits();
                 order.OrderDate = DateTime.Now;
                 order.OrderStatus= OrderStatus.PENDING_CONFIRMATION;
