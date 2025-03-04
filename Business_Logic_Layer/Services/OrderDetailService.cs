@@ -48,6 +48,19 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
+                if (orderDetail == null)
+                {
+                    throw new ArgumentNullException(nameof(orderDetail), "OrderDetail cannot be null");
+                }
+
+                // Fetch the ingredient product asynchronously
+                var ingredientProduct = await _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId);
+
+                // Ensure ingredientProduct is not null
+                if (ingredientProduct == null)
+                {
+                    throw new Exception($"IngredientProduct with ID {orderDetail.IngredientProductId} not found.");
+                }
                 orderDetail.Price = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.TotalPrice;
                 orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
                 return await _orderDetailRepository.CreateAsync(orderDetail);

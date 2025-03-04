@@ -115,9 +115,9 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddOrder([FromBody] OrderRequest order)
         {
-            if (order == null)
+            if (order == null || order.orderDetailList == null || !order.orderDetailList.Any())
             {
-                return BadRequest(new { message = "Dữ liệu order lỗi" });
+                return BadRequest(new { message = "Dữ liệu order lỗi hoặc không có OrderDetail" });
             }
 
             var createdOrder = await _orderService.CreateAsync(order);
