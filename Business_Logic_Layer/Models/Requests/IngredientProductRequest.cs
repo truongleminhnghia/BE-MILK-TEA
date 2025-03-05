@@ -11,5 +11,7 @@ namespace Business_Logic_Layer.Models.Requests
     {
         public Guid IngredientId { get; set; }
         public int Quantity { get; set; }
+
+        public ProductType ProductType { get; set; }
     }
 }
