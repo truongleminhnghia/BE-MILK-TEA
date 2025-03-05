@@ -35,7 +35,7 @@ namespace Business_Logic_Layer.Services
                 // Kiểm tra xem các nguyên liệu có tồn tại không
                 foreach (var ingredientRequest in request.Ingredients)
                 {
-                    var ingredient = await _ingredientRepository.GetByIdAsync(ingredientRequest.IngredientId);
+                    var ingredient = await _ingredientRepository.GetById(ingredientRequest.IngredientId);
                     if (ingredient == null)
                     {
                         throw new ArgumentException($"Nguyên liệu với ID {ingredientRequest.IngredientId} không tồn tại.");
@@ -91,43 +91,80 @@ namespace Business_Logic_Layer.Services
 
         public async Task<RecipeResponse?> UpdateRecipe(Guid recipeId, RecipeRequest request)
         {
-            var recipe = await _recipeRepository.GetRecipeById(recipeId);
-            if (recipe == null) return null;
-
-            // Cập nhật thông tin
-            recipe.RecipeTitle = request.RecipeTitle;
-            recipe.Content = request.Content;
-            recipe.CategoryId = request.CategoryId;
-
-            // Xóa danh sách nguyên liệu cũ và thêm mới
-            recipe.IngredientRecipes.Clear();
-            foreach (var ingredient in request.Ingredients)
+            try
             {
-                recipe.IngredientRecipes.Add(new IngredientRecipe
+                var recipe = await _recipeRepository.GetRecipeById(recipeId);
+                if (recipe == null) throw new Exception("Lấy thông tin thất bại!");
+
+                // Cập nhật thông tin công thức
+                recipe.RecipeTitle = request.RecipeTitle;
+                recipe.Content = request.Content;
+                recipe.CategoryId = request.CategoryId;
+
+                // Xóa tất cả nguyên liệu cũ trước khi thêm mới
+                await _recipeRepository.DeleteIngredientsByRecipeIdAsync(recipeId);
+
+                // Thêm nguyên liệu mới
+                recipe.IngredientRecipes = request.Ingredients.Select(ingredient => new IngredientRecipe
                 {
                     RecipeId = recipe.Id,
                     IngredientId = ingredient.IngredientId,
                     WeightOfIngredient = ingredient.WeightOfIngredient
-                });
-            }
+                }).ToList();
 
-            var isUpdated = await _recipeRepository.UpdateAsync(recipe);
-            if (!isUpdated) return null;
+                await _recipeRepository.UpdateRecipe(recipe);
 
-            // Chuyển đổi sang RecipeResponse
-            return new RecipeResponse
-            {
-                Id = recipe.Id,
-                RecipeTitle = recipe.RecipeTitle,
-                Content = recipe.Content,
-                CategoryId = recipe.CategoryId,
-                Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
+                // Trả về DTO
+                return new RecipeResponse
                 {
-                    IngredientId = ir.IngredientId,
-                    IngredientName = ir.Ingredient.IngredientName,
-                    WeightOfIngredient = ir.WeightOfIngredient
-                }).ToList()
-            };
+                    Id = recipe.Id,
+                    RecipeTitle = recipe.RecipeTitle,
+                    Content = recipe.Content,
+                    CategoryId = recipe.CategoryId,
+                    Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
+                    {
+                        IngredientId = ir.IngredientId,
+                        IngredientName = ir.Ingredient.IngredientName,
+                        WeightOfIngredient = ir.WeightOfIngredient
+                    }).ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<RecipeResponse>> GetAllRecipes(
+    string? search, string? sortBy, bool isDescending,
+    Guid? categoryId, int page, int pageSize)
+        {
+            try
+            {
+                var recipes = await _recipeRepository.GetAllRecipes(
+                search, sortBy, isDescending, categoryId, page, pageSize);
+
+                return recipes.Select(recipe => new RecipeResponse
+                {
+                    Id = recipe.Id,
+                    RecipeTitle = recipe.RecipeTitle,
+                    Content = recipe.Content,
+                    CategoryId = recipe.CategoryId,
+                    CategoryName = recipe.Category?.CategoryName,
+                    Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
+                    {
+                        IngredientId = ir.IngredientId,
+                        IngredientName = ir.Ingredient.IngredientName,
+                        WeightOfIngredient = ir.WeightOfIngredient
+                    }).ToList()
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
+                return null;
+            }
         }
 
     }

@@ -81,6 +81,30 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllRecipes(
+    string? search, string? sortBy, bool isDescending = false,
+    Guid? categoryId = null, int page = 1, int pageSize = 10)
+        {
+            try
+            {
+                var recipes = await _recipeService.GetAllRecipes(
+                search, sortBy, isDescending, categoryId, page, pageSize);
+
+                return Ok(new ApiResponse(
+                                HttpStatusCode.OK.GetHashCode(),
+                                true,
+                "Lấy danh sách công thức thành công",
+                                recipes
+                            ));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
+        }
+
+
     }
 
 }
