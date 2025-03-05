@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
+using Business_Logic_Layer.Services.NotificationService;
 using Business_Logic_Layer.Services.VNPayService;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
@@ -19,11 +20,20 @@ namespace Business_Logic_Layer.Services.PaymentService
     {
         private readonly IPaymentRepository _paymentRepository;
         private readonly IVNPayService _vnPayService;
+        private readonly INotificationService _notificationService;
+        private readonly IAccountRepository _accountRepository;
 
-        public PaymentService(IPaymentRepository paymentRepository, IVNPayService vnPayService)
+        public PaymentService(
+            IPaymentRepository paymentRepository,
+            IVNPayService vnPayService,
+            INotificationService notificationService,
+            IAccountRepository accountRepository
+        )
         {
             _paymentRepository = paymentRepository;
             _vnPayService = vnPayService;
+            _notificationService = notificationService;
+            _accountRepository = accountRepository;
         }
 
         public async Task<PaymentResponse> CreatePaymentAsync(
@@ -61,7 +71,6 @@ namespace Business_Logic_Layer.Services.PaymentService
         public async Task<PaymentResponse> ProcessPaymentCallbackAsync(IQueryCollection collections)
         {
             var response = _vnPayService.ProcessPaymentCallback(collections);
-
             if (response.Success)
             {
                 // Find the pending payment for this order
@@ -77,8 +86,19 @@ namespace Business_Logic_Layer.Services.PaymentService
                     pendingPayment.TranscationId = response.TransactionId;
                     pendingPayment.AmountPaid = response.Amount;
                     pendingPayment.RemainingAmount = pendingPayment.TotlaPrice - response.Amount;
-
                     await _paymentRepository.UpdateAsync(pendingPayment);
+
+                    // Retrieve the account associated with the order
+                    var account = await _accountRepository.GetById(response.OrderId);
+
+                    // Send payment success notification
+                    if (account != null)
+                    {
+                        await _notificationService.SendPaymentSuccessEmailAsync(
+                            pendingPayment,
+                            account
+                        );
+                    }
 
                     response.PaymentId = pendingPayment.Id;
                     response.Message = "Payment completed successfully";
@@ -89,7 +109,6 @@ namespace Business_Logic_Layer.Services.PaymentService
                     response.Message = "No pending payment found for this order";
                 }
             }
-
             return response;
         }
 
