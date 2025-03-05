@@ -31,9 +31,6 @@ namespace WebAPI.Controllers
             _categoryService = categoryService;
         }
 
-        //Lấy danh sách tất cả nguyên liệu
-        // pagesize, currentPage, total, conditionm,
-        // Get All, GET (bybId, email, code)
         // [HttpGet]
         // public async Task<IActionResult> GetAll(
         //     [FromQuery] string? search,
@@ -69,12 +66,43 @@ namespace WebAPI.Controllers
         //     );
         // }
 
+        [HttpGet]
+        public async Task<IActionResult> SearchIngredients(
+                        [FromQuery] string? search,
+                        [FromQuery] string? categorySearch,
+                        [FromQuery] Guid? categoryId,
+                        [FromQuery] string? sortBy,
+                        [FromQuery] DateTime? startDate,
+                        [FromQuery] DateTime? endDate,
+                        [FromQuery] IngredientStatus? status,
+                        [FromQuery] decimal? minPrice,
+                        [FromQuery] decimal? maxPrice,
+                        [FromQuery] bool? isSale,
+                        [FromQuery] bool isDescending = false,
+                        [FromQuery] int pageCurrent = 1,
+                        [FromQuery] int pageSize = 10)
+        {
+            var result = await _ingredientService.GetAllAsync(
+                search, categorySearch, categoryId, sortBy, isDescending,
+                pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale
+            );
+            if (result == null || !result.Data.Any())
+            {
+                return NotFound(
+                        new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
+                    );
+            }
+            return Ok(
+                    new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", result)
+                );
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
             {
-                var ingreReponse = await _ingredientService.GetIngredientByIdAsync(id);
+                var ingreReponse = await _ingredientService.GetById(id);
                 if (ingreReponse == null)
                 {
                     return NotFound(
@@ -104,7 +132,7 @@ namespace WebAPI.Controllers
                         new ApiResponse(
                             HttpStatusCode.BadRequest.GetHashCode(),
                             false,
-                            "Data không hợp lệ"
+                            "Thông tin nguyên liệu không được bỏ trống"
                         )
                     );
                 }
@@ -135,74 +163,34 @@ namespace WebAPI.Controllers
             }
         }
 
-        // //Cập nhật nguyên liệu
-        // [HttpPut("{id}")]
-        // //[Authorize(Roles = "ROLE_STAFF")]
-        // public async Task<IActionResult> Update(Guid id, [FromBody] IngredientRequest ingredient)
-        // {
-        //     if (ingredient == null || id == Guid.Empty)
-        //     {
-        //         return BadRequest(
-        //             new ApiResponse(
-        //                 HttpStatusCode.BadRequest.GetHashCode(),
-        //                 false,
-        //                 "Data không hợp lệ"
-        //             )
-        //         );
-        //     }
+        [HttpPut("{id}")]
+        //[Authorize(Roles = "ROLE_STAFF")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngredientRequest request, bool? status = false)
+        {
+            if (status == true && id != null)
+            {
+                bool result = await _ingredientService.ChangeStatus(id);
+                if (!result)
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
+                }
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thay đổi trạng thái thành công", null));
+            }
+            else if (id != null && request != null)
+            {
+                IngredientResponse ingredientResponse = await _ingredientService.Update(id, request);
+                if (ingredientResponse == null)
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Cập nhật nguyên liệu thất bại", null));
+                }
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Cập nhật nguyên liệu thành công", ingredientResponse));
+            }
+            else
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                                    new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
+            }
 
-        //     if (string.IsNullOrWhiteSpace(ingredient.ImageUrl))
-        //     {
-        //         return BadRequest(
-        //             new ApiResponse(
-        //                 HttpStatusCode.BadRequest.GetHashCode(),
-        //                 false,
-        //                 "ImageUrl không được để trống"
-        //             )
-        //         );
-        //     }
-
-        //     var existingIngredient = await _ingredientService.GetIngredientByIdAsync(id);
-        //     if (existingIngredient == null)
-        //     {
-        //         return NotFound(
-        //             new ApiResponse(
-        //                 HttpStatusCode.NotFound.GetHashCode(),
-        //                 false,
-        //                 "Không tìm thấy nguyên liệu"
-        //             )
-        //         );
-        //     }
-
-        //     var ingredientEntity = _mapper.Map<Ingredient>(ingredient);
-        //     ingredientEntity.Id = id;
-
-        //     ingredientEntity.ImageUrl = ingredient.ImageUrl;
-
-        //     var updatedIngredient = await _ingredientService.UpdateIngredientAsync(
-        //         id,
-        //         ingredientEntity
-        //     );
-
-        //     return Ok(
-        //         new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Cập nhật thành công")
-        //     );
-        // }
-
-        // //  Xóa nguyên liệu
-        // // id nhận về là string
-        // [HttpDelete("{id}")]
-        // //[Authorize("ROLE_STAFF")]
-        // public async Task<IActionResult> Delete(Guid id)
-        // {
-        //     var ingredient = await _ingredientService.GetIngredientByIdAsync(id);
-        //     if (ingredient == null)
-        //     {
-        //         return NotFound(new { message = "Ingredient not found" });
-        //     }
-
-        //     await _ingredientService.DeleteIngredientAsync(id);
-        //     return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Xoá thành công"));
-        // }
+        }
     }
 }
