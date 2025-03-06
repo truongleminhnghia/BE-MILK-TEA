@@ -54,7 +54,7 @@ namespace WebAPI.Controllers
                                 page,
                                 pageSize
                             );
-                if (categories == null || categories.Any())
+                if (categories == null || !categories.Any())
                 {
                     return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
                 }

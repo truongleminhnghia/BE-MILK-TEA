@@ -29,6 +29,7 @@ namespace Business_Logic_Layer.Models.Responses
         public float Rate { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
+        public string IngredientType { get; set; }
 
         public List<ImageRespone?> Images { get; set; }
     }
