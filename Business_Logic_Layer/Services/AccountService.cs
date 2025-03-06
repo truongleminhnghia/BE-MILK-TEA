@@ -16,6 +16,7 @@ using Azure.Core;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.Identity.Client;
 
+
 namespace Business_Logic_Layer.Services
 {
     public class AccountService : IAccountService
@@ -102,14 +103,14 @@ namespace Business_Logic_Layer.Services
                 {
                     account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
                 }
-                var cart = new Cart
-                {
-                    Id = Guid.NewGuid(),        // Tạo ID mới cho Cart
-                    AccountId = account.Id,    // Gán ID tài khoản cho Cart
-                    CreatedAt = DateTime.UtcNow
-                };
+                //var cart = new Cart
+                //{
+                //    Id = Guid.NewGuid(),        // Tạo ID mới cho Cart
+                //    AccountId = account.Id,    // Gán ID tài khoản cho Cart
+                //    CreatedAt = DateTime.UtcNow
+                //};
 
-                await _cartRepository.Create(cart); // Lưu giỏ hàng vào database
+                //await _cartRepository.Create(cart); // Lưu giỏ hàng vào database
 
 
                 await _accountRepository.UpdateAccount(account);

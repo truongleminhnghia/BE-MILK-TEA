@@ -22,6 +22,10 @@ namespace Business_Logic_Layer.Repositories
             _context = context;
         }
 
+        public CartItemRepository()
+        {
+        }
+
         public async Task<IEnumerable<CartItem>> GetAllAsync()
         {
             try
@@ -129,9 +133,11 @@ namespace Business_Logic_Layer.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<CartItem> Create(CartItem cartItem)
+        public async Task<CartItem> Create(CartItem cartItem)
         {
-            throw new NotImplementedException();
+            await _context.CartItems.AddAsync(cartItem);
+            await _context.SaveChangesAsync();
+            return cartItem;
         }
     }
 }

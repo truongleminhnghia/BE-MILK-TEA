@@ -16,6 +16,7 @@ using Business_Logic_Layer.Utils;
 using Business_Logic_Layer.Services.Interfaces;
 using Business_Logic_Layer.Repositories;
 using Microsoft.OpenApi.Models;
+using Business_Logic_Layer.Services.Cart;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -181,7 +182,8 @@ builder.Services.AddAutoMapper(
     typeof(ImageMapper),
     typeof(IngredientProductMapper),
     typeof(AccountMapper),
-    typeof(CategoryMapper)
+    typeof(CategoryMapper),
+    typeof(CartMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
@@ -207,6 +209,7 @@ builder.Services.AddScoped<IIngredientProductRepository, IngredientProductReposi
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<ICartItemService, CartItemService>();
+builder.Services.AddScoped<CartService>();
 
 
 

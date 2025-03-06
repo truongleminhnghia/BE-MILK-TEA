@@ -17,9 +17,14 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Cart> Create(Cart cart)  // Đổi từ AddAsync() -> Create()
         {
-            await _context.Carts.AddAsync(cart);
+            _context.Carts.Add(cart);
             await _context.SaveChangesAsync();
             return cart;
+        }
+
+        public Task GetByAccountId(Guid id)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Cart?> GetByAccountIdAsync(Guid accountId)

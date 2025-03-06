@@ -10,7 +10,7 @@ using System.Net;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/cart/items")]
     [ApiController]
     public class CartItemController : ControllerBase
     {

@@ -9,6 +9,6 @@ namespace Data_Access_Layer.Repositories
         
         Task<Cart?> GetByAccountIdAsync(Guid accountId);
         Task<Cart> Create(Cart cart);
-
+        Task GetByAccountId(Guid id);
     }
 }
