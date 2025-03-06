@@ -16,6 +16,7 @@ using Azure.Core;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.Identity.Client;
 
+
 namespace Business_Logic_Layer.Services
 {
     public class AccountService : IAccountService
@@ -23,10 +24,12 @@ namespace Business_Logic_Layer.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly Source _source;
+        private readonly ICartRepository _cartRepository;
 
-        public AccountService(IAccountRepository accountRepository, IMapper mapper, Source source)
+        public AccountService(IAccountRepository accountRepository, IMapper mapper, Source source, ICartRepository cartRepository)
         {
             _accountRepository = accountRepository;
+            _cartRepository = cartRepository;
             _mapper = mapper;
             _source = source;
         }
@@ -87,6 +90,7 @@ namespace Business_Logic_Layer.Services
                 if (!string.IsNullOrEmpty(request.LastName)) account.LastName = request.LastName;
                 if (!string.IsNullOrEmpty(request.Password)) account.Password = request.Password;
 
+
                 // Cập nhật thông tin Customer nếu có
                 if (account.Customer != null && request.Customer != null && account.RoleName == RoleName.ROLE_CUSTOMER)
                 {
@@ -99,6 +103,15 @@ namespace Business_Logic_Layer.Services
                 {
                     account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
                 }
+                //var cart = new Cart
+                //{
+                //    Id = Guid.NewGuid(),        // Tạo ID mới cho Cart
+                //    AccountId = account.Id,    // Gán ID tài khoản cho Cart
+                //    CreatedAt = DateTime.UtcNow
+                //};
+
+                //await _cartRepository.Create(cart); // Lưu giỏ hàng vào database
+
 
                 await _accountRepository.UpdateAccount(account);
                 return account;
