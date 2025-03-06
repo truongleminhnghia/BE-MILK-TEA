@@ -63,10 +63,6 @@ namespace Data_Access_Layer.Entities
         public Employee? Employee { get; set; }
         public Cart? Cart { get; set; }
 
-        public Account()
-        {
-            
-        }
     }
 }
 

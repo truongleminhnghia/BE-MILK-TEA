@@ -8,7 +8,7 @@ using System.Net;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/recipe")]
 
     public class RecipeController : ControllerBase
     {

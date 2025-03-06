@@ -32,6 +32,7 @@ namespace Data_Access_Layer.Data
         public virtual DbSet<Ingredient> Ingredients { get; set; }
         public virtual DbSet<IngredientProduct> IngredientProducts { get; set; }
         public virtual DbSet<IngredientPromotion> IngredientPromotions { get; set; }
+        public virtual DbSet<IngredientQuantity> IngredientQuantities { get; set; }
         public virtual DbSet<IngredientRecipe> IngredientRecipes { get; set; }
         public virtual DbSet<IngredientReview> IngredientReviews { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
@@ -101,7 +102,18 @@ namespace Data_Access_Layer.Data
                 .Property(a => a.IngredientType)
                 .HasConversion<string>();
 
+            modelBuilder.Entity<Ingredient>()
+                .HasMany(i => i.IngredientQuantities)
+                .WithOne(iq => iq.Ingredients)
+                .HasForeignKey(iq => iq.IngredientId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<IngredientQuantity>()
+                .Property(iq => iq.IngredientType)
+                .HasConversion<string>();
+            modelBuilder.Entity<IngredientQuantity>()
+                .Property(iq => iq.ProductType)
+                .HasConversion<string>();
         }
 
         public override int SaveChanges()

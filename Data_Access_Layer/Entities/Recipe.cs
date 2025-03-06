@@ -1,3 +1,4 @@
+using Data_Access_Layer.Enum;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -28,6 +29,11 @@ namespace Data_Access_Layer.Entities
         [ForeignKey("CategoryId")]
         [Required]
         public Guid CategoryId { get; set; }
+
+        [Column("recipe_status")]
+        [Required]
+        [EnumDataType(typeof(RecipeStatusEnum))]
+        public RecipeStatusEnum RecipeStatus { get; set; }
 
         public Category? Category { get; set; }
 
