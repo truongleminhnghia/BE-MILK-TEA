@@ -29,15 +29,15 @@ namespace WebAPI.Controllers
         //Get all
         [HttpGet] // accountId có thể NULL để tránh bắt buộc nhập
         public async Task<IActionResult> GetOrder(
-    [FromQuery] Guid? accountId,
-    [FromQuery] Guid? orderId,
-    [FromQuery] OrderStatus? orderStatus,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string? search = null,
-    [FromQuery] string? sortBy = null,
-    [FromQuery] bool isDescending = false,
-    [FromQuery] DateTime? orderDate = null)
+            [FromQuery] Guid? accountId,
+            [FromQuery] Guid? orderId,
+            [FromQuery] OrderStatus? orderStatus,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] DateTime? orderDate = null)
         {
             // Nếu nhập cả 2 ➝ Báo lỗi
             if (accountId.HasValue && orderId.HasValue)
