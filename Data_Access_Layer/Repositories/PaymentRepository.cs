@@ -43,7 +43,12 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Payment> UpdateAsync(Payment payment)
         {
-            _context.Payments.Update(payment);
+            var existingPayment = await GetByIdAsync(payment.Id);
+            if (existingPayment != null)
+            {
+                _context.Entry(existingPayment).State = EntityState.Detached;
+            }
+            _context.Entry(payment).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return payment;
         }
