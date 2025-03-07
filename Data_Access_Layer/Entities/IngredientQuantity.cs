@@ -27,11 +27,6 @@ namespace Data_Access_Layer.Entities
         [Required]
         public int Quantity { get; set; }
 
-        [Column("ingredient_type", TypeName = "nvarchar(200)")]
-        [Required]
-        [EnumDataType(typeof(IngredientType))]
-        public IngredientType IngredientType { get; set; }
-
         [Column("product_type", TypeName = "nvarchar(200)")]
         [Required]
         [EnumDataType(typeof(ProductType))]

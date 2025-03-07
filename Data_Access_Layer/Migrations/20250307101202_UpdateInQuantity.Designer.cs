@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250307095247_UpdateImageInAccount")]
-    partial class UpdateImageInAccount
+    [Migration("20250307101202_UpdateInQuantity")]
+    partial class UpdateInQuantity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -450,11 +450,6 @@ namespace Data_Access_Layer.Migrations
                     b.Property<Guid>("IngredientId")
                         .HasColumnType("char(36)")
                         .HasColumnName("ingredient_id");
-
-                    b.Property<string>("IngredientType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("ingredient_type");
 
                     b.Property<string>("ProductType")
                         .IsRequired()

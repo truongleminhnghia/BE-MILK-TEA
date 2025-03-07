@@ -448,11 +448,6 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("ingredient_id");
 
-                    b.Property<string>("IngredientType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("ingredient_type");
-
                     b.Property<string>("ProductType")
                         .IsRequired()
                         .HasColumnType("nvarchar(200)")

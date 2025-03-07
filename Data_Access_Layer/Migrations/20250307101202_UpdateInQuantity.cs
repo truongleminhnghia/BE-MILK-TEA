@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data_Access_Layer.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateImageInAccount : Migration
+    public partial class UpdateInQuantity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -423,7 +423,6 @@ namespace Data_Access_Layer.Migrations
                     ingredient_quantity_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     quantity = table.Column<int>(type: "int", nullable: false),
-                    ingredient_type = table.Column<string>(type: "nvarchar(200)", nullable: false),
                     product_type = table.Column<string>(type: "nvarchar(200)", nullable: false),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)

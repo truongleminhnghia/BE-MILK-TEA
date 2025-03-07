@@ -109,9 +109,6 @@ namespace Data_Access_Layer.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<IngredientQuantity>()
-                .Property(iq => iq.IngredientType)
-                .HasConversion<string>();
-            modelBuilder.Entity<IngredientQuantity>()
                 .Property(iq => iq.ProductType)
                 .HasConversion<string>();
         }
