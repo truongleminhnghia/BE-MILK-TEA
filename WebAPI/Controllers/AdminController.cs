@@ -10,7 +10,7 @@ using System.Net;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/admins")]
+    [Route("api/v1/admins")]
     [Authorize(Roles = "ROLE_ADMIN")]
     public class AdminController : ControllerBase
     {
