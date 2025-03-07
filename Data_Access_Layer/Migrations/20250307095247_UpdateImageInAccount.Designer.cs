@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250306124032_AddIngredientQuantity")]
-    partial class AddIngredientQuantity
+    [Migration("20250307095247_UpdateImageInAccount")]
+    partial class UpdateImageInAccount
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,6 +50,11 @@ namespace Data_Access_Layer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(300)")
                         .HasColumnName("first_name");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("image_url");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -342,10 +347,6 @@ namespace Data_Access_Layer.Migrations
                     b.Property<double>("PricePromotion")
                         .HasColumnType("double")
                         .HasColumnName("price_promotion");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int")
-                        .HasColumnName("quantity");
 
                     b.Property<int>("QuantityPerCarton")
                         .HasColumnType("int")
@@ -816,6 +817,11 @@ namespace Data_Access_Layer.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("image_url");
 
                     b.Property<int>("RecipeStatus")
                         .HasColumnType("int")
