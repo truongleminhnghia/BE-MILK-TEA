@@ -55,32 +55,6 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet("callback")]
-        public async Task<IActionResult> PaymentCallback()
-        {
-            try
-            {
-                _logger.LogInformation(
-                    $"PaymentCallback endpoint called with query parameters: {Request.QueryString}"
-                );
-
-                var result = await _paymentService.ProcessPaymentCallbackAsync(Request.Query);
-                _logger.LogInformation(
-                    $"Payment callback processed: Success={result.Success}, OrderId={result.OrderId}"
-                );
-
-                // Redirect to a payment result page with the appropriate status
-                return Redirect(
-                    $"/payment/result?success={result.Success}&orderId={result.OrderId}"
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in PaymentCallback: {ex.Message}");
-                return StatusCode(500, ex.Message);
-            }
-        }
-
         [HttpGet("order/{orderId}")]
         public async Task<IActionResult> GetPaymentsByOrder(Guid orderId)
         {
