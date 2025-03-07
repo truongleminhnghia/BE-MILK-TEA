@@ -9,6 +9,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Business_Logic_Layer.Services.VNPayService
@@ -16,10 +17,12 @@ namespace Business_Logic_Layer.Services.VNPayService
     public class VNPayService : IVNPayService
     {
         private readonly VNPayConfiguration _vnPayConfig;
+        private readonly ILogger<VNPayService> _logger;
 
-        public VNPayService(IOptions<VNPayConfiguration> vnPayConfig)
+        public VNPayService(IOptions<VNPayConfiguration> vnPayConfig, ILogger<VNPayService> logger)
         {
             _vnPayConfig = vnPayConfig.Value;
+            _logger = logger;
         }
 
         public string CreatePaymentUrl(PaymentCreateRequest request, HttpContext httpContext)
@@ -59,44 +62,86 @@ namespace Business_Logic_Layer.Services.VNPayService
 
         public PaymentResponse ProcessPaymentCallback(IQueryCollection collections)
         {
-            var vnpay = new VNPayLibrary();
-            foreach (var (key, value) in collections)
-            {
-                if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
-                {
-                    vnpay.AddResponseData(key, value.ToString());
-                }
-            }
-
-            string orderId = vnpay.GetResponseData("vnp_TxnRef");
-            string vnPayTransactionId = vnpay.GetResponseData("vnp_TransactionNo");
-            string responseCode = vnpay.GetResponseData("vnp_ResponseCode");
-
-            bool isValidSignature = vnpay.ValidateSignature(
-                vnpay.GetResponseData("vnp_SecureHash"),
-                _vnPayConfig.HashSecret
+            _logger.LogInformation(
+                "Processing VNPay callback: {Collections}",
+                string.Join(", ", collections.Select(c => $"{c.Key}={c.Value}"))
             );
 
-            if (isValidSignature)
-            {
-                var response = new PaymentResponse
-                {
-                    OrderId = Guid.Parse(orderId),
-                    TransactionId = vnPayTransactionId,
-                    Success = responseCode == "00",
-                    PaymentMethod = PaymentMethod.VNPAY,
-                    Amount = Convert.ToDouble(vnpay.GetResponseData("vnp_Amount")) / 100, // Convert from smallest unit
-                    PaymentDate = DateTime.ParseExact(
-                        vnpay.GetResponseData("vnp_PayDate"),
-                        "yyyyMMddHHmmss",
-                        CultureInfo.InvariantCulture
-                    ),
-                };
+            var response = new PaymentResponse();
 
-                return response;
+            // Check if collections contains necessary data
+            if (collections.Count > 0)
+            {
+                string vnp_ResponseCode = collections["vnp_ResponseCode"];
+                string vnp_TransactionStatus = collections["vnp_TransactionStatus"];
+                string vnp_TxnRef = collections["vnp_TxnRef"];
+                string vnp_Amount = collections["vnp_Amount"];
+                string vnp_TransactionNo = collections["vnp_TransactionNo"];
+
+                _logger.LogInformation(
+                    "VNPay callback details: ResponseCode={ResponseCode}, TransactionStatus={TransactionStatus}, TxnRef={TxnRef}",
+                    vnp_ResponseCode,
+                    vnp_TransactionStatus,
+                    vnp_TxnRef
+                );
+
+                // Parse OrderId from vnp_TxnRef
+                if (Guid.TryParse(vnp_TxnRef, out Guid orderId))
+                {
+                    response.OrderId = orderId;
+                    _logger.LogInformation("Successfully parsed OrderId: {OrderId}", orderId);
+                }
+                else
+                {
+                    _logger.LogError(
+                        "Failed to parse OrderId from vnp_TxnRef: {TxnRef}",
+                        vnp_TxnRef
+                    );
+                    response.Success = false;
+                    response.Message = "Invalid order reference";
+                    return response;
+                }
+
+                // Parse Amount from vnp_Amount (note: VNPay amount is in VND with last 2 digits removed)
+                if (long.TryParse(vnp_Amount, out long amountVnd))
+                {
+                    // VNPay sends amount * 100, so divide by 100 to get actual amount
+                    double amount = (double)amountVnd / 100;
+                    response.Amount = amount;
+                    _logger.LogInformation("Successfully parsed Amount: {Amount}", amount);
+                }
+                else
+                {
+                    _logger.LogError(
+                        "Failed to parse Amount from vnp_Amount: {Amount}",
+                        vnp_Amount
+                    );
+                }
+
+                // Parse Transaction ID
+                response.TransactionId = vnp_TransactionNo;
+
+                // Check if payment was successful
+                // VNPay success codes are "00" for both ResponseCode and TransactionStatus
+                bool isSuccess = vnp_ResponseCode == "00" && vnp_TransactionStatus == "00";
+
+                response.Success = isSuccess;
+                response.Message = isSuccess ? "Payment successful" : "Payment failed";
+
+                _logger.LogInformation(
+                    "VNPay payment {Status}: {Message}",
+                    isSuccess ? "successful" : "failed",
+                    response.Message
+                );
+            }
+            else
+            {
+                _logger.LogError("Empty VNPay callback collections");
+                response.Success = false;
+                response.Message = "No VNPay response data";
             }
 
-            return new PaymentResponse { Success = false, Message = "Invalid signature" };
+            return response;
         }
 
         private string GetIpAddress(HttpContext httpContext)

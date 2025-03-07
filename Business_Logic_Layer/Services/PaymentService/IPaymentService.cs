@@ -17,7 +17,7 @@ namespace Business_Logic_Layer.Services.PaymentService
             HttpContext httpContext
         );
         Task<PaymentResponse> ProcessPaymentCallbackAsync(IQueryCollection collections);
-        Task<Payment> GetPaymentByIdAsync(Guid paymentId);
+
         Task<List<Payment>> GetPaymentsByOrderIdAsync(Guid orderId);
     }
 }
