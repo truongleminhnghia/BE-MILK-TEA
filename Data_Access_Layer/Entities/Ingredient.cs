@@ -70,10 +70,6 @@ namespace Data_Access_Layer.Entities
         [ForeignKey("CategoryId")]
         public Guid CategoryId { get; set; }
 
-        [Column("quantity")]
-        [Required]
-        public int Quantity { get; set; }
-
         [Column("is_sale")]
         [Required]
         public bool IsSale { get; set; }

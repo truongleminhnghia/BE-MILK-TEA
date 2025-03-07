@@ -41,6 +41,10 @@ namespace Data_Access_Layer.Entities
         [Phone]
         public string Phone { get; set; } = string.Empty;
 
+        [Column("image_url", TypeName = "nvarchar(1000)")] // URL
+        [Required]
+        public string ImageUrl { get; set; }
+
         [Column("role_name", TypeName = "varchar(200)")]
         [Required]
         [EnumDataType(typeof(RoleName))]
