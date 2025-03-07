@@ -1,54 +1,58 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Business_Logic_Layer.AutoMappers;
+using Business_Logic_Layer.Configurations;
 using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
+using Business_Logic_Layer.Services.NotificationService;
+using Business_Logic_Layer.Services.PaymentService;
+using Business_Logic_Layer.Services.VNPayService;
+using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Repositories;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Business_Logic_Layer.Utils;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+builder.Services.AddSwaggerGen();
+builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddHttpClient();
+builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection("VNPay"));
 
-    // Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
-    });
+// Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
+//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+//    {
+//        Name = "Authorization",
+//        Type = SecuritySchemeType.Http,
+//        Scheme = "Bearer",
+//        BearerFormat = "JWT",
+//        In = ParameterLocation.Header,
+//        Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
+//    });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+//    {
+//        {
+//            new OpenApiSecurityScheme
+//            {
+//                Reference = new OpenApiReference
+//                {
+//                    Type = ReferenceType.SecurityScheme,
+//                    Id = "Bearer"
+//                }
+//            },
+//            Array.Empty<string>()
+//        }
+//    });
+//});
 
 
 Env.Load();
@@ -96,7 +100,7 @@ var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
-//muốn chạy thì comment từ đây lại, + xóa Migration
+
 if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
 {
     throw new InvalidOperationException("JWT environment variables are not set properly.");
@@ -201,6 +205,14 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
 builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IVNPayService, VNPayService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
@@ -212,7 +224,6 @@ builder.Services.AddScoped<Source>();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
-
 // config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 
@@ -222,11 +233,13 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500") // Replace with your frontend URL
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
+            policy
+                .WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        }
+    );
 });
 
 builder.Services.AddHttpClient<AuthenService>();
@@ -243,26 +256,28 @@ app.UseAuthorization();
 app.UseHttpsRedirection();
 
 //cấu hình tự động bỏ qua xác thực đối với một số endpoint / API cụ thể ngay từ Program.cs nếu lười dùng [AllowAnonymous] cho từng API
-app.Use(async (context, next) =>
-{
-    var path = context.Request.Path.Value.ToLower();
-
-    var publicEndpoints = new[]
+app.Use(
+    async (context, next) =>
     {
-        "/api/v1/auths/register",
-        "/api/v1/auths/login",
-        "/api/v1/auths/forgot-password"
-    };
+        var path = context.Request.Path.Value.ToLower();
 
-    // Nếu request thuộc API công khai, bỏ qua xác thực
-    if (publicEndpoints.Any(endpoint => path.StartsWith(endpoint)))
-    {
+        var publicEndpoints = new[]
+        {
+            "/api/v1/auths/register",
+            "/api/v1/auths/login",
+            "/api/v1/auths/forgot-password",
+        };
+
+        // Nếu request thuộc API công khai, bỏ qua xác thực
+        if (publicEndpoints.Any(endpoint => path.StartsWith(endpoint)))
+        {
+            await next();
+            return;
+        }
+
         await next();
-        return;
     }
-
-    await next();
-});
+);
 
 app.MapControllers();
 app.UseCors(MyAllowSpecificOrigins);

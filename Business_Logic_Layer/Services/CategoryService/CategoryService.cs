@@ -1,3 +1,5 @@
+﻿using AutoMapper;
+using Data_Access_Layer.Entities;
 ﻿using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
@@ -6,6 +8,7 @@ namespace Business_Logic_Layer.Services.CategoryService
 {
     public class CategoryService : ICategoryService
     {
+        private readonly IMapper _mapper;
         private readonly ICategoryRepository _categoryRepository;
         public CategoryService(ICategoryRepository categoryRepository)
         {
