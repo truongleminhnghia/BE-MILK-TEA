@@ -13,7 +13,7 @@ namespace Data_Access_Layer.Entities
     public class Order
     {
         [Key]
-        [Column("order_id")]
+        [Column("order_id", TypeName = "CHAR(36)")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
@@ -53,10 +53,10 @@ namespace Data_Access_Layer.Entities
 
         [Column("total_price")]
         [Required(ErrorMessage = "Totla price must be greater than 0")]
-        public double TotlaPrice { get; set; }
+        public double TotalPrice { get; set; }
 
         [Column("price_affter_promotion")]
-        public double? PriceAffterPromotion { get; set; }
+        public double? PriceAfterPromotion { get; set; }
 
         [Column("ref_code")]
         public string RefCode { get; set; } = string.Empty;

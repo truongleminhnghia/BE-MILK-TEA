@@ -4,15 +4,17 @@ using Business_Logic_Layer.AutoMappers;
 using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
+using Business_Logic_Layer.Services.EmailService;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
+using Business_Logic_Layer.Services.PromotionService;
+using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Repositories;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Business_Logic_Layer.Utils;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,20 +23,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
     // Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
-    });
+{
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    Scheme = "Bearer",
+    BearerFormat = "JWT",
+    In = ParameterLocation.Header,
+    Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
+});
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -96,7 +98,7 @@ var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
-//muốn chạy thì comment từ đây lại, + xóa Migration
+
 if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
 {
     throw new InvalidOperationException("JWT environment variables are not set properly.");
@@ -200,7 +202,14 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();   
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
@@ -212,7 +221,6 @@ builder.Services.AddScoped<Source>();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
-
 // config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 
@@ -222,10 +230,11 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500") // Replace with your frontend URL
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
+            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app",
+                "http://127.0.0.1:5500") // Replace with your frontend URL
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
         });
 });
 
