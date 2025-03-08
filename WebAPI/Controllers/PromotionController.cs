@@ -41,7 +41,7 @@ namespace WebAPI.Controllers
                 if (StartDate.HasValue && EndDate.HasValue && StartDate > EndDate)
                 {
                     return BadRequest(new ApiResponse(
-                        HttpStatusCode.BadRequest,
+                        (int)HttpStatusCode.BadRequest,
                         false,
                         "StartDate không được lớn hơn EndDate."
                     ));
@@ -52,7 +52,7 @@ namespace WebAPI.Controllers
              );
 
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    (int)HttpStatusCode.OK,
                     true,
                     promotions != null ? "Lấy dữ liệu thành công!" : " Không có Promotion nào phù hợp",
                     promotions
@@ -62,7 +62,7 @@ namespace WebAPI.Controllers
             {
                 Console.WriteLine($"Lỗi khi lấy danh sách Promotion: {ex.Message}");
                 return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(
-                    HttpStatusCode.InternalServerError,
+                    (int)HttpStatusCode.InternalServerError,
                     false,
                     "Đã xảy ra lỗi trong quá trình xử lý yêu cầu."
                 ));
@@ -76,14 +76,14 @@ namespace WebAPI.Controllers
             if (promotions == null)
             {
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    (int)HttpStatusCode.OK,
                     true,
                     "Không có promotion nào có ID đó cả.",
                     null
                 ));
             }
             return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    (int)HttpStatusCode.OK,
                     true,
                     "Lấy dữ liệu thành công!",
                     promotions
@@ -98,7 +98,7 @@ namespace WebAPI.Controllers
                 if (promotion == null)
                 {
                     return BadRequest(new ApiResponse(
-                        HttpStatusCode.BadRequest,
+                        (int)HttpStatusCode.BadRequest,
                         false,
                         "Dữ liệu promotion lỗi."
                     ));
@@ -107,7 +107,7 @@ namespace WebAPI.Controllers
                 var createdPromotion = await _promotionService.CreateAsync(promotion);
 
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    (int)HttpStatusCode.OK,
                     true,
                     "Thêm promotion thành công!",
                     createdPromotion
@@ -116,7 +116,7 @@ namespace WebAPI.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
+                    (int)HttpStatusCode.BadRequest,
                     false,
                     ex.Message
                 ));
@@ -134,7 +134,7 @@ namespace WebAPI.Controllers
                 if (promotionUpdateRequest == null)
                 {
                     return BadRequest(new ApiResponse(
-                        HttpStatusCode.BadRequest,
+                        (int)HttpStatusCode.BadRequest,
                         false,
                         "Dữ liệu không hợp lệ."
                     ));
@@ -144,7 +144,7 @@ namespace WebAPI.Controllers
                 var updatedPromotion = await _promotionService.UpdateAsync(promotionId, promotion);
 
                 return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
+                    (int)HttpStatusCode.OK,
                     true,
                     "Cập nhật thành công.",
                     updatedPromotion
@@ -153,7 +153,7 @@ namespace WebAPI.Controllers
             catch (ArgumentException ex) // Bắt lỗi ngày không hợp lệ
             {
                 return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest,
+                    (int)HttpStatusCode.BadRequest,
                     false,
                     ex.Message
                 ));
