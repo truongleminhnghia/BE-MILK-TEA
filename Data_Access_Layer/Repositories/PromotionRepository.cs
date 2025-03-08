@@ -143,7 +143,7 @@ namespace Data_Access_Layer.Repositories
                 {
                     throw new Exception("StartDate không thể lớn hơn EndDate.");
                 }
-
+                existingPromotion.PromotionType = promotion.PromotionType;
                 existingPromotion.IsActive = promotion.IsActive;
                 existingPromotion.StartDate = promotion.StartDate;
                 existingPromotion.EndDate = promotion.EndDate;

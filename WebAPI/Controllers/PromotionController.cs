@@ -113,7 +113,7 @@ namespace WebAPI.Controllers
                     createdPromotion
                 ));
             }
-            catch (ArgumentException ex) 
+            catch (ArgumentException ex)
             {
                 return BadRequest(new ApiResponse(
                     HttpStatusCode.BadRequest.GetHashCode(),
@@ -125,8 +125,8 @@ namespace WebAPI.Controllers
         //UPDATE
         [HttpPut("{promotionId}")]
         public async Task<IActionResult> UpdatePromotion(
-    Guid promotionId,
-    [FromBody] PromotionUpdateRequest promotionUpdateRequest
+        Guid promotionId,
+        [FromBody] PromotionUpdateRequest promotionUpdateRequest
 )
         {
             try
@@ -159,5 +159,6 @@ namespace WebAPI.Controllers
                 ));
             }
         }
+        
     }
 }
