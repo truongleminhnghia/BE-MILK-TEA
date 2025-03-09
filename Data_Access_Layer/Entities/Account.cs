@@ -42,7 +42,7 @@ namespace Data_Access_Layer.Entities
         public string Phone { get; set; } = string.Empty;
 
         [Column("image_url", TypeName = "nvarchar(1000)")] // URL
-        [Required]
+        // [Required]
         public string ImageUrl { get; set; }
 
         [Column("role_name", TypeName = "varchar(200)")]

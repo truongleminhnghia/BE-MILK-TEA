@@ -132,17 +132,17 @@ namespace Business_Logic_Layer.Services
                 try
                 {
 
-                    Account? currentUser = null;
+                    // Account? currentUser = null;
 
-                    try
-                    {
-                        currentUser = await _source.GetCurrentAccount();
-                    }
-                    catch (Exception ex)
-                    {
-                        // Ghi log lỗi thay vì cho lỗi này rơi thẳng vào catch chính
-                        Console.WriteLine("Lỗi khi lấy CurrentUser: " + ex.Message);
-                    }
+                    // try
+                    // {
+                    //     currentUser = await _source.GetCurrentAccount();
+                    // }
+                    // catch (Exception ex)
+                    // {
+                    //     // Ghi log lỗi thay vì cho lỗi này rơi thẳng vào catch chính
+                    //     Console.WriteLine("Lỗi khi lấy CurrentUser: " + ex.Message);
+                    // }
 
                     var existingEmail = await _accountRepository.GetByEmail(request.Email);
                     if (existingEmail != null)
