@@ -1,10 +1,12 @@
-﻿using System;
+
+using Data_Access_Layer.Data;
+using Data_Access_Layer.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Data_Access_Layer.Data;
-using Data_Access_Layer.Entities;
+
 using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,8 +15,8 @@ namespace Data_Access_Layer.Repositories
     public interface IPromotionRepository
     {
         Task<IEnumerable<Promotion>> GetAllPromotionAsync(
-            bool? IsActive, string? search, string? sortBy, 
-            bool isDescending,PromotionType? promotionType,
+            bool? IsActive, string? search, string? sortBy,
+            bool isDescending, PromotionType? promotionType,
             DateTime? startDate, DateTime? endDate,
             int page, int pageSize);
         Task<Promotion?> GetByIdAsync(Guid id);
@@ -22,6 +24,11 @@ namespace Data_Access_Layer.Repositories
         Task<Promotion?> UpdateAsync(Guid id, Promotion promotion);
         //Task<bool> DeleteAsync(Guid id);
     }
+}
+
+namespace Data_Access_Layer.Repositories
+{
+
     public class PromotionRepository : IPromotionRepository
     {
         private readonly ApplicationDbContext _context;
@@ -49,10 +56,8 @@ namespace Data_Access_Layer.Repositories
             }
         }
 
-
-
         public async Task<IEnumerable<Promotion>> GetAllPromotionAsync(
-            bool? IsActive,string? search, string? sortBy, bool isDescending,
+            bool? IsActive, string? search, string? sortBy, bool isDescending,
             PromotionType? promotionType, DateTime? startDate, DateTime? endDate,
             int page, int pageSize)
         {

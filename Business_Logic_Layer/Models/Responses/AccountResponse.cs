@@ -18,6 +18,8 @@ namespace Business_Logic_Layer.Models.Responses
         public AccountStatus AccountStatus { get; set; }
         public string Phone { get; set; } = string.Empty;
 
+        public string ImageUrl { get; set; }
+
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public RoleName RoleName { get; set; }
 
