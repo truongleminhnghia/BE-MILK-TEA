@@ -18,9 +18,19 @@ namespace Business_Logic_Layer.Services.IngredientProductService
             return await _ingredientProductRepository.CreateAsync(ingredientProduct);
         }
 
+        public async Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientId)
+        {
+            return await _ingredientProductRepository.GetIngredientProductbyId(ingredientId);
+        }
+
         public async Task<bool> IngredientExistsAsync(Guid ingredientId)
         {
             return await _ingredientProductRepository.IngredientExistsAsync(ingredientId);
+        }
+
+        public async Task<IngredientProduct> UpdateIngredientProduct(IngredientProduct ingredientProduct)
+        {
+            return await _ingredientProductRepository.UpdateIngredientProduct(ingredientProduct);   
         }
     }
 }

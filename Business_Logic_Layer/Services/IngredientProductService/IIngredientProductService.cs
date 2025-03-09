@@ -11,5 +11,7 @@ namespace Business_Logic_Layer.Services.IngredientProductService
     {
         Task<IngredientProduct> CreateAsync(IngredientProduct ingredientProduct);
         Task<bool> IngredientExistsAsync(Guid ingredientId);
+        Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientId);
+        Task<IngredientProduct> UpdateIngredientProduct(IngredientProduct ingredientProduct);
     }
 }

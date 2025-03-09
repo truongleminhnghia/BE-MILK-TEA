@@ -35,5 +35,19 @@ namespace Data_Access_Layer.Repositories
         {
             return await _context.Ingredients.AnyAsync(i => i.Id == ingredientId);
         }
+
+
+
+        public async Task<IngredientProduct> UpdateIngredientProduct(IngredientProduct ingredientProduct)
+        {
+            var existingProduct = await _context.IngredientProducts.FindAsync(ingredientProduct.Id);
+            if (existingProduct == null)
+            {
+                return null;
+            }
+            existingProduct.Quantity = existingProduct.Quantity;
+            await _context.SaveChangesAsync();
+            return existingProduct;
+        }
     }
 }
