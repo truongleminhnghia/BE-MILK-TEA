@@ -8,8 +8,13 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Entities;
-using Business_Logic_Layer.Interfaces;
-using Data_Access_Layer.Interfaces;
+using Business_Logic_Layer.Utils;
+using Data_Access_Layer.Repositories;
+using System.Text.Unicode;
+using System.Web;
+using Azure.Core;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.Identity.Client;
 
 namespace Business_Logic_Layer.Services
 {
@@ -17,11 +22,13 @@ namespace Business_Logic_Layer.Services
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
+        private readonly Source _source;
 
-        public AccountService(IAccountRepository accountRepository, IMapper mapper)
+        public AccountService(IAccountRepository accountRepository, IMapper mapper, Source source)
         {
             _accountRepository = accountRepository;
             _mapper = mapper;
+            _source = source;
         }
 
         public async Task<Account?> GetByEmail(string _email)
@@ -30,12 +37,12 @@ namespace Business_Logic_Layer.Services
             {
                 if (_email == null)
                 {
-                    throw new Exception("Id do not null");
+                    throw new Exception("Id bị thiếu");
                 }
                 var _account = await _accountRepository.GetByEmail(_email);
                 if (_account == null)
                 {
-                    throw new Exception("Account do not exits");
+                    throw new Exception("Tài khoản không tồn tại");
                 }
                 return _account;
             }
@@ -46,20 +53,20 @@ namespace Business_Logic_Layer.Services
             }
         }
 
-        public async Task<Account?> GetById(string _id)
+        public async Task<AccountResponse?> GetById(Guid id)
         {
             try
             {
-                if (_id == null)
+                if (id == null)
                 {
-                    throw new Exception("Id do not null");
+                    throw new Exception("Id bị thiếu");
                 }
-                var _account = await _accountRepository.GetById(_id);
+                var _account = await _accountRepository.GetById(id);
                 if (_account == null)
                 {
-                    throw new Exception("Account do not exits");
+                    throw new Exception("Tài khoản không tồn tại");
                 }
-                return _account;
+                return MapToAccountResponse.ComplexAccountResponse(_account);
             }
             catch (Exception ex)
             {
@@ -67,80 +74,50 @@ namespace Business_Logic_Layer.Services
                 return null;
             }
         }
-
-        public async Task<Account> CreateAccount(CreateAccountRequest createAccountRequest)
+               
+        public async Task<Account?> UpdateAccount(Guid id, UpdateAccountRequest request)
         {
             try
             {
-                foreach (var item in createAccountRequest.GetType().GetProperties())
+                var account = await _accountRepository.GetById(id);
+                if (account == null) return null;
+
+                // Cập nhật thông tin Account
+                if (!string.IsNullOrEmpty(request.FirstName)) account.FirstName = request.FirstName;
+                if (!string.IsNullOrEmpty(request.LastName)) account.LastName = request.LastName;
+                if (!string.IsNullOrEmpty(request.Password)) account.Password = request.Password;
+
+                // Cập nhật thông tin Customer nếu có
+                if (account.Customer != null && request.Customer != null && account.RoleName == RoleName.ROLE_CUSTOMER)
                 {
-                    if (item.GetValue(createAccountRequest) == null)
-                    {
-                        throw new Exception("Request do not null!");
-                    }
-                }
-                var account = _mapper.Map<Account>(createAccountRequest);
-                account.AccountStatus = AccountStatus.AWAITING_CONFIRM;
-                account.RoleName = RoleName.ROLE_CUSTOMER;
-                var result = await _accountRepository.Create(account);
-                if (result == null)
-                {
-                    throw new Exception("Create account failed");
+                    account.Customer.TaxCode = request.Customer.TaxCode ?? account.Customer.TaxCode;
+                    account.Customer.Address = request.Customer.Address ?? account.Customer.Address;
                 }
 
+                // Cập nhật thông tin Employee nếu có
+                if (account.Employee != null && request.Employee != null && account.RoleName == RoleName.ROLE_STAFF)
+                {
+                    account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
+                }
+
+                await _accountRepository.UpdateAccount(account);
                 return account;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);
-                return null;
-            }
-        }
-         
-        
-
-        public async Task<Employee> CreateStaff(CreateStaffRequest createEmployeeRequest)
-        {
-            try
-            {
-                if (createEmployeeRequest == null)
-                {
-                    throw new Exception("Request do not null!");
-                }
-                var _account = _mapper.Map<Account>(createEmployeeRequest);
-                _account.RoleName = RoleName.ROLE_STAFF;
-                _account.AccountStatus = AccountStatus.ACTIVE;
-                var _result = await _accountRepository.Create(_account);
-                return _result;
-            }
-            catch (Exception ex)
-            {
                 Console.WriteLine("error: " + ex.Message);
                 return null;
             }
         }
 
-        //public async Task<Account> CreateManager(CreateManagerRequest createManagerRequest)
-        //{
-        //    try
-        //    {
-        //        if (createManagerRequest == null)
-        //        {
-        //            throw new Exception("Request do not null!");
-        //        }
-        //        var _account = _mapper.Map<Account>(createManagerRequest);
-        //        _account.RoleName = RoleName.ROLE_MANAGER;
-        //        _account.AccountStatus = AccountStatus.ACTIVE;
-        //        _account
-        //        var _result = await _accountRepository.Create(_account);
-        //        return _result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine("error: " + ex.Message);
-        //        return null;
-        //    }
-        //}
+        public async Task<IEnumerable<Account>> GetAllAccounts(
+            string? search, string? sortBy, bool isDescending,
+            AccountStatus? accountStatus, RoleName? role, int page, int pageSize)
+        {
+            return await _accountRepository.GetAllAccounts(
+                search, sortBy, isDescending, accountStatus, role, page, pageSize);
+        }
+
     }
 }
 

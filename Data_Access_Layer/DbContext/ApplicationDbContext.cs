@@ -27,11 +27,12 @@ namespace Data_Access_Layer.Data
         public virtual DbSet<CartItem> CartItems { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
-        public virtual DbSet<Employee> Empoyees { get; set; }
+        public virtual DbSet<Employee> Employees { get; set; }
         public virtual DbSet<Image> Images { get; set; }
         public virtual DbSet<Ingredient> Ingredients { get; set; }
         public virtual DbSet<IngredientProduct> IngredientProducts { get; set; }
         public virtual DbSet<IngredientPromotion> IngredientPromotions { get; set; }
+        public virtual DbSet<IngredientQuantity> IngredientQuantities { get; set; }
         public virtual DbSet<IngredientRecipe> IngredientRecipes { get; set; }
         public virtual DbSet<IngredientReview> IngredientReviews { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
@@ -94,7 +95,22 @@ namespace Data_Access_Layer.Data
                 .WithOne(pd => pd.Promotion)
                 .HasForeignKey<PromotionDetail>(pd => pd.PromotionId)
                 .IsRequired();
+            modelBuilder.Entity<IngredientProduct>()
+                .Property(a => a.ProductType)
+                .HasConversion<string>();
+            modelBuilder.Entity<Ingredient>()
+                .Property(a => a.IngredientType)
+                .HasConversion<string>();
 
+            modelBuilder.Entity<Ingredient>()
+                .HasMany(i => i.IngredientQuantities)
+                .WithOne(iq => iq.Ingredients)
+                .HasForeignKey(iq => iq.IngredientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<IngredientQuantity>()
+                .Property(iq => iq.ProductType)
+                .HasConversion<string>();
         }
 
         public override int SaveChanges()

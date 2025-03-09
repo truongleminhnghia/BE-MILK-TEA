@@ -3,26 +3,19 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
+using Business_Logic_Layer.Services;
 using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Data_Access_Layer.Entities;
-using Business_Logic_Layer.Interfaces;
 
 namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/auths")]
+    [AllowAnonymous]
     public class AuthenController : ControllerBase
     {
         private readonly IAuthenService _authenService;
@@ -35,97 +28,80 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("register")]
-        //public async Task<IActionResult> Register(
-        //    [FromBody] RegisterRequest _request,
-        //    [FromQuery] string? _typeLogin = null) // Cho phép null
-        public async Task<IActionResult> Register(
-            [FromBody] RegisterRequest _request)
+        public async Task<IActionResult> Register([FromBody] CreateAccountRequest _request) // Cho phép null
         {
             try
-            {
-                var account = await _authenService.Register(_request);
+             {
+                var account = await _authenService.Register(_request, false);
 
-                return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
-                    true,
-                    "Đăng ký thành công",
-                    account
-                ));
+                return Ok(new ApiResponse (HttpStatusCode.OK.GetHashCode(), true, "Đăng ký thành công", account));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(
-                    HttpStatusCode.InternalServerError,
-                    false,
-                    "An error occurred during registration. Please try again."
-                ));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse( HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
             }
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest _request, [FromQuery] string _typeLogin)
+        public async Task<IActionResult> Login([FromBody] LoginRequest? request, [FromQuery] string typeLogin)
         {
             try
             {
-                if (_typeLogin == null)
+                if (typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
-                    _typeLogin = TypeLogin.LOGIN_LOCAL.ToString();
+                    var loginSuccess = await _authenService.LoginLocal(request, typeLogin);
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Đăng nhập thành công", loginSuccess));
                 }
-
-                var _loginSuccess = await _authenService.Login(_request, _typeLogin);
-                return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
-                    true,
-                    "Đăng nhập thành công",
-                    _loginSuccess
-                    ));
+                else if (typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+                {
+                    var urlLogin = _authenService.GenerateUrl(TypeLogin.LOGIN_GOOGLE.ToString());
+                    return Ok(new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Create URL successfull",
+                        urlLogin
+                        ));
+                }
+                return BadRequest(new ApiResponse (HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại" ));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError,
-                    false,
-                    ex.Message
-                ));
+                return StatusCode(500, new ApiResponse (HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
             }
         }
 
-        [HttpPost("google-login")]
-        public async Task<ApiResponse> GoogleLogin([FromBody] GoogleLoginModel model)
-        {
-            var response = await _authenService.LoginWithGoogle(model.GoogleToken);
-            return response;
-        }
 
-
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        [HttpGet("callback")]
+        public async Task<IActionResult> CallbackAuthenticate([FromQuery] string code, [FromQuery] string type_login)
         {
             try
             {
-                await _authenService.Logout();
-                return Ok(new ApiResponse(
-                    HttpStatusCode.OK,
-                    true,
-                    "Đăng xuất thành công"
-                ));
+                var infoUser = await _authenService.AuthenticateAndFetchProfile(code, type_login);
+                if (infoUser == null)
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "failed", null));
+                }
+                if (type_login.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+                {
+                    var oauth2 = new Oauth2Request
+                    {
+                        FullName = infoUser.ContainsKey("name") ? infoUser["name"].ToString() : "",
+                        GoogleAccountId = infoUser.ContainsKey("sub") ? infoUser["sub"].ToString() : "",
+                        Email = infoUser.ContainsKey("email") ? infoUser["email"].ToString() : "",
+                        Avatar = infoUser.ContainsKey("picture") ? infoUser["picture"].ToString() : "",
+                        PhoneNumber = "",
+                    };
+                    var result = await _authenService.LoginOauth2(oauth2);
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "success", result));
+                }
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "failed", null));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError,
-                    false,
-                    ex.Message
-                ));
+                return StatusCode(500, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
             }
-        }
 
-        [HttpGet]
-        public async Task<string> Admin()
-        {
-            return await Task.FromResult("Hello");
         }
-
 
     }
 }

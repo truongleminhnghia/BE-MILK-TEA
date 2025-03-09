@@ -50,8 +50,12 @@ namespace Data_Access_Layer.Entities
         [Column("quantity_per_carton")]
         public int QuantityPerCarton { get; set; } // số lượng trong mỗi thùng ==> thùng 12 bịch
 
-        [Column("unit")]
-        public int Unit { get; set; } // đơn vị là bị or bịch
+        [Column("ingredient_type")]
+        [Required]
+        public IngredientType IngredientType  { get; set; } // Thêm Enum mới
+
+        [Column("unit", TypeName = "nvarchar(50)")]
+        public string Unit { get; set; } = string.Empty; // đơn vị là string, viết kilogram hoặc gram
 
         [Column("price_origin")]
         [Required]
@@ -65,10 +69,6 @@ namespace Data_Access_Layer.Entities
         [Required]
         [ForeignKey("CategoryId")]
         public Guid CategoryId { get; set; }
-
-        [Column("quantity")]
-        [Required]
-        public int Quantity { get; set; } // quantity của bịch
 
         [Column("is_sale")]
         [Required]
@@ -84,7 +84,9 @@ namespace Data_Access_Layer.Entities
         public ICollection<IngredientPromotion>? IngredientPromotions { get; set; }
         public ICollection<IngredientRecipe>? IngredientRecipes { get; set; }
         public Category? Category { get; set; }
+        public ICollection<IngredientQuantity>? IngredientQuantities { get; set; }
     }
+    
 }
 
 // isStaff = true ==> crud

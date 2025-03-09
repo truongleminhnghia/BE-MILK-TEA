@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data_Access_Layer.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class ImgUrlAccount : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,6 +27,7 @@ namespace Data_Access_Layer.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     phone_number = table.Column<string>(type: "varchar(15)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    image_url = table.Column<string>(type: "nvarchar(1000)", nullable: false),
                     role_name = table.Column<string>(type: "varchar(200)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -219,11 +220,12 @@ namespace Data_Access_Layer.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     weight_per_bag = table.Column<float>(type: "float", nullable: false),
                     quantity_per_carton = table.Column<int>(type: "int", nullable: false),
-                    unit = table.Column<int>(type: "int", nullable: false),
+                    ingredient_type = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    unit = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     price_origin = table.Column<double>(type: "double", nullable: false),
                     price_promotion = table.Column<double>(type: "double", nullable: false),
                     category_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    quantity = table.Column<int>(type: "int", nullable: false),
                     is_sale = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     rate = table.Column<float>(type: "float", nullable: false),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -248,7 +250,9 @@ namespace Data_Access_Layer.Migrations
                     recipe_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     recipe_title = table.Column<string>(type: "nvarchar(300)", nullable: false),
                     content = table.Column<string>(type: "nvarchar(2000)", nullable: false),
+                    image_url = table.Column<string>(type: "nvarchar(1000)", nullable: false),
                     category_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    recipe_status = table.Column<int>(type: "int", nullable: false),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
@@ -370,7 +374,9 @@ namespace Data_Access_Layer.Migrations
                     ingredient_product_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     total_price = table.Column<double>(type: "double", nullable: false),
-                    quantity = table.Column<int>(type: "int", nullable: false)
+                    quantity = table.Column<int>(type: "int", nullable: false),
+                    product_type = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -411,6 +417,29 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ingredient_quantity",
+                columns: table => new
+                {
+                    ingredient_quantity_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    quantity = table.Column<int>(type: "int", nullable: false),
+                    product_type = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ingredient_quantity", x => x.ingredient_quantity_id);
+                    table.ForeignKey(
+                        name: "FK_ingredient_quantity_ingredient_ingredient_id",
+                        column: x => x.ingredient_id,
+                        principalTable: "ingredient",
+                        principalColumn: "ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "ingredient_review",
                 columns: table => new
                 {
@@ -444,7 +473,8 @@ namespace Data_Access_Layer.Migrations
                 {
                     ingredient_recipe_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    recipe_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                    recipe_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    weight_of_ingredient = table.Column<float>(type: "float", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -582,6 +612,11 @@ namespace Data_Access_Layer.Migrations
                 column: "promotion_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ingredient_quantity_ingredient_id",
+                table: "ingredient_quantity",
+                column: "ingredient_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ingredient_recipe_ingredient_id",
                 table: "ingredient_recipe",
                 column: "ingredient_id");
@@ -660,6 +695,9 @@ namespace Data_Access_Layer.Migrations
 
             migrationBuilder.DropTable(
                 name: "ingredient_promotion");
+
+            migrationBuilder.DropTable(
+                name: "ingredient_quantity");
 
             migrationBuilder.DropTable(
                 name: "ingredient_recipe");

@@ -2,8 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using Business_Logic_Layer.Interfaces;
+using System.Security.Claims;
+using Data_Access_Layer.Repositories;
+using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Http;
+using AutoMapper;
+using Business_Logic_Layer.Services;
 
 namespace Business_Logic_Layer.Utils
 {
@@ -12,10 +16,15 @@ namespace Business_Logic_Layer.Utils
         /// nơi tập hợp các hàm viết chung của project
         /// 
         private readonly IJwtService _jwtService;
-
-        public Source(IJwtService jwtService)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IAccountRepository _accountRepository;
+        private readonly IMapper _mapper;
+        public Source(IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IAccountRepository accountRepository, IMapper mapper)
         {
             _jwtService = jwtService;
+            _httpContextAccessor = httpContextAccessor;
+            _accountRepository = accountRepository;
+            _mapper = mapper;
         }
 
         public string CheckRoleName()
@@ -49,9 +58,40 @@ namespace Business_Logic_Layer.Utils
             return result;
         }
 
+        // ham nay dung de lay thong tin cua user dang dang nhap
+        public async Task<Account?> GetCurrentAccount()
+        {
+            var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                throw new UnauthorizedAccessException("Người dùng chưa đăng nhập hoặc token không hợp lệ"); ;
+            }
+
+            return await _accountRepository.GetById(userId);
+        }
+
         public string GenerateRandom8Digits()
         {
             return new Random().Next(10000000, 99999999).ToString();
+        }
+
+        public int CheckDate(DateTime input)
+        {
+            // Lấy ngày hiện tại
+            DateTime today = DateTime.Now;
+            int daysRemaining = (input - today).Days;
+            if (daysRemaining < 0)
+            {
+                return -1; // hết date
+            }
+            else if (daysRemaining <= 10)
+            {
+                return 1; // còn dưới 10 ngày
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }
