@@ -35,7 +35,7 @@ namespace Business_Logic_Layer.Services
                 // Kiểm tra xem các nguyên liệu có tồn tại không
                 foreach (var ingredientRequest in request.Ingredients)
                 {
-                    var ingredient = await _ingredientRepository.GetByIdAsync(ingredientRequest.IngredientId);
+                    var ingredient = await _ingredientRepository.GetById(ingredientRequest.IngredientId);
                     if (ingredient == null)
                     {
                         throw new ArgumentException($"Nguyên liệu với ID {ingredientRequest.IngredientId} không tồn tại.");

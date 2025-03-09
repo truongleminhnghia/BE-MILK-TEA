@@ -12,12 +12,10 @@ namespace Data_Access_Layer.Repositories
     public class ImageRepository : IImageRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<ImageRepository> _logger;
 
-        public ImageRepository(ApplicationDbContext context, ILogger<ImageRepository> logger = null)
+        public ImageRepository(ApplicationDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
 
@@ -28,23 +26,20 @@ namespace Data_Access_Layer.Repositories
             return image;
         }
 
-        public async Task<bool> CheckImageUrl(string url)
+
+        public async Task<bool> Delete(Guid id)
         {
-            return !await _context.Images.AnyAsync(img => img.ImageUrl == url);
+            _context.Images.Remove(await _context.Images.FirstOrDefaultAsync(i => i.Id == id));
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<bool> Delete(Guid id, Guid ingredientId)
+        public async Task<Image> GetById(Guid id)
         {
-            var imageExisting = await GetIdAndIngredient(id, ingredientId);
-            if (imageExisting != null)
-            {
-                _context.Images.Remove(imageExisting);
-                return true;
-            }
-            return false;
+            return await _context.Images.FirstAsync(i => i.Id == id);
         }
 
-        public async Task<List<Image>> GetByIdAndIngredient(Guid id, Guid ingredientId)
+        public async Task<List<Image>> GetByIdAndIngredientByList(Guid id, Guid ingredientId)
         {
             return await _context.Images.Where(img => img.Id == id && img.IngredientId == ingredientId).ToListAsync();
         }
@@ -59,14 +54,15 @@ namespace Data_Access_Layer.Repositories
             return await _context.Images.FirstOrDefaultAsync(img => img.Id.Equals(id) && img.IngredientId.Equals(ingredientId));
         }
 
-        public async Task<bool> Update(Guid id, Guid ingredientId, Image image)
+        public async Task<bool> Update(Guid id, Image image)
         {
-            var imageExisting = await GetIdAndIngredient(id, ingredientId);
-            if (imageExisting != null)
+            var imageExisting = await _context.Images.FirstOrDefaultAsync(i => i.Id == id);
+            if (imageExisting == null)
             {
-                _context.Entry(imageExisting).State = EntityState.Detached;
+                return false;
             }
-            _context.Entry(image).State = EntityState.Modified;
+            imageExisting.ImageUrl = image.ImageUrl;
+            _context.Images.Update(imageExisting);
             await _context.SaveChangesAsync();
             return true;
         }

@@ -123,7 +123,7 @@ namespace Business_Logic_Layer.Services
             }
         }
 
-        public async Task<AccountResponse> Register(CreateAccountRequest request)
+        public async Task<AccountResponse> Register(CreateAccountRequest request, bool isAdmin)
         {
             var strategy = _context.Database.CreateExecutionStrategy(); // Lấy chiến lược thực thi an toàn
             return await strategy.ExecuteAsync(async () =>
@@ -149,44 +149,44 @@ namespace Business_Logic_Layer.Services
                     {
                         throw new Exception("Email đã tồn tại.");
                     }
-                    Account account = _mapper.Map<Account>(request);
-                    if (currentUser == null)
-                    {
-                        account.Password = _passwordHasher.HashPassword(request.Password);
-                        account.AccountStatus = AccountStatus.ACTIVE;
-                        account.RoleName = RoleName.ROLE_CUSTOMER;
-                        await _accountRepository.Create(account);
 
-                        if (account.Customer == null)
-                        {
-                            account.Customer = new Customer();
-                        }
+                    Account account = _mapper.Map<Account>(request);
+                    account.Password = _passwordHasher.HashPassword(request.Password);
+                    account.AccountStatus = AccountStatus.ACTIVE;
+                    if (isAdmin)
+                    {
+                        account.RoleName = request.RoleName;
+
+                    }
+                    else
+                    {
+                        account.RoleName = RoleName.ROLE_CUSTOMER;
+                    }
+                    await _accountRepository.Create(account);
+
+                    if (account.RoleName.ToString() == RoleName.ROLE_CUSTOMER.ToString())
+                    {
+                        account.Customer = new Customer();
                         account.Customer.AccountId = account.Id;
                         account.Customer.TaxCode = string.Empty;
                         account.Customer.Address = string.Empty;
                         await _customerRepository.Create(account.Customer);
                     }
-
-                    if (currentUser?.RoleName == RoleName.ROLE_ADMIN)
+                    else
                     {
-                        account.Password = _passwordHasher.HashPassword(request.Password);
-                        account.AccountStatus = AccountStatus.ACTIVE;
-                        await _accountRepository.Create(account);
-
-                        if (account.Employee == null)
-                        {
-                            account.Employee = new Employee();
-                        }
+                        account.Employee = new Employee();
                         account.Employee.AccountId = account.Id;
-                        bool isUniqueRefCode; // bool isUniqueRefCode = true;
-                        do
+                        string refCode = _source.GenerateRandom8Digits().ToString();
+                        
+                        if (await _employeeRepository.CheckRefCode(refCode))
                         {
-                            account.Employee.RefCode = account.Employee.RefCode = _source.GenerateRandom8Digits().ToString();
-                            isUniqueRefCode = await _employeeRepository.CheckRefCode(account.Employee.RefCode);
+                            throw new Exception("RefCode đã tồn tại");
                         }
-                        while (!isUniqueRefCode);
+                        account.Employee.RefCode = refCode;
+
                         await _employeeRepository.Create(account.Employee);
                     }
+
                     await transaction.CommitAsync(); // Commit transaction khi mọi thứ thành công
                     return MapToAccountResponse.ComplexAccountResponse(account);
                 }

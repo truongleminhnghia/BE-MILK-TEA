@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Data_Access_Layer.Data;
+using Data_Access_Layer.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,11 +40,11 @@ namespace Data_Access_Layer.Repositories
             }
 
             try
-            {
+        {
                 _context.Promotions.Add(promotion);
-                await _context.SaveChangesAsync();
-                return promotion;
-            }
+            await _context.SaveChangesAsync();
+            return promotion;
+        }
             catch (Exception ex)
             {
                 throw new Exception("Lỗi khi tạo promotion.", ex);

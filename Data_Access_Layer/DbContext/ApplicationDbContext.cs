@@ -2,7 +2,6 @@
 using Data_Access_Layer.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +22,6 @@ namespace Data_Access_Layer.Data
 
         }
 
-    
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Cart> Carts { get; set; }
         public virtual DbSet<CartItem> CartItems { get; set; }
@@ -34,6 +32,7 @@ namespace Data_Access_Layer.Data
         public virtual DbSet<Ingredient> Ingredients { get; set; }
         public virtual DbSet<IngredientProduct> IngredientProducts { get; set; }
         public virtual DbSet<IngredientPromotion> IngredientPromotions { get; set; }
+        public virtual DbSet<IngredientQuantity> IngredientQuantities { get; set; }
         public virtual DbSet<IngredientRecipe> IngredientRecipes { get; set; }
         public virtual DbSet<IngredientReview> IngredientReviews { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
@@ -103,7 +102,15 @@ namespace Data_Access_Layer.Data
                 .Property(a => a.IngredientType)
                 .HasConversion<string>();
 
+            modelBuilder.Entity<Ingredient>()
+                .HasMany(i => i.IngredientQuantities)
+                .WithOne(iq => iq.Ingredients)
+                .HasForeignKey(iq => iq.IngredientId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<IngredientQuantity>()
+                .Property(iq => iq.ProductType)
+                .HasConversion<string>();
         }
 
         public override int SaveChanges()
