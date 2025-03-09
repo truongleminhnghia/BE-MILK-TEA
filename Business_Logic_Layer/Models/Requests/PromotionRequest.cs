@@ -17,5 +17,4 @@ namespace Business_Logic_Layer.Models.Requests
         public PromotionType PromotionType { get; set; }
 
     }
-
 }
