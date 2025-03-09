@@ -10,13 +10,20 @@ namespace Data_Access_Layer.Repositories
 {
     public interface IIngredientRepository
     {
-        Task<IEnumerable<Ingredient>> GetAllAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status);
-        Task<Ingredient> GetByIdAsync(Guid id);
+        public IQueryable<Ingredient> GetAll(
+        string? search,
+        string? categorySearch,
+        Guid? categoryId,
+        DateTime? startDate,
+        DateTime? endDate,
+        IngredientStatus? status,
+        decimal? minPrice,
+        decimal? maxPrice,
+        bool? isSale);
+        Task<Ingredient> GetById(Guid id);
         Task<Ingredient> CreateAsync(Ingredient ingredient);
         Task<Ingredient> UpdateAsync(Guid id, Ingredient ingredient);
-        Task<bool> DeleteAsync(Guid id);
-        Task<Ingredient> GetLastIngredientCode();
         Task<bool> CheckCode(string code);
-        Task<Ingredient> GetIngredientByIdAsync(Guid ingredientId);
+        Task<bool> ChangeStatus(Guid id);
     }
 }

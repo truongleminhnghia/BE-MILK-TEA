@@ -7,12 +7,12 @@ namespace Data_Access_Layer.Repositories
 {
     public interface IImageRepository
     {
-        Task<List<Image>> GetByIdAndIngredient(Guid id, Guid ingredientId);
+        Task<List<Image>> GetByIdAndIngredientByList(Guid id, Guid ingredientId);
         Task<List<Image>> GetByIngredient(Guid ingredientId);
         Task<Image> GetIdAndIngredient(Guid id, Guid ingredientId);
         Task<Image> AddImageAsync(Image image);
-        Task<bool> Update(Guid id, Guid ingredientId, Image image);
-        Task<bool> Delete(Guid id, Guid ingredientId);
-        Task<bool> CheckImageUrl(string url);
+        Task<Image> GetById(Guid id);
+        Task<bool> Update(Guid id, Image image);
+        Task<bool> Delete(Guid id);
     }
 }

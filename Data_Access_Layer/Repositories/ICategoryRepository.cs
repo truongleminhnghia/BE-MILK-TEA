@@ -15,5 +15,6 @@ namespace Data_Access_Layer.Repositories
         Task<Category?> GetByNameAsync(string name);
         Task<Category?> UpdateAsync(Guid id, Category category);
         Task<bool> DeleteAsync(Guid id);
+        public Task<List<Dictionary<string, object>>> GetBySomeField(List<string> fields, CategoryStatus status);
     }
 }

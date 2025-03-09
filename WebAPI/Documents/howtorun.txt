@@ -30,8 +30,7 @@ và thực hiện các lệnh bên dưới để khởi tạo biến môi trư�
                 $env:PASSWORD_LOCAL="12345"
                 $env:DATABASE_NAME_LOCAL="DB_MILK_TEA"
                 $env:SSLMODE="Required"
-                (đối với JWT thì sẽ sử dụng chung biến)            
-                $env:JWT_SECRET_KEY="E007827940DB15A8380D0A2C12CFDBF58C92553A14D80611BDBF3C7CAC06C09B16BCDD6DDE82A5D616DB8C6EE2577243F4C24F36605EF478EFDB03DE3FCFE47C"
+                (đối với JWT thì sẽ sử dụng chung biến)            $env:JWT_SECRET_KEY="E007827940DB15A8380D0A2C12CFDBF58C92553A14D80611BDBF3C7CAC06C09B16BCDD6DDE82A5D616DB8C6EE2577243F4C24F36605EF478EFDB03DE3FCFE47C"
                 $env:JWT_ISSUER="https://localhost:7190"
                 $env:JWT_AUDIENCE="https://localhost:7190"
                 $env:JWT_EXPIRY_MINUTES = "30"

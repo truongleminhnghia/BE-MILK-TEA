@@ -12,7 +12,7 @@ using System.Net;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/accounts")]
+    [Route("api/v1/accounts")]
 
     public class AccountController : ControllerBase
     {
