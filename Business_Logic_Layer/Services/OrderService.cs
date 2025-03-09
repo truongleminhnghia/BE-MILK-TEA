@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
+using Business_Logic_Layer.Services.IngredientProductService;
+using Business_Logic_Layer.Services.IngredientService;
 using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
@@ -30,15 +32,21 @@ namespace Business_Logic_Layer.Services
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderDetailService _orderDetailService;
+        private readonly IIngredientProductService _ingredientProductService;
+        //private readonly IIngredientService _ingredientService;
         private readonly CartRepository _cartRepository;
         private readonly CartItemService _cartItemService;
         private readonly IMapper _mapper;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService)
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, IIngredientProductService ingredientProductService
+            //, IIngredientService ingredientService
+            )
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
             _orderDetailService = orderDetailService;
+            _ingredientProductService = ingredientProductService;
+            //_ingredientService = ingredientService;
         }
         public async Task<OrderResponse> CreateAsync(OrderRequest orderRequest)
         {
@@ -51,23 +59,39 @@ namespace Business_Logic_Layer.Services
                 order.OrderStatus= OrderStatus.PENDING_CONFIRMATION;
                 //order.PriceAfterPromotion = order.TotalPrice - promotionPrice;
                 var createdOrder = await _orderRepository.CreateAsync(order);
-                List<OrderDetail> a = new List<OrderDetail>();
+                List<OrderDetail> orderDetailList = new List<OrderDetail>();
 
                 foreach (OrderDetailRequest orderDetail in orderRequest.orderDetailList)
                 {
-                    var b = new OrderDetail();
-                    b.OrderId = createdOrder.Id;
-                    b.IngredientProductId = orderDetail.IngredientProductId;
-                    var createOrderDetail = await _orderDetailService.CreateAsync(b);
-                    a.Add(createOrderDetail);
+                    var orderDetails = new OrderDetail();
+                    //var ingredients = new Ingredient();
+                    var ingredientProduct = new IngredientProduct();
+
+                    //xử lý quantity
+                    var chosenIngredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetail.IngredientProductId);
+                    if (orderDetail.Quantity > chosenIngredientProduct.Quantity)
+                    {
+                        throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({chosenIngredientProduct.Quantity}) của sản phẩm {chosenIngredientProduct.IngredientId}");
+                    }
+                    chosenIngredientProduct.Quantity -= order.Quantity;
+                    await _ingredientProductService.UpdateIngredientProduct(chosenIngredientProduct);
+                    //chosenProduct.QuantityPerCarton -= createdOrder.Quantity;
+                    
+                    //tạo orderdetail
+                    orderDetails.OrderId = createdOrder.Id;
+                    orderDetails.IngredientProductId = orderDetail.IngredientProductId;
+                    orderDetails.Quantity = orderDetail.Quantity;
+                    var createOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
+                    orderDetailList.Add(createOrderDetail);
                     createdOrder.Quantity += createOrderDetail.Quantity;
                     createdOrder.TotalPrice += createOrderDetail.Price * createOrderDetail.Quantity;
+
                 }
-                createdOrder.OrderDetails = a;
+                createdOrder.OrderDetails = orderDetailList;
                 createdOrder = await Update(createdOrder);
 
                 var returna = _mapper.Map<OrderResponse>(createdOrder);
-                returna.ConvertToOrderDetailResponse(a, _mapper);
+                returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);
                 return returna;
             }
             catch (Exception ex)
@@ -126,6 +150,24 @@ namespace Business_Logic_Layer.Services
             try
             {
                 var rover = await _orderRepository.UpdateStatusAsync(id,order);
+                var ingredientProduct = new IngredientProduct();
+                if (rover.OrderStatus == OrderStatus.CANCELED || rover.OrderStatus == OrderStatus.FAILED)
+                {
+                    var query = await _orderDetailService.GetAllOrderDetailsAsync(id,null,null,false,1,10);
+                    var orderDetails = query.Select(q => new OrderDetail
+                    {
+                        Id = q.Id,
+                        IngredientProductId = q.IngredientProductId,
+                        Quantity = q.Quantity,
+         
+                    }).ToList();
+                    foreach (OrderDetail orderDetail in orderDetails)
+                    {
+                        var chosenIngredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetail.IngredientProductId);
+                        chosenIngredientProduct.Quantity += orderDetail.Quantity;
+                        await _ingredientProductService.UpdateIngredientProduct(chosenIngredientProduct);
+                    }
+                }
                 return rover;
             }
             catch (Exception ex)
