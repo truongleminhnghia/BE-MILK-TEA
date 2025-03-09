@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250307101202_UpdateInQuantity")]
-    partial class UpdateInQuantity
+    [Migration("20250309130042_InitCreate")]
+    partial class InitCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -596,7 +596,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("ref_code");
 
-                    b.Property<double>("TotlaPrice")
+                    b.Property<double>("TotalPrice")
                         .HasColumnType("double")
                         .HasColumnName("total_price");
 

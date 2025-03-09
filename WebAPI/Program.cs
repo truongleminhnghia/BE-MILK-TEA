@@ -67,7 +67,7 @@ Env.Load();
 //var connectionString =
 //   $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
-var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
+var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Nghia_2003;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -99,10 +99,10 @@ var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
 //muốn chạy thì comment từ đây lại, + xóa Migration
-if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
-//{
+// if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
+// {
 //   throw new InvalidOperationException("JWT environment variables are not set properly.");
-//}
+// }
 
 // đăng kí xác thực
 builder

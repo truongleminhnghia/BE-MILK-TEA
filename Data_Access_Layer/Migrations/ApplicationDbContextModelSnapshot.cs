@@ -593,7 +593,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("ref_code");
 
-                    b.Property<double>("TotlaPrice")
+                    b.Property<double>("TotalPrice")
                         .HasColumnType("double")
                         .HasColumnName("total_price");
 
