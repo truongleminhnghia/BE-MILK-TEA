@@ -17,6 +17,7 @@ namespace Business_Logic_Layer.AutoMappers
             CreateMap<IngredientQuantityRequest, IngredientQuantity>().ReverseMap();
             CreateMap<IngredientQuantityResponse, IngredientQuantity>().ReverseMap();
             CreateMap<IngredientQuantityRequest, IngredientQuantityResponse>().ReverseMap();
+
         }
     }
 }
