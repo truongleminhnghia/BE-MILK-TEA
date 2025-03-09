@@ -14,8 +14,23 @@ namespace Business_Logic_Layer.Services.IngredientService
     public interface IIngredientService
     {
         // Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status);
-        Task<IngredientResponse> GetIngredientByIdAsync(Guid id);
+        public Task<PageResult<IngredientResponse>> GetAllAsync(
+        string? search,
+        string? categorySearch,
+        Guid? categoryId,
+        string? sortBy,
+        bool isDescending,
+        int pageCurrent,
+        int pageSize,
+        DateTime? startDate,
+        DateTime? endDate,
+        IngredientStatus? status,
+        decimal? minPrice,
+        decimal? maxPrice,
+        bool? isSale);
+        Task<IngredientResponse> GetById(Guid id);
         Task<IngredientResponse> CreateIngredientAsync(IngredientRequest request);
         Task<IngredientResponse> Update(Guid id, UpdateIngredientRequest request);
+        Task<bool> ChangeStatus(Guid id);
     }
 }

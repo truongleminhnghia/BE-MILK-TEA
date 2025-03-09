@@ -16,5 +16,6 @@ namespace Business_Logic_Layer.Services
         Task<Category?> GetByNameAsync(string name);
         Task<Category?> UpdateAsync(Guid id, Category category);
         Task<bool> DeleteAsync(Guid id);
+        public Task<List<Dictionary<string, object>>> GetField(string fieldQuery, CategoryStatus status);
     }
 }

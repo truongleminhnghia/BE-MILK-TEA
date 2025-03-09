@@ -32,10 +32,12 @@ namespace Business_Logic_Layer.Services.PromotionService
     {
         private readonly IMapper _mapper;
         private readonly IPromotionRepository _promotionRepository;
-        public PromotionService(IMapper mapper, IPromotionRepository promotionRepository)
+        private readonly Source _source;
+        public PromotionService(IMapper mapper, IPromotionRepository promotionRepository,Source source)
         {
             _mapper = mapper;
             _promotionRepository = promotionRepository;
+            _source = source;
         }
 
         public async Task<PromotionResponse> CreateAsync(PromotionRequest promotionRequest)
@@ -43,7 +45,7 @@ namespace Business_Logic_Layer.Services.PromotionService
             try
             {
                 var promotion = _mapper.Map<Promotion>(promotionRequest);
-                promotion.PromotionCode = "PR" + new Source().GenerateRandom8Digits();
+                promotion.PromotionCode = "PR" + _source.GenerateRandom8Digits();
                 promotion.CreateAt = DateTime.Now;
                 promotion.IsActive = true;
 
