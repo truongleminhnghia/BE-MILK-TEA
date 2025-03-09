@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 
 namespace Business_Logic_Layer.Models.Requests
@@ -38,5 +39,7 @@ namespace Business_Logic_Layer.Models.Requests
         public Guid CategoryId { get; set; }
         public bool IsSale { get; set; }
         public List<ImageRequest>? ImageRequest { get; set; }
+
+        public List<IngredientQuantityRequest>? IngredientQuantities { get; set; }  
     }
 }
