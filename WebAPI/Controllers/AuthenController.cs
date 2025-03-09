@@ -32,7 +32,7 @@ namespace WebAPI.Controllers
         {
             try
              {
-                var account = await _authenService.Register(_request);
+                var account = await _authenService.Register(_request, false);
 
                 return Ok(new ApiResponse (HttpStatusCode.OK.GetHashCode(), true, "Đăng ký thành công", account));
             }

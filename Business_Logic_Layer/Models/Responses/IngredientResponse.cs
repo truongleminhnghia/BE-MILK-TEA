@@ -24,10 +24,15 @@ namespace Business_Logic_Layer.Models.Responses
         public string Unit { get; set; }
         public double PriceOrigin { get; set; }
         public double PricePromotion { get; set; }
-        public CategoryResponse? Categories { get; set; }
+        public CategoryResponse? Category { get; set; }
         public bool IsSale { get; set; }
         public float Rate { get; set; }
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
+        public string IngredientType { get; set; }
 
         public List<ImageRespone?> Images { get; set; }
+
+        public List<IngredientQuantityResponse>? IngredientQuantities { get; set; }
     }
 }

@@ -11,6 +11,5 @@ namespace Data_Access_Layer.Repositories
     {
         Task<IngredientProduct> CreateAsync(IngredientProduct ingredientProduct);
         Task<bool> IngredientExistsAsync(Guid ingredientId);
-        Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId);
     }
 }

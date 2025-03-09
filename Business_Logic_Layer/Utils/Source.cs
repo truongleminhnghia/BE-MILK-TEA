@@ -26,10 +26,7 @@ namespace Business_Logic_Layer.Utils
             _accountRepository = accountRepository;
             _mapper = mapper;
         }
-        public Source()
-        {
 
-        }
         public string CheckRoleName()
         {
             var roleName = _jwtService.GetRole();

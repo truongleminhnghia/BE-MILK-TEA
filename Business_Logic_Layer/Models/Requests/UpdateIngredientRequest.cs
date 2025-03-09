@@ -9,16 +9,16 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class UpdateIngredientRequest
     {
-        public string Supplier { get; set; }
-        public string IngredientName { get; set; }
-        public string Description { get; set; }
-        public string FoodSafetyCertification { get; set; }
+        public string? Supplier { get; set; }
+        public string? IngredientName { get; set; }
+        public string? Description { get; set; }
+        public string? FoodSafetyCertification { get; set; }
         public IngredientStatus IngredientStatus { get; set; }
-        [Range(0.1, float.MaxValue, ErrorMessage = "Số lượng trong mỗi túi phải lớn hơn 0")]
-        public float WeightPerBag { get; set; }
-        public int QuantityPerCarton { get; set; }
-        public double PriceOrigin { get; set; }
-        public bool IsSale { get; set; }
+        public float? WeightPerBag { get; set; }
+        public int? QuantityPerCarton { get; set; }
+        public double? PriceOrigin { get; set; }
+        public bool? IsSale { get; set; }
         public List<ImageRequest>? ImageRequest { get; set; }
+        public List<IngredientQuantityRequest>? IngredientQuantities { get; set; }
     }
 }
