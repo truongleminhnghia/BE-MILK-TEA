@@ -13,6 +13,7 @@ namespace Business_Logic_Layer.Models.Responses
         public string FirstName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public AccountStatus AccountStatus { get; set; }
