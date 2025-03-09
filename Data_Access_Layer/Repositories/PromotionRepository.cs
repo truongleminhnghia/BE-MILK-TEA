@@ -1,4 +1,7 @@
-﻿using System;
+
+using Data_Access_Layer.Data;
+using Data_Access_Layer.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,8 +16,8 @@ namespace Data_Access_Layer.Repositories
     public interface IPromotionRepository
     {
         Task<IEnumerable<Promotion>> GetAllPromotionAsync(
-            bool? IsActive, string? search, string? sortBy, 
-            bool isDescending,PromotionType? promotionType,
+            bool? IsActive, string? search, string? sortBy,
+            bool isDescending, PromotionType? promotionType,
             DateTime? startDate, DateTime? endDate,
             int page, int pageSize);
         Task<Promotion?> GetByIdAsync(Guid id);
@@ -52,7 +55,7 @@ namespace Data_Access_Layer.Repositories
 
 
         public async Task<IEnumerable<Promotion>> GetAllPromotionAsync(
-            bool? IsActive,string? search, string? sortBy, bool isDescending,
+            bool? IsActive, string? search, string? sortBy, bool isDescending,
             PromotionType? promotionType, DateTime? startDate, DateTime? endDate,
             int page, int pageSize)
         {
@@ -160,6 +163,13 @@ namespace Data_Access_Layer.Repositories
             {
                 throw new Exception("Lỗi khi cập nhật promotion.", ex);
             }
+        }
+
+        public async Task<Promotion> CreatePromotionAsync(Promotion promotion)
+        {
+            await _context.Promotions.AddAsync(promotion);
+            await _context.SaveChangesAsync();
+            return promotion;
         }
     }
 }
