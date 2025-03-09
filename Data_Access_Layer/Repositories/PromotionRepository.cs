@@ -1,17 +1,11 @@
 
-<<<<<<< HEAD
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using System;
-=======
-﻿using System;
->>>>>>> 0b9d9d445b4344e7708d5e74c4a6bdf33c90f19f
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Data_Access_Layer.Data;
-using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
