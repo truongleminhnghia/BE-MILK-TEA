@@ -11,6 +11,7 @@ using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Business_Logic_Layer.Services.IngredientService
 {
@@ -31,6 +32,25 @@ namespace Business_Logic_Layer.Services.IngredientService
             _imageSerivce = imageService;
         }
 
+        public async Task<bool> ChangeStatus(Guid id)
+        {
+            try
+            {
+                var result = await _ingredientRepository.ChangeStatus(id);
+                if (!result)
+                {
+                    throw new Exception("Thay đổi trạng thái thất bại");
+                }
+                return result;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: ", ex.Message);
+                return false;
+            }
+        }
+
         public async Task<IngredientResponse> CreateIngredientAsync(IngredientRequest request)
         {
             try
@@ -48,7 +68,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                 ingredient.IngredientCode = "P" + _source.GenerateRandom8Digits();
                 ingredient.Category = categoryExists;
                 ingredient.CreateAt = DateTime.Now;
-                if (!await _ingredientRepository.CheckCode(ingredient.IngredientCode))
+                if (await _ingredientRepository.CheckCode(ingredient.IngredientCode))
                 {
                     throw new Exception("Mã nguyên liệu đã tồn tại");
                 }
@@ -64,7 +84,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                 }
                 List<ImageRespone> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
                 ingredient.Images = _mapper.Map<List<Image>>(imageRespones);
-                ingredientResponse.Categories = _mapper.Map<CategoryResponse>(categoryExists);
+                ingredientResponse.Category = _mapper.Map<CategoryResponse>(categoryExists);
                 ingredientResponse.Images = imageRespones;
                 return ingredientResponse;
             }
@@ -75,19 +95,16 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
-        public async Task<IngredientResponse> GetIngredientByIdAsync(Guid id)
+        public async Task<IngredientResponse> GetById(Guid id)
         {
             try
             {
-                var ingredient = await _ingredientRepository.GetByIdAsync(id);
+                var ingredient = await _ingredientRepository.GetById(id);
                 if (ingredient == null)
                 {
                     throw new KeyNotFoundException("Ingredient not found");
                 }
-                var res = _mapper.Map<IngredientResponse>(ingredient);
-                res.Categories = _mapper.Map<CategoryResponse>(await _categoryService.GetByIdAsync(ingredient.CategoryId));
-                res.Images = _mapper.Map<List<ImageRespone>>(await _imageSerivce.GetByIdAndIngredient(Guid.Empty, ingredient.Id));
-                return res;
+                return _mapper.Map<IngredientResponse>(ingredient);
             }
             catch (Exception ex)
             {
@@ -100,12 +117,49 @@ namespace Business_Logic_Layer.Services.IngredientService
         {
             try
             {
-                if (_ingredientRepository.GetIngredientByIdAsync(id) == null)
+                Ingredient ingredient = await _ingredientRepository.GetById(id);
+                if (ingredient == null)
                 {
                     throw new Exception("Nguyên liệu không tồn tại");
                 }
-                var ingredient = _mapper.Map<Ingredient>(request);
-                var res = _mapper.Map<IngredientResponse>(await _ingredientRepository.UpdateAsync(id, ingredient));
+                if (request.Supplier != null)
+                {
+                    ingredient.Supplier = request.Supplier;
+                }
+                if (request.IngredientName != null)
+                {
+                    ingredient.IngredientName = request.IngredientName;
+                }
+                if (request.Description != null)
+                {
+                    ingredient.Description = request.Description;
+                }
+                if (request.FoodSafetyCertification != null)
+                {
+                    ingredient.FoodSafetyCertification = request.FoodSafetyCertification;
+                }
+                if (request.IngredientStatus != null)
+                {
+                    ingredient.IngredientStatus = request.IngredientStatus;
+                }
+                if (request.WeightPerBag.HasValue && request.WeightPerBag.Value > 0f)
+                {
+                    ingredient.WeightPerBag = request.WeightPerBag.Value;
+                }
+                if (request.QuantityPerCarton.HasValue && request.QuantityPerCarton > 0)
+                {
+                    ingredient.QuantityPerCarton = request.QuantityPerCarton.Value;
+                }
+                if (request.PriceOrigin.HasValue && request.PriceOrigin.Value > 0.0)
+                {
+                    ingredient.PriceOrigin = request.PriceOrigin.Value;
+                }
+                if (request.IsSale.HasValue)
+                {
+                    ingredient.IsSale = request.IsSale.Value;
+                }
+                var i = await _ingredientRepository.UpdateAsync(id, ingredient);
+                var res = _mapper.Map<IngredientResponse>(i);
                 if (res == null)
                 {
                     throw new Exception("Cập nhật thất bại");
@@ -124,29 +178,52 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
-        // public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(
-        //     string? search,
-        //     Guid? categoryId,
-        //     string? sortBy,
-        //     bool isDescending,
-        //     int page,
-        //     int pageSize,
-        //     DateTime? startDate,
-        //     DateTime? endDate,
-        //     IngredientStatus? status
-        // )
-        // {
-        //     return await _ingredientRepository.GetAllAsync(
-        //         search,
-        //         categoryId,
-        //         sortBy,
-        //         isDescending,
-        //         page,
-        //         pageSize,
-        //         startDate,
-        //         endDate,
-        //         status
-        //     );
-        // }
+        public async Task<PageResult<IngredientResponse>> GetAllAsync(
+        string? search,
+        string? categorySearch,
+        Guid? categoryId,
+        string? sortBy,
+        bool isDescending,
+        int pageCurrent,
+        int pageSize,
+        DateTime? startDate,
+        DateTime? endDate,
+        IngredientStatus? status,
+        decimal? minPrice,
+        decimal? maxPrice,
+        bool? isSale)
+        {
+            var query = _ingredientRepository.GetAll(search, categorySearch, categoryId, startDate, endDate, status, minPrice, maxPrice, isSale);
+
+            // **Sắp xếp**
+            var validSortColumns = new HashSet<string> { "IngredientName", "CreateAt", "PriceOrigin", "CategoryName" };
+            if (!string.IsNullOrEmpty(sortBy) && validSortColumns.Contains(sortBy))
+            {
+                query = isDescending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
+                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
+            }
+            else
+            {
+                query = query.OrderByDescending(i => i.CreateAt);
+            }
+
+            // **Tổng số bản ghi**
+            int total = await query.CountAsync();
+
+            // **Phân trang**
+            var items = await query
+                .Skip((pageCurrent - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PageResult<IngredientResponse>
+            {
+                Data = _mapper.Map<List<IngredientResponse>>(items),
+                PageCurrent = pageCurrent,
+                PageSize = pageSize,
+                Total = total
+            };
+        }
     }
 }
