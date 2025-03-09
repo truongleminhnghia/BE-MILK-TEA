@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Data_Access_Layer.Data;
+using Data_Access_Layer.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -143,7 +145,7 @@ namespace Data_Access_Layer.Repositories
                 }
 
                 if (promotion.StartDate > promotion.EndDate)
-                {
+        {
                     throw new Exception("StartDate không thể lớn hơn EndDate.");
                 }
                 existingPromotion.PromotionType = promotion.PromotionType;
@@ -152,7 +154,7 @@ namespace Data_Access_Layer.Repositories
                 existingPromotion.EndDate = promotion.EndDate;
                 existingPromotion.UpdateAt = DateTime.Now;
 
-                await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
                 return existingPromotion;
             }
             catch (ArgumentException ex)

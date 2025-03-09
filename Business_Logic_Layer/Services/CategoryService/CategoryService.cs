@@ -1,5 +1,3 @@
-﻿using AutoMapper;
-using Data_Access_Layer.Entities;
 ﻿using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
@@ -8,7 +6,6 @@ namespace Business_Logic_Layer.Services.CategoryService
 {
     public class CategoryService : ICategoryService
     {
-        private readonly IMapper _mapper;
         private readonly ICategoryRepository _categoryRepository;
         public CategoryService(ICategoryRepository categoryRepository)
         {
@@ -44,6 +41,25 @@ namespace Business_Logic_Layer.Services.CategoryService
         public async Task<bool> DeleteAsync(Guid id)
         {
             return await _categoryRepository.DeleteAsync(id);
+        }
+
+        public async Task<List<Dictionary<string, object>>> GetField(string fieldQuery, CategoryStatus status)
+        {
+            try
+            {
+                var fields = fieldQuery?.Split(',').Select(f => f.Trim()).ToList() ?? new List<string> { "Id", "CategoryName" };
+                var result = await _categoryRepository.GetBySomeField(fields, status);
+                if (result == null)
+                {
+                    throw new Exception("Không có dữ liệu");
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: ", ex.Message);
+                return null;
+            }
         }
     }
 }

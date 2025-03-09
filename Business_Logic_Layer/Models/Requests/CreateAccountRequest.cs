@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Data_Access_Layer.Enum;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -21,8 +22,7 @@ namespace Business_Logic_Layer.Models.Requests
         [Required(ErrorMessage = "Tên không được bỏ trống")]
         public string FirstName { get; set; }
 
-        [Required(ErrorMessage = "Số điện thoại không được bỏ trống")]
-        public string PhoneNumber { get; set; }
+        public RoleName RoleName { get; set; }
 
     }
 

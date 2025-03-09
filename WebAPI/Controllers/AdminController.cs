@@ -10,7 +10,7 @@ using System.Net;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/admins")]
+    [Route("api/v1/admins")]
     [Authorize(Roles = "ROLE_ADMIN")]
     public class AdminController : ControllerBase
     {
@@ -20,14 +20,16 @@ namespace WebAPI.Controllers
         private readonly IJwtService _jwtService;
         private readonly IMapper _mapper;
         private readonly Source _source;
+        private readonly IAuthenService _authenService;
 
-        public AdminController(IAccountService accountService, IJwtService jwtService, IMapper mapper, Source source, IEmployeeService employeeService)
+        public AdminController(IAccountService accountService, IJwtService jwtService, IMapper mapper, Source source, IEmployeeService employeeService, IAuthenService authenService)
         {
             _accountService = accountService;
             _jwtService = jwtService;
             _mapper = mapper;
             _source = source;
             _employeeService = employeeService;
+            _authenService = authenService;
         }
 
 
@@ -41,6 +43,21 @@ namespace WebAPI.Controllers
             var employeeResponse = _mapper.Map<EmployeeResponse>(employee);
             
             return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Successfull", employeeResponse));
+        }
+
+        [HttpPost("create-account")]
+        public async Task<IActionResult> Register([FromBody] CreateAccountRequest _request) // Cho phép null
+        {
+            try
+            {
+                var account = await _authenService.Register(_request, true);
+
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Đăng ký thành công", account));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
         }
     }
 }
