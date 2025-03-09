@@ -6,6 +6,8 @@ using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
+using Business_Logic_Layer.Services.PromotionService;
+using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Repositories;
 using DotNetEnv;
@@ -55,17 +57,17 @@ Env.Load();
 
 //var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
-//var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
-//var _port = Environment.GetEnvironmentVariable("PORT_LOCAL");
-//var _user = Environment.GetEnvironmentVariable("USER_LOCAL");
-//var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
-//var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
-//var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
+var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
+var _port = Environment.GetEnvironmentVariable("PORT_LOCAL");
+var _user = Environment.GetEnvironmentVariable("USER_LOCAL");
+var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
+var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
+var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
-//var connectionString =
-//   $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+var connectionString =
+    $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
-var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
+//var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -98,9 +100,9 @@ var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 // kiểm tra xem, nó có tồn tai hay khoong
 //muốn chạy thì comment từ đây lại, + xóa Migration
 if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
-//{
-//   throw new InvalidOperationException("JWT environment variables are not set properly.");
-//}
+{
+    throw new InvalidOperationException("JWT environment variables are not set properly.");
+}
 
 // đăng kí xác thực
 builder
@@ -201,6 +203,12 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
 builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();   
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
