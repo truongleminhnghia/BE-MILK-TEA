@@ -6,6 +6,8 @@ using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
+using Business_Logic_Layer.Services.PromotionService;
+using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Repositories;
 using DotNetEnv;
@@ -201,6 +203,13 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
 builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
+
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();   
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
