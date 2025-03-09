@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250307101202_UpdateInQuantity")]
-    partial class UpdateInQuantity
+    [Migration("20250309082108_ImgUrlAccount")]
+    partial class ImgUrlAccount
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
