@@ -14,7 +14,7 @@ namespace Data_Access_Layer.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(
+        public async Task<(IEnumerable<Category>, int TotalCount)> GetAllCategoriesAsync(
             string? search, string? sortBy, bool isDescending,
             CategoryStatus? categoryStatus, CategoryType? categoryType,
             DateTime? startDate, DateTime? endDate,
@@ -71,11 +71,16 @@ namespace Data_Access_Layer.Repositories
                 query = query.OrderByDescending(c => c.CreateAt); // Default sorting by CreateAt descending
             }
 
+            int total = await query.CountAsync();
+
 
             // **Pagination**
-            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+            var categories = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
-            return await query.ToListAsync();
+            return (categories, total);
         }
 
         public async Task<Category?> GetByIdAsync(Guid id)

@@ -1,25 +1,39 @@
-﻿using Data_Access_Layer.Entities;
+﻿using AutoMapper;
+using Business_Logic_Layer.Models.Responses;
+using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Business_Logic_Layer.Services.CategoryService
 {
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        public CategoryService(ICategoryRepository categoryRepository)
+        private readonly IMapper _mapper;
+
+        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(
+        public async Task<PageResult<CategoryResponse>> GetAllCategoriesAsync(
                     string? search, string? sortBy, bool isDescending,
                     CategoryStatus? categoryStatus, CategoryType? categoryType,
                     DateTime? startDate, DateTime? endDate,
                     int page, int pageSize)
         {
-            return await _categoryRepository.GetAllCategoriesAsync(
+            var(categories, total) = await _categoryRepository.GetAllCategoriesAsync(
                 search, sortBy, isDescending, categoryStatus, categoryType, startDate, endDate, page, pageSize);
+
+            return new PageResult<CategoryResponse>
+            {
+                Data = _mapper.Map<List<CategoryResponse>>(categories),
+                PageCurrent = page,
+                PageSize = pageSize,
+                Total = total
+            };
         }
         public async Task<Category?> GetByIdAsync(Guid id)
         {
