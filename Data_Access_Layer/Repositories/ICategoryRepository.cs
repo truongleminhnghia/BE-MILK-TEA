@@ -5,7 +5,7 @@ namespace Data_Access_Layer.Repositories
 {
     public interface ICategoryRepository
     {
-        Task<IEnumerable<Category>> GetAllCategoriesAsync(
+        Task<(IEnumerable<Category>, int TotalCount)> GetAllCategoriesAsync(
             string? search, string? sortBy, bool isDescending,
             CategoryStatus? categoryStatus, CategoryType? categoryType,
             DateTime? startDate, DateTime? endDate,

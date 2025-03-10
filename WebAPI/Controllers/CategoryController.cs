@@ -54,12 +54,12 @@ namespace WebAPI.Controllers
                                 page,
                                 pageSize
                             );
-                if (categories == null || !categories.Any())
+                if (categories == null || !categories.Data.Any())
                 {
                     return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
                 }
-                var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(categories);
-                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categoryRes));
+                // var categoryRes = _mapper.Map<List<CategoryResponse>>(categories);
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categories));
             }
             else
             {
