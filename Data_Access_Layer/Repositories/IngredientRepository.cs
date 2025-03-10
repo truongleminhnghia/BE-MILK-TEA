@@ -25,10 +25,19 @@ namespace Data_Access_Layer.Repositories
         // }
 
         public async Task<IEnumerable<Ingredient>> GetAllAsync(
-            string? search, Guid? categoryId, string? sortBy, bool isDescending, int page, int pageSize, DateTime? startDate, DateTime? endDate, IngredientStatus? status)
+            string? search,
+            Guid? categoryId,
+            string? sortBy,
+            bool isDescending,
+            int page,
+            int pageSize,
+            DateTime? startDate,
+            DateTime? endDate,
+            IngredientStatus? status
+        )
         {
-            var query = _context.Ingredients
-                .Include(i => i.Category)
+            var query = _context
+                .Ingredients.Include(i => i.Category)
                 .Include(i => i.Images)
                 .AsQueryable();
             // **Filtering by name**
@@ -53,7 +62,9 @@ namespace Data_Access_Layer.Repositories
             if (startDate.HasValue && endDate.HasValue)
             {
                 DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
-                query = query.Where(i => i.CreateAt >= startDate.Value && i.CreateAt <= adjustedEndDate);
+                query = query.Where(i =>
+                    i.CreateAt >= startDate.Value && i.CreateAt <= adjustedEndDate
+                );
             }
             else if (startDate.HasValue)
             {

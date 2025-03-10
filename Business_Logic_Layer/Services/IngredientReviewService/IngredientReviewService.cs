@@ -63,7 +63,7 @@ namespace Business_Logic_Layer.Services.IngredientReviewService
             // Xác thực thành phần và tài khoản tồn tại
             var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId);
             if (ingredient == null)
-                throw new ArgumentException("Không tìm thấy thành phần");
+                throw new ArgumentException("Không tìm thấy nguyên liệu");
 
             var account = await _accountRepository.GetById(request.AccountId);
             if (account == null)
@@ -91,6 +91,16 @@ namespace Business_Logic_Layer.Services.IngredientReviewService
             };
 
             var createdReview = await _ingredientReviewRepository.CreateAsync(review);
+
+            // Cập nhật xếp hạng trung bình của thành phần
+            var ingredientReviews = await _ingredientReviewRepository.GetByIngredientIdAsync(
+                request.IngredientId
+            );
+            var averageRating = ingredientReviews.Average(r => r.Rate);
+
+            ingredient.Rate = (float)averageRating;
+            await _ingredientRepository.UpdateAsync(ingredient.Id, ingredient);
+
             return MapToResponse(createdReview);
         }
 
@@ -111,6 +121,20 @@ namespace Business_Logic_Layer.Services.IngredientReviewService
             existingReview.Rate = request.Rate;
 
             var updatedReview = await _ingredientReviewRepository.UpdateAsync(existingReview);
+
+            // Cập nhật xếp hạng trung bình của thành phần
+            var ingredientReviews = await _ingredientReviewRepository.GetByIngredientIdAsync(
+                existingReview.IngredientId
+            );
+            var averageRating = ingredientReviews.Average(r => r.Rate);
+
+            var ingredient = await _ingredientRepository.GetByIdAsync(existingReview.IngredientId);
+            if (ingredient != null)
+            {
+                ingredient.Rate = (float)averageRating;
+                await _ingredientRepository.UpdateAsync(ingredient.Id, ingredient);
+            }
+
             return MapToResponse(updatedReview);
         }
 
