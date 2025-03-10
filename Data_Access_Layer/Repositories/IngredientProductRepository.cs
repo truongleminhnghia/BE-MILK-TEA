@@ -25,29 +25,15 @@ namespace Data_Access_Layer.Repositories
             return ingredientProduct;
         }
 
-        public async Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId)
-        {
-
-            return await _context.IngredientProducts.FirstOrDefaultAsync(n => n.Id.Equals(ingredientProductId));
-        }
-
         public async Task<bool> IngredientExistsAsync(Guid ingredientId)
         {
             return await _context.Ingredients.AnyAsync(i => i.Id == ingredientId);
         }
 
-
-
-        public async Task<IngredientProduct> UpdateIngredientProduct(IngredientProduct ingredientProduct)
+        public async Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId)
         {
-            var existingProduct = await _context.IngredientProducts.FindAsync(ingredientProduct.Id);
-            if (existingProduct == null)
-            {
-                return null;
-            }
-            existingProduct.Quantity = existingProduct.Quantity;
-            await _context.SaveChangesAsync();
-            return existingProduct;
+
+            return await _context.IngredientProducts.FirstOrDefaultAsync(n => n.Id.Equals(ingredientProductId));
         }
     }
 }

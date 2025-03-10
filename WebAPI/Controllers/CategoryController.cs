@@ -37,25 +37,39 @@ namespace WebAPI.Controllers
             [FromQuery] string? sortBy = null,
             [FromQuery] bool isDescending = false,
             [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] string? _field = null
         )
         {
-            var categories = await _categoryService.GetAllCategoriesAsync(
-                search,
-                sortBy,
-                isDescending,
-                categoryStatus,
-                categoryType,
-                startDate,
-                endDate,
-                page,
-                pageSize
-            );
-
-            var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(categories);
-            return Ok(
-                new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categoryRes)
-            );
+            if (string.IsNullOrEmpty(_field))
+            {
+                var categories = await _categoryService.GetAllCategoriesAsync(
+                                search,
+                                sortBy,
+                                isDescending,
+                                categoryStatus,
+                                categoryType,
+                                startDate,
+                                endDate,
+                                page,
+                                pageSize
+                            );
+                if (categories == null || !categories.Data.Any())
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
+                }
+                // var categoryRes = _mapper.Map<List<CategoryResponse>>(categories);
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categories));
+            }
+            else
+            {
+                var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE);
+                if (categories == null || !categories.Any())
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
+                }
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categories));
+            }
         }
 
         //GET BY ID

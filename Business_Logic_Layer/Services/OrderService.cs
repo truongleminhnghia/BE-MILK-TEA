@@ -16,6 +16,7 @@ using Data_Access_Layer.Repositories;
 using Microsoft.Identity.Client;
 
 
+
 namespace Business_Logic_Layer.Services
 {
     public interface IOrderService
@@ -37,24 +38,22 @@ namespace Business_Logic_Layer.Services
         private readonly CartRepository _cartRepository;
         private readonly CartItemService _cartItemService;
         private readonly IMapper _mapper;
+        private readonly Source _source;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, IIngredientProductService ingredientProductService
-            //, IIngredientService ingredientService
-            )
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source)
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
             _orderDetailService = orderDetailService;
-            _ingredientProductService = ingredientProductService;
-            //_ingredientService = ingredientService;
+            _source = source;
         }
         public async Task<OrderResponse> CreateAsync(OrderRequest orderRequest)
         {
             try
             {
-                var source = new Source();
+                // var source = new Source();
                 var order = _mapper.Map<Order>(orderRequest);
-                order.OrderCode = "OD" + source.GenerateRandom8Digits();
+                order.OrderCode = "OD" + _source.GenerateRandom8Digits();
                 order.OrderDate = DateTime.Now;
                 order.OrderStatus= OrderStatus.PENDING_CONFIRMATION;
                 //order.PriceAfterPromotion = order.TotalPrice - promotionPrice;

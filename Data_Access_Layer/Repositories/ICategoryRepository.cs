@@ -5,7 +5,7 @@ namespace Data_Access_Layer.Repositories
 {
     public interface ICategoryRepository
     {
-        Task<IEnumerable<Category>> GetAllCategoriesAsync(
+        Task<(IEnumerable<Category>, int TotalCount)> GetAllCategoriesAsync(
             string? search, string? sortBy, bool isDescending,
             CategoryStatus? categoryStatus, CategoryType? categoryType,
             DateTime? startDate, DateTime? endDate,
@@ -15,5 +15,6 @@ namespace Data_Access_Layer.Repositories
         Task<Category?> GetByNameAsync(string name);
         Task<Category?> UpdateAsync(Guid id, Category category);
         Task<bool> DeleteAsync(Guid id);
+        public Task<List<Dictionary<string, object>>> GetBySomeField(List<string> fields, CategoryStatus status);
     }
 }
