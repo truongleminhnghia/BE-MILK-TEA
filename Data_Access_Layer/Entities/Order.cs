@@ -53,7 +53,7 @@ namespace Data_Access_Layer.Entities
 
         [Column("total_price")]
         [Required(ErrorMessage = "Totla price must be greater than 0")]
-        public double TotlaPrice { get; set; }
+        public double TotalPrice { get; set; }
 
         [Column("price_affter_promotion")]
         public double? PriceAffterPromotion { get; set; }

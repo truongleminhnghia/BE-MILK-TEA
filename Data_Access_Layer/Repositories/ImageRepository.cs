@@ -12,159 +12,59 @@ namespace Data_Access_Layer.Repositories
     public class ImageRepository : IImageRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<ImageRepository> _logger;
 
-        public ImageRepository(ApplicationDbContext context, ILogger<ImageRepository> logger = null)
+        public ImageRepository(ApplicationDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
-        public async Task<IEnumerable<Image>> GetAllImagesAsync()
+
+        public async Task<Image> AddImageAsync(Image image)
         {
-            try
-            {
-                return await _context.Set<Image>().ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Lỗi truy xuất tất cả hình ảnh");
-                throw new Exception("Không thể truy xuất hình ảnh từ cơ sở dữ liệu", ex);
-            }
+            _context.Images.AddAsync(image);
+            await _context.SaveChangesAsync();
+            return image;
         }
 
-        public async Task<Image> GetImageByIdAsync(Guid id)
+
+        public async Task<bool> Delete(Guid id)
         {
-            try
-            {
-                return await _context.Set<Image>().FindAsync(id);
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Lỗi truy xuất hình ảnh với ID {ImageId}", id);
-                throw new Exception($"Không thể truy xuất hình ảnh bằng ID {id}", ex);
-            }
+            _context.Images.Remove(await _context.Images.FirstOrDefaultAsync(i => i.Id == id));
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task AddImageAsync(Image image)
+        public async Task<Image> GetById(Guid id)
         {
-            try
-            {
-                if (image == null)
-                {
-                    throw new ArgumentNullException(nameof(image), "Hình ảnh không được rỗng");
-                }
-
-                await _context.Set<Image>().AddAsync(image);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger?.LogError(ex, "Đã xảy ra lỗi cơ sở dữ liệu khi thêm hình ảnh");
-                throw new Exception(
-                    "Không thể thêm hình ảnh vào cơ sở dữ liệu. Đã xảy ra lỗi cơ sở dữ liệu",
-                    ex
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Lỗi thêm hình ảnh");
-                throw new Exception("Không thể thêm hình ảnh", ex);
-            }
+            return await _context.Images.FirstAsync(i => i.Id == id);
         }
 
-        public async Task UpdateImageAsync(Image image)
+        public async Task<List<Image>> GetByIdAndIngredientByList(Guid id, Guid ingredientId)
         {
-            if (image == null)
-            {
-                throw new ArgumentNullException(nameof(image), "Đối tượng hình ảnh không thể rỗng");
-            }
-
-            try
-            {
-                var existingImage = await _context.Images.FindAsync(image.Id);
-
-                if (existingImage == null)
-                {
-                    _logger?.LogWarning(
-                        "Không tìm thấy hình ảnh có ID {ImageId} để cập nhật",
-                        image.Id
-                    );
-                    throw new KeyNotFoundException($"Hình ảnh có ID {image.Id} không tìm thấy");
-                }
-
-                existingImage.ImageUrl = image.ImageUrl;
-                if (image.IngredientId != Guid.Empty)
-                {
-                    existingImage.IngredientId = image.IngredientId;
-                }
-                _context.Entry(existingImage).State = EntityState.Modified;
-
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                _logger?.LogError(
-                    ex,
-                    "Xung đột đồng thời khi cập nhật hình ảnh với ID {ImageId}",
-                    image.Id
-                );
-                throw new Exception(
-                    $"Đã xảy ra xung đột đồng thời khi cập nhật hình ảnh có ID {image.Id}",
-                    ex
-                );
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger?.LogError(ex, "Database error updating image with ID {ImageId}", image.Id);
-                throw new Exception(
-                    $"Đã xảy ra lỗi cơ sở dữ liệu khi cập nhật hình ảnh có ID {image.Id}",
-                    ex
-                );
-            }
-            catch (KeyNotFoundException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Lỗi cập nhật hình ảnh với ID {ImageId}", image.Id);
-                throw new Exception($"Lỗi cập nhật hình ảnh với ID {image.Id}", ex);
-            }
+            return await _context.Images.Where(img => img.Id == id && img.IngredientId == ingredientId).ToListAsync();
         }
 
-        public async Task DeleteImageAsync(Guid id)
+        public async Task<List<Image>> GetByIngredient(Guid ingredientId)
         {
-            try
+            return await _context.Images.Where(img => img.IngredientId == ingredientId).ToListAsync();
+        }
+
+        public async Task<Image> GetIdAndIngredient(Guid id, Guid ingredientId)
+        {
+            return await _context.Images.FirstOrDefaultAsync(img => img.Id.Equals(id) && img.IngredientId.Equals(ingredientId));
+        }
+
+        public async Task<bool> Update(Guid id, Image image)
+        {
+            var imageExisting = await _context.Images.FirstOrDefaultAsync(i => i.Id == id);
+            if (imageExisting == null)
             {
-                var image = await _context.Set<Image>().FindAsync(id);
-                if (image != null)
-                {
-                    _context.Set<Image>().Remove(image);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    _logger?.LogWarning("Đã cố xóa hình ảnh không tồn tại bằng ID {ImageId}", id);
-                }
+                return false;
             }
-            catch (DbUpdateException ex)
-            {
-                _logger?.LogError(
-                    ex,
-                    "Đã xảy ra lỗi cơ sở dữ liệu khi xóa hình ảnh có ID {ImageId}",
-                    id
-                );
-                throw new Exception(
-                    $"Không xóa được hình ảnh có ID {id} Đã xảy ra lỗi cơ sở dữ liệu",
-                    ex
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Lỗi xóa ảnh có ID {ImageId}", id);
-                throw new Exception($"Không thể xóa hình ảnh với ID {id}", ex);
-            }
+            imageExisting.ImageUrl = image.ImageUrl;
+            _context.Images.Update(imageExisting);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

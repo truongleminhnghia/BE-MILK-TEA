@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,10 @@ namespace Data_Access_Layer.Entities
         [Phone]
         public string Phone { get; set; } = string.Empty;
 
+        [Column("image_url", TypeName = "nvarchar(1000)")] // URL
+        // [Required]
+        public string ImageUrl { get; set; }
+
         [Column("role_name", TypeName = "varchar(200)")]
         [Required]
         [EnumDataType(typeof(RoleName))]
@@ -55,14 +60,13 @@ namespace Data_Access_Layer.Entities
         public virtual ICollection<Order>? Orders { get; set; }
         public virtual ICollection<IngredientReview>? IngredientReviews { get; set; }
 
+        [JsonIgnore]
         public Customer? Customer { get; set; }
-        public Employee? Empoyee { get; set; }
+
+        [JsonIgnore]
+        public Employee? Employee { get; set; }
         public Cart? Cart { get; set; }
 
-        public Account()
-        {
-            
-        }
     }
 }
 

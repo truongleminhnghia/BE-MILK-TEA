@@ -15,6 +15,7 @@ namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/auths")]
+    [AllowAnonymous]
     public class AuthenController : ControllerBase
     {
         private readonly IAuthenService _authenService;
@@ -27,45 +28,31 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest _request) // Cho phép null
+        public async Task<IActionResult> Register([FromBody] CreateAccountRequest _request) // Cho phép null
         {
             try
-            {
-                var account = await _authenService.Register(_request);
+             {
+                var account = await _authenService.Register(_request, false);
 
-                return Ok(new ApiResponse(
-                    HttpStatusCode.OK.GetHashCode(),
-                    true,
-                    "Đăng ký thành công",
-                    account
-                ));
+                return Ok(new ApiResponse (HttpStatusCode.OK.GetHashCode(), true, "Đăng ký thành công", account));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(
-                    HttpStatusCode.InternalServerError.GetHashCode(),
-                    false,
-                    ex.Message
-                ));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse( HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
             }
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest? _request, [FromQuery] string _typeLogin)
+        public async Task<IActionResult> Login([FromBody] LoginRequest? request, [FromQuery] string typeLogin)
         {
             try
             {
-                if (_typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
+                if (typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
-                    var _loginSuccess = await _authenService.Login(_request, _typeLogin);
-                    return Ok(new ApiResponse(
-                        HttpStatusCode.OK.GetHashCode(),
-                        true,
-                        "Đăng nhập thành công",
-                        _loginSuccess
-                    ));
+                    var loginSuccess = await _authenService.LoginLocal(request, typeLogin);
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Đăng nhập thành công", loginSuccess));
                 }
-                else if (_typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
+                else if (typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
                 {
                     var urlLogin = _authenService.GenerateUrl(TypeLogin.LOGIN_GOOGLE.ToString());
                     return Ok(new ApiResponse(
@@ -75,21 +62,14 @@ namespace WebAPI.Controllers
                         urlLogin
                         ));
                 }
-                return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest.GetHashCode(),
-                    false,
-                    "Failed"
-                    ));
+                return BadRequest(new ApiResponse (HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại" ));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError.GetHashCode(),
-                    false,
-                    ex.Message
-                ));
+                return StatusCode(500, new ApiResponse (HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
             }
         }
+
 
         [HttpGet("callback")]
         public async Task<IActionResult> CallbackAuthenticate([FromQuery] string code, [FromQuery] string type_login)

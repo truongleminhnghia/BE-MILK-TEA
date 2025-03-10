@@ -1,3 +1,4 @@
+using Data_Access_Layer.Enum;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -24,10 +25,19 @@ namespace Data_Access_Layer.Entities
         [Required]
         public string? Content { get; set; }
 
+        [Column("image_url", TypeName = "nvarchar(1000)")] // URL
+        [Required]
+        public string ImageUrl { get; set; }
+
         [Column("category_id", TypeName = "char(36)")]
         [ForeignKey("CategoryId")]
         [Required]
         public Guid CategoryId { get; set; }
+
+        [Column("recipe_status")]
+        [Required]
+        [EnumDataType(typeof(RecipeStatusEnum))]
+        public RecipeStatusEnum RecipeStatus { get; set; }
 
         public Category? Category { get; set; }
 

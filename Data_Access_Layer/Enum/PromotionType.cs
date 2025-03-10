@@ -4,6 +4,6 @@ namespace Data_Access_Layer.Enum
     {
         PROMOTION_PRODUCT,
         PROMOTION_ORDER,
-        PROMOTION_CUSTOMER,
+        PROMOTION_CUSTOMER
     }
 }

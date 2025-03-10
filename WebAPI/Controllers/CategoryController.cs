@@ -31,25 +31,45 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetAll(
             [FromQuery] CategoryStatus? categoryStatus,
             [FromQuery] CategoryType? categoryType,
-            [FromQuery] int page = 1,              
-            [FromQuery] int pageSize = 10,             
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool isDescending = false,
             [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null)
-
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] string? _field = null
+        )
         {
-            var categories = await _categoryService.GetAllCategoriesAsync(
-        search, sortBy, isDescending, categoryStatus, categoryType, startDate, endDate, page, pageSize);
-
-            var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(categories);
-            return Ok(new ApiResponse(
-                HttpStatusCode.OK.GetHashCode(),
-                true,
-                "Thành công",
-                categoryRes
-            ));
+            if (string.IsNullOrEmpty(_field))
+            {
+                var categories = await _categoryService.GetAllCategoriesAsync(
+                                search,
+                                sortBy,
+                                isDescending,
+                                categoryStatus,
+                                categoryType,
+                                startDate,
+                                endDate,
+                                page,
+                                pageSize
+                            );
+                if (categories == null || !categories.Any())
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
+                }
+                var categoryRes = _mapper.Map<IEnumerable<CategoryResponse>>(categories);
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categoryRes));
+            }
+            else
+            {
+                var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE);
+                if (categories == null || !categories.Any())
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
+                }
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categories));
+            }
         }
 
         //GET BY ID
@@ -74,7 +94,7 @@ namespace WebAPI.Controllers
 
         //CREATE
         [HttpPost]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryRequest category)
         {
             if (category == null)
@@ -150,23 +170,28 @@ namespace WebAPI.Controllers
 
                 if (!result)
                 {
-                    return NotFound(new ApiResponse
-                        (HttpStatusCode.NotFound.GetHashCode(),
-                        false,
-                        "Không tìm thấy"));
+                    return NotFound(
+                        new ApiResponse(
+                            HttpStatusCode.NotFound.GetHashCode(),
+                            false,
+                            "Không tìm thấy"
+                        )
+                    );
                 }
 
-                return Ok(new ApiResponse
-                    (HttpStatusCode.OK.GetHashCode(),
-                    true,
-                    "Tắt thành công"));
-            } catch (KeyNotFoundException ex)
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Tắt thành công"));
+            }
+            catch (KeyNotFoundException ex)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, ex.Message));
+                return NotFound(
+                    new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, ex.Message)
+                );
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, ex.Message));
+                return BadRequest(
+                    new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, ex.Message)
+                );
             }
         }
     }
