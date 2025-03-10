@@ -55,7 +55,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet("order/{orderId}")]
+        [HttpGet("orderId")]
         public async Task<IActionResult> GetPaymentsByOrder(Guid orderId)
         {
             try
