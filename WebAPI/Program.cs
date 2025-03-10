@@ -6,6 +6,7 @@ using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
 using Business_Logic_Layer.Services.IngredientProductService;
+using Business_Logic_Layer.Services.IngredientReviewService;
 using Business_Logic_Layer.Services.IngredientService;
 using Business_Logic_Layer.Services.NotificationService;
 using Business_Logic_Layer.Services.PaymentService;
@@ -213,6 +214,8 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IIngredientReviewRepository, IngredientReviewRepository>();
+builder.Services.AddScoped<IIngredientReviewService, IngredientReviewService>();
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
