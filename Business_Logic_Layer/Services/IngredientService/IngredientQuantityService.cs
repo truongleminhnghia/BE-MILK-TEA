@@ -26,54 +26,6 @@ namespace Business_Logic_Layer.Services.IngredientService
             _ingredientRepository = ingredientRepository;
         }
 
-        public async Task<PageResult<IngredientQuantityResponse>> GetAllAsync(
-    string? search,
-    Guid? ingredientId,
-    ProductType? productType,
-    int? minQuantity,
-    int? maxQuantity,
-    DateTime? startDate,
-    DateTime? endDate,
-    string? sortBy,
-    bool isDescending,
-    int pageCurrent,
-    int pageSize)
-        {
-            var query = _ingredientQuantityRepository.GetAll(
-                search, ingredientId, productType, minQuantity, maxQuantity, startDate, endDate
-            );
-
-            // Sắp xếp dữ liệu
-            var validSortColumns = new HashSet<string> { "Quantity", "CreateAt", "UpdateAt", "ProductType" };
-            if (!string.IsNullOrEmpty(sortBy) && validSortColumns.Contains(sortBy))
-            {
-                query = isDescending
-                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
-                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
-            }
-            else
-            {
-                query = query.OrderByDescending(iq => iq.CreateAt);
-            }
-
-            // Tổng số bản ghi
-            int total = await query.CountAsync();
-
-            // Phân trang
-            var items = await query
-                .Skip((pageCurrent - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return new PageResult<IngredientQuantityResponse>
-            {
-                Data = _mapper.Map<List<IngredientQuantityResponse>>(items),
-                PageCurrent = pageCurrent,
-                PageSize = pageSize,
-                Total = total
-            };
-        }
-
 
         public async Task<List<IngredientQuantityResponse>> GetByIngredientId(Guid ingredientId)
         {
@@ -137,6 +89,15 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
+        public async Task<IngredientQuantity> Save(IngredientQuantity ingredientQuantity)
+        {
+            await _ingredientQuantityRepository.AddAsync(ingredientQuantity);
+            return ingredientQuantity;
+        }
 
+        public Task<IngredientQuantity> SaveList(Guid ingredientId, List<IngredientQuantity> ingredientQuantity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
