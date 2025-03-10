@@ -67,13 +67,13 @@ namespace Business_Logic_Layer.Services
                     var ingredientProduct = new IngredientProduct();
 
                     //xử lý quantity
-                    var chosenIngredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetail.IngredientProductId);
-                    if (orderDetail.Quantity > chosenIngredientProduct.Quantity)
-                    {
-                        throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({chosenIngredientProduct.Quantity}) của sản phẩm {chosenIngredientProduct.IngredientId}");
-                    }
-                    chosenIngredientProduct.Quantity -= order.Quantity;
-                    await _ingredientProductService.UpdateIngredientProduct(chosenIngredientProduct);
+                    //var chosenIngredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetail.IngredientProductId);
+                    //if (orderDetail.Quantity > chosenIngredientProduct.Quantity)
+                    //{
+                    //    throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({chosenIngredientProduct.Quantity}) của sản phẩm {chosenIngredientProduct.IngredientId}");
+                    //}
+                    //chosenIngredientProduct.Quantity -= order.Quantity;
+                    //await _ingredientProductService.UpdateIngredientProduct(chosenIngredientProduct);
                     //chosenProduct.QuantityPerCarton -= createdOrder.Quantity;
                     
                     //tạo orderdetail
@@ -160,12 +160,12 @@ namespace Business_Logic_Layer.Services
                         Quantity = q.Quantity,
          
                     }).ToList();
-                    foreach (OrderDetail orderDetail in orderDetails)
-                    {
-                        var chosenIngredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetail.IngredientProductId);
-                        chosenIngredientProduct.Quantity += orderDetail.Quantity;
-                        await _ingredientProductService.UpdateIngredientProduct(chosenIngredientProduct);
-                    }
+                    //foreach (OrderDetail orderDetail in orderDetails)
+                    //{
+                    //    var chosenIngredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetail.IngredientProductId);
+                    //    chosenIngredientProduct.Quantity += orderDetail.Quantity;
+                    //    await _ingredientProductService.UpdateIngredientProduct(chosenIngredientProduct);
+                    //}
                 }
                 return rover;
             }

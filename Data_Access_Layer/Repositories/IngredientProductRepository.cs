@@ -32,7 +32,6 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId)
         {
-
             return await _context.IngredientProducts.FirstOrDefaultAsync(n => n.Id.Equals(ingredientProductId));
         }
     }

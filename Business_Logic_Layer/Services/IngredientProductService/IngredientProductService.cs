@@ -28,9 +28,5 @@ namespace Business_Logic_Layer.Services.IngredientProductService
             return await _ingredientProductRepository.IngredientExistsAsync(ingredientId);
         }
 
-        public async Task<IngredientProduct> UpdateIngredientProduct(IngredientProduct ingredientProduct)
-        {
-            return await _ingredientProductRepository.UpdateIngredientProduct(ingredientProduct);   
-        }
     }
 }
