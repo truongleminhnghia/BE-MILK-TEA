@@ -91,6 +91,13 @@ namespace Data_Access_Layer.Repositories
         {
             return await _context.IngredientQuantities.FirstOrDefaultAsync(iq => iq.Id == id);
         }
+
+        public async Task<IngredientQuantity> GetByIdAndProductType(Guid ingredientId, ProductType ProductType)
+        {
+            return await _context.IngredientQuantities
+         .Include(iq => iq.Ingredients) // Nếu cần lấy thông tin nguyên liệu
+         .FirstOrDefaultAsync(iq => iq.IngredientId == ingredientId && iq.ProductType == ProductType);
+        }
     }
 
 }

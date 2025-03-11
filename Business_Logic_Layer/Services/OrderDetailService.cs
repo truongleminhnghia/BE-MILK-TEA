@@ -17,7 +17,7 @@ namespace Business_Logic_Layer.Services
         public Task<OrderDetail> CreateAsync(OrderDetail orderDetail);
         public Task<List<OrderDetailResponse>> GetAllOrderDetailsAsync(Guid orderId, string? search, string? sortBy, bool isDescending, int page, int pageSize);
         public Task<OrderDetail?> GetByIdAsync(Guid orderDetailId);
-        Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail);
+        public Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail);
         public Task<bool> DeleteByIdAsync(Guid orderDetailId);
     }
     public class OrderDetailService : IOrderDetailService

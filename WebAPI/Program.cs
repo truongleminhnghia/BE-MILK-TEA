@@ -208,7 +208,9 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
-builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();  
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IIngredientQuantityService, IngredientQuantityService>();
+builder.Services.AddScoped<IIngredientQuantityRepository, IngredientQuantityRepository>();
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
