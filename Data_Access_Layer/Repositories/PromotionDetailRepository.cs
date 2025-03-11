@@ -1,37 +1,78 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Azure;
+using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
 {
     public class PromotionDetailRepository : IPromotionDetailRepository
     {
-        public Task<PromotionDetail> CreateAsync(PromotionDetail promotionDetail)
+        private readonly ApplicationDbContext _context;
+        public PromotionDetailRepository(ApplicationDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
         }
 
-        public Task<bool> DeleteByIdAsync(Guid id)
+        public async Task<PromotionDetail> CreateAsync(PromotionDetail promotionDetail)
         {
-            throw new NotImplementedException();
+            promotionDetail.Id = Guid.NewGuid();
+            _context.PromotionDetails.Add(promotionDetail);
+            await _context.SaveChangesAsync();
+            return promotionDetail;
         }
 
-        public Task<List<PromotionDetail>> GetAllPromotionDetailAsync(Guid PromotionId)
+        public async Task<bool> DeleteByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var promotionDetail = await _context.PromotionDetails.FindAsync(id);
+            if (promotionDetail == null)
+            {
+                return false;
+            }
+            _context.PromotionDetails.Remove(promotionDetail);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public Task<PromotionDetail> GetbyId(Guid id)
+        public async Task<List<PromotionDetail>> GetAllPromotionDetailAsync(Guid id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.PromotionDetails
+            .Where(pd => pd.PromotionId == id)
+            .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Không thể lọc được promotion detail: {ex.Message}", ex);
+            }
         }
 
-        public Task<PromotionDetail> UpdateAsync(Guid id, PromotionDetail promotionDetail)
+        public async Task<PromotionDetail> GetbyId(Guid id)
         {
-            throw new NotImplementedException();
+            return await _context.PromotionDetails.FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<PromotionDetail> UpdateAsync(Guid id, PromotionDetail promotionDetail)
+        {
+            var existingPromotionDetail = await _context.PromotionDetails.FindAsync(id);
+            if (existingPromotionDetail == null)
+            {
+                return null;
+            }
+            //var promotion = await _context.PromotionDetails.FirstOrDefaultAsync(i => i.Id == promotionDetail.Id);
+            //if (promotion == null)
+            //{
+            //    throw new Exception("Ingredient not found.");
+            //}
+            
+            await _context.SaveChangesAsync();
+            return existingPromotionDetail;
         }
     }
 }

@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 // using Business_Logic_Layer.Utils;
 using Microsoft.OpenApi.Models;
 using Business_Logic_Layer.Services.PromotionService;
+using Business_Logic_Layer.Services.PromotionDetailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -180,7 +181,8 @@ builder.Services.AddAutoMapper(
     typeof(ImageMapper),
     typeof(IngredientProductMapper),
     typeof(AccountMapper),
-    typeof(CategoryMapper)
+    typeof(CategoryMapper),
+    typeof(PromotionDetailMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
@@ -211,6 +213,8 @@ builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
 builder.Services.AddScoped<IIngredientQuantityService, IngredientQuantityService>();
 builder.Services.AddScoped<IIngredientQuantityRepository, IngredientQuantityRepository>();
+builder.Services.AddScoped<IPromotionDetailRepository, PromotionDetailRepository>();
+builder.Services.AddScoped<IPromotionDetailService, PromotionDetailService>();
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();

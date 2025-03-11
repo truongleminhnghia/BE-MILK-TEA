@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Business_Logic_Layer.Models.Responses
+namespace Business_Logic_Layer.Models.Requests
 {
-    public class PromotionDetailResponse
+    public class PromotionDetailUpdateRequest
     {
         [Required]
         public Guid Id { get; set; }

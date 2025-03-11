@@ -10,7 +10,7 @@ namespace Data_Access_Layer.Repositories
     public interface IPromotionDetailRepository
     {
         public Task<PromotionDetail> CreateAsync(PromotionDetail promotionDetail);
-        public Task<List<PromotionDetail>> GetAllPromotionDetailAsync(Guid PromotionId);
+        public Task<List<PromotionDetail>> GetAllPromotionDetailAsync(Guid id);
         public Task<PromotionDetail> GetbyId(Guid id);
         public Task<PromotionDetail> UpdateAsync(Guid id, PromotionDetail promotionDetail);
         public Task<bool> DeleteByIdAsync(Guid id);
