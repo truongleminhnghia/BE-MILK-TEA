@@ -13,5 +13,6 @@ namespace Data_Access_Layer.Repositories
         Task<bool> IngredientExistsAsync(Guid ingredientId);
 
         public Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId);
+        public Task<IngredientProduct> UpdateAsync(Guid ingredientProductId, IngredientProduct ingredientProduct);
     }
 }

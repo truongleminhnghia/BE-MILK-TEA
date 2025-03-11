@@ -75,6 +75,7 @@ namespace Business_Logic_Layer.Services
                     //chosenIngredientProduct.Quantity -= order.Quantity;
                     //await _ingredientProductService.UpdateIngredientProduct(chosenIngredientProduct);
                     //chosenProduct.QuantityPerCarton -= createdOrder.Quantity;
+
                     
                     //tạo orderdetail
                     orderDetails.OrderId = createdOrder.Id;
