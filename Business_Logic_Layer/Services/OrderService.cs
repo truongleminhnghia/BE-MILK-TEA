@@ -193,12 +193,7 @@ namespace Business_Logic_Layer.Services
                         {
                             throw new Exception($"Không tìm thấy nguyên liệu với ID {ingredientProducts.IngredientId}");
                         }
-
-                        if (ingredientQuantityProduct.Quantity < orderDetail.Quantity)
-                        {
-                            throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({ingredientProducts.Quantity})");
-                        }
-                        ingredientQuantityProduct.Quantity -= orderDetail.Quantity;
+                        ingredientQuantityProduct.Quantity += orderDetail.Quantity;
                         var a = _mapper.Map<IngredientQuantityRequest>(ingredientQuantityProduct);
                         await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, a);
                     }
