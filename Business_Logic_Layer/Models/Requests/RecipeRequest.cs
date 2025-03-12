@@ -13,6 +13,8 @@ namespace Business_Logic_Layer.Models.Requests
 
         public string Content { get; set; } = string.Empty;
 
+        public string ImageUrl { get; set; } = string.Empty;
+
         public Guid CategoryId { get; set; }
 
         public List<RecipeIngredientRequest> Ingredients { get; set; } = new();

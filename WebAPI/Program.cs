@@ -57,17 +57,17 @@ Env.Load();
 
 // var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
-var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
-var _port = Environment.GetEnvironmentVariable("PORT_LOCAL");
-var _user = Environment.GetEnvironmentVariable("USER_LOCAL");
-var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
-var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
-var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
+//var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
+//var _port = Environment.GetEnvironmentVariable("PORT_LOCAL");
+//var _user = Environment.GetEnvironmentVariable("USER_LOCAL");
+//var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
+//var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
+//var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
 // var connectionString =
 //   $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
-var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=Nghia_2003;Database=DB_MILK_TEA;SslMode=Required;";
+var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -174,7 +174,11 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
-builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();  
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
+
 
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
