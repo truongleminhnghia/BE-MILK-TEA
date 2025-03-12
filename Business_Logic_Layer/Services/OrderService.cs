@@ -69,8 +69,7 @@ namespace Business_Logic_Layer.Services
                 {
                     //xử lý quantity
                     var orderDetails = new OrderDetail();
-                    var orderDetailId = orderDetail.IngredientProductId;
-                    var ingredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetailId);
+                    var ingredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetail.IngredientProductId);
 
                     if (ingredientProduct == null)
                     {
@@ -88,14 +87,22 @@ namespace Business_Logic_Layer.Services
                     {
                         throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({ingredientProduct.Quantity})");
                     }
+                    //Trừ số lượng đang có trong database = số lượng đặt
                     ingredientQuantityProduct.Quantity -= orderDetail.Quantity;
-                    var a = _mapper.Map<IngredientQuantityRequest>(ingredientQuantityProduct);
-                    await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, a);
+
+                    //Gán ingredientQuantityProduct thành IngredientQuantityRequest
+                    var ingredientQuantityRequest = _mapper.Map<IngredientQuantityRequest>(ingredientQuantityProduct);
+                    await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, ingredientQuantityRequest);
+
                     //tạo orderdetail
-                    var chosenIngredient = await _ingredientService.GetById(ingredientProduct.IngredientId);
+                    var chosenIngredient = await _ingredientService.GetById(ingredientProduct.Ingredient.Id);
                     orderDetails.OrderId = createdOrder.Id;
                     orderDetails.IngredientProductId = orderDetail.IngredientProductId;
                     orderDetails.Quantity = orderDetail.Quantity;
+
+
+                    //orderDetails.Price = orderDetail.Price;
+
                     orderDetails.Price = chosenIngredient.PriceOrigin;
                     var createOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
                     orderDetailList.Add(createOrderDetail);

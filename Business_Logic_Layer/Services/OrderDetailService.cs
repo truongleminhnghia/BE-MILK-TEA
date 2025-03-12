@@ -61,7 +61,6 @@ namespace Business_Logic_Layer.Services
                 {
                     throw new Exception($"không tìm được nguuyen6 liệu với id{orderDetail.IngredientProductId}");
                 }
-                orderDetail.Price = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.TotalPrice;
                 //orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
                 return await _orderDetailRepository.CreateAsync(orderDetail);
             }
