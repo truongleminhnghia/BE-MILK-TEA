@@ -59,7 +59,7 @@ namespace Business_Logic_Layer.Services
                 // Ensure ingredientProduct is not null
                 if (ingredientProduct == null)
                 {
-                    throw new Exception($"không tìm được nguuyen6 liệu với id{orderDetail.IngredientProductId}");
+                    throw new Exception($"không tìm được nguyen liệu với id{orderDetail.IngredientProductId}");
                 }
                 //orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
                 return await _orderDetailRepository.CreateAsync(orderDetail);
