@@ -73,15 +73,21 @@ namespace WebAPI.Controllers
             ));
         }
         // POST: Tạo mới PromotionDetail
-        [HttpPost]
-        public async Task<IActionResult> AddPromotionDetail([FromBody] PromotionDetailRequest promotionDetailRequest)
+        [HttpPost("{promotionId}")]
+        public async Task<IActionResult> AddPromotionDetail(Guid promotionId, [FromBody] PromotionDetailRequest promotionDetailRequest)
         {
             if (promotionDetailRequest == null)
             {
                 return BadRequest(new { message = "Invalid promotion detail data" });
             }
 
+            // Tạo entity từ request
             var promotionDetailEntity = _mapper.Map<PromotionDetail>(promotionDetailRequest);
+
+            // ✅ Gán PromotionId lấy từ URL
+            promotionDetailEntity.PromotionId = promotionId;
+
+            // Lưu vào DB
             var createdPromotionDetail = await _promotionDetailService.CreateAsync(promotionDetailEntity);
 
             return Ok(new ApiResponse(

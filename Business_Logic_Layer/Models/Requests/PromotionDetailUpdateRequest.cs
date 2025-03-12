@@ -9,8 +9,6 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class PromotionDetailUpdateRequest
     {
-        [Required]
-        public Guid Id { get; set; }
 
         public string? PromotionName { get; set; }
         public string? Description { get; set; }
