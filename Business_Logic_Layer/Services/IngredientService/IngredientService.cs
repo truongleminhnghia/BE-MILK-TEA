@@ -74,7 +74,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                 }
                 if (_source.CheckDate(ingredient.ExpiredDate) == 1 || _source.CheckDate(ingredient.ExpiredDate) == -1)
                 {
-                    throw new Exception("Hạng sử dụng chỉ còn 10 ngày hoặc hết hạn");
+                    throw new Exception("Hạn sử dụng chỉ còn 10 ngày hoặc hết hạn");
                 }
                 IngredientResponse ingredientResponse = _mapper.Map<IngredientResponse>(await _ingredientRepository.CreateAsync(ingredient));
 
