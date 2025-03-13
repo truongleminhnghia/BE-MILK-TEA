@@ -49,17 +49,40 @@ namespace Business_Logic_Layer.Services.IngredientService
         {
             try
             {
-                var ingredient = await _ingredientRepository.GetById(request.IngredientId);
-                if (ingredient == null)
-                {
-                    throw new KeyNotFoundException("Không tìm thấy nguyên liệu");
-                }
+                //var ingredient = await _ingredientRepository.GetById(request.IngredientId);
+                //if (ingredient == null)
+                //{
+                //    throw new KeyNotFoundException("Không tìm thấy nguyên liệu");
+                //}
 
                 var newIngredientQuantity = _mapper.Map<IngredientQuantity>(request);
                 newIngredientQuantity.CreateAt = DateTime.UtcNow;
 
                 await _ingredientQuantityRepository.AddAsync(newIngredientQuantity);
                 return _mapper.Map<IngredientQuantityResponse>(newIngredientQuantity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi tạo IngredientQuantity: " + ex.Message);
+            }
+        }
+        public async Task<List<IngredientQuantityResponse>> CreateQuantitiesAsync(Guid ingredientId, List<IngredientQuantityRequest> request)
+        {
+            try
+            {
+                var list = new List<IngredientQuantityResponse>();
+                var ingredientExisted = await _ingredientRepository.GetById(ingredientId);
+                if (ingredientExisted == null)
+                {
+                    throw new Exception("Nguyên liệu không tồn tại");
+                }
+                foreach (var item in request)
+                {
+                    item.IngredientId = ingredientId;
+                    var savedQuantities = await CreateAsync(item);
+                    list.Add(savedQuantities);
+                }
+                return list;
             }
             catch (Exception ex)
             {
@@ -86,6 +109,29 @@ namespace Business_Logic_Layer.Services.IngredientService
             catch (Exception ex)
             {
                 throw new Exception("Lỗi khi cập nhật IngredientQuantity: " + ex.Message);
+            }
+        }
+        public async Task<List<IngredientQuantityResponse>> UpdateQuantitiesAsync(Guid ingredientId, List<IngredientQuantityRequest> request)
+        {
+            try
+            {
+                var list = new List<IngredientQuantityResponse>();
+                var ingredientExisted = await _ingredientRepository.GetById(ingredientId);
+                if (ingredientExisted == null)
+                {
+                    throw new Exception("Nguyên liệu không tồn tại");
+                }
+                foreach (var item in request)
+                {
+                    item.IngredientId = ingredientId;
+                    var savedQuantities = await UpdateAsync((Guid)item.Id, item);
+                    list.Add(savedQuantities);
+                }
+                return list;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi cập nhật danh sach IngredientQuantity: " + ex.Message);
             }
         }
 

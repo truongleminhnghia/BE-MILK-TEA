@@ -169,6 +169,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
 builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
+builder.Services.AddScoped<IIngredientQuantityService, IngredientQuantityService>();
+builder.Services.AddScoped<IIngredientQuantityRepository, IngredientQuantityRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
