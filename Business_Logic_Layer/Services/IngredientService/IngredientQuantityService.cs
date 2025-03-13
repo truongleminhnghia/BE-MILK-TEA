@@ -94,11 +94,11 @@ namespace Business_Logic_Layer.Services.IngredientService
         {
             try
             {
-                //var ingredientQuantity = await _ingredientQuantityRepository.GetById(id);
-                //if (ingredientQuantity == null)
-                //{
-                //    throw new KeyNotFoundException("Không tìm thấy mẫu mã sản phẩm");
-                //}
+                var ingredientQuantity = await _ingredientQuantityRepository.GetById(id);
+                if (ingredientQuantity == null)
+                {
+                    throw new KeyNotFoundException("Không tìm thấy mẫu mã sản phẩm");
+                }
 
                 _mapper.Map(request, ingredientQuantity);
                 ingredientQuantity.UpdateAt = DateTime.UtcNow;
@@ -124,14 +124,14 @@ namespace Business_Logic_Layer.Services.IngredientService
                 foreach (var item in request)
                 {
                     item.IngredientId = ingredientId;
-                    var savedQuantities = await UpdateAsync(item);
+                    var savedQuantities = await UpdateAsync((Guid)item.Id, item);
                     list.Add(savedQuantities);
                 }
                 return list;
             }
             catch (Exception ex)
             {
-                throw new Exception("Lỗi khi tạo IngredientQuantity: " + ex.Message);
+                throw new Exception("Lỗi khi cập nhật danh sach IngredientQuantity: " + ex.Message);
             }
         }
 

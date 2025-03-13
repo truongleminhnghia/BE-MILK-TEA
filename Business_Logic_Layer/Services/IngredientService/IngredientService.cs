@@ -172,12 +172,12 @@ namespace Business_Logic_Layer.Services.IngredientService
                     var imageRes = await _imageSerivce.UpdateImages(request.ImageRequest, ingredient.Id);
                     if (imageRes != null) res.Images = imageRes;
                 }
-                return res;
                 if (request.IngredientQuantities != null)
                 {
-                    var quantityRes = await _ingredientQuantityService.UpdateAsync(request.IngredientQuantities);
+                    var quantityRes = await _ingredientQuantityService.UpdateQuantitiesAsync(ingredient.Id, request.IngredientQuantities);
                     if (quantityRes != null) res.IngredientQuantities = quantityRes;
                 }
+                return res;                
             }
             catch (Exception ex)
             {
