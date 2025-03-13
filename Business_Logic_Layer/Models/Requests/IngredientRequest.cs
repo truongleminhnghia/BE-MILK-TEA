@@ -38,5 +38,6 @@ namespace Business_Logic_Layer.Models.Requests
         public Guid CategoryId { get; set; }
         public bool IsSale { get; set; }
         public List<ImageRequest>? ImageRequest { get; set; }
+        public List<IngredientQuantityRequest>? IngredientQuantities { get; set; }
     }
 }
