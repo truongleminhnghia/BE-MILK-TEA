@@ -10,6 +10,7 @@ namespace Data_Access_Layer.Repositories
     public interface IIngredientProductRepository
     {
         Task<IngredientProduct> CreateAsync(IngredientProduct ingredientProduct);
+        Task UpdateAsync(IngredientProduct ingredientProduct);
         Task<bool> IngredientExistsAsync(Guid ingredientId);
 
         public Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId);

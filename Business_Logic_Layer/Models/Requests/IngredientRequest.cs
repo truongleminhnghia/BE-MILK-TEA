@@ -20,8 +20,8 @@ namespace Business_Logic_Layer.Models.Requests
         [Required(ErrorMessage = "Trạng thái nguyên liệu không được bỏ trống")]
         public IngredientStatus IngredientStatus { get; set; }
 
-        [Required(ErrorMessage = "Số lượng trong mỗi túi không được bỏ trống")]
-        [Range(0.1, float.MaxValue, ErrorMessage = "Số lượng trong mỗi túi phải lớn hơn 0")]
+        [Required(ErrorMessage = "Khối lượng trong mỗi túi không được bỏ trống")]
+        [Range(0.1, float.MaxValue, ErrorMessage = "Khối lượng trong mỗi túi phải lớn hơn 0")]
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
 

@@ -20,7 +20,7 @@ namespace Data_Access_Layer.Repositories
             DateTime? endDate
         );
         Task<List<IngredientQuantity>> GetByIngredientId(Guid ingredientId);
-        Task AddAsync(IngredientQuantity entity);
+        Task<IngredientQuantity> AddAsync(IngredientQuantity entity);
         Task UpdateAsync(IngredientQuantity entity);
         Task<IngredientQuantity> GetById(Guid id);
     }

@@ -76,10 +76,11 @@ namespace Data_Access_Layer.Repositories
         }
 
 
-        public async Task AddAsync(IngredientQuantity entity)
+        public async Task<IngredientQuantity> AddAsync(IngredientQuantity entity)
         {
             await _context.IngredientQuantities.AddAsync(entity);
             await _context.SaveChangesAsync();
+            return entity;
         }
 
         public async Task UpdateAsync(IngredientQuantity entity)

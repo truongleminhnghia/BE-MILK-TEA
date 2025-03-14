@@ -17,9 +17,5 @@ namespace Business_Logic_Layer.Services.IngredientService
         Task<IngredientQuantityResponse> UpdateAsync(Guid id, IngredientQuantityRequest request);
         Task<List<IngredientQuantityResponse>> CreateQuantitiesAsync(Guid ingredientId, List<IngredientQuantityRequest> request);
         Task<List<IngredientQuantityResponse>> UpdateQuantitiesAsync(Guid ingredientId, List<IngredientQuantityRequest> request);
-        Task<IngredientQuantity> Save(IngredientQuantity ingredientQuantity);
-        Task<IngredientQuantity> SaveList(Guid ingredientId, List<IngredientQuantity> ingredientQuantity);
-
-
     }
 }
