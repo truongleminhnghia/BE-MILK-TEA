@@ -27,13 +27,15 @@ namespace WebAPI.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IPromotionService _promotionService;
         private readonly IMapper _mapper;
+        private readonly IRecipeService _recipeService;
 
-        public WebSocketController(ICategoryService categoryService, IIngredientService ingredientService, IMapper mapper, IPromotionService promotionService)
+        public WebSocketController(ICategoryService categoryService, IIngredientService ingredientService, IMapper mapper, IPromotionService promotionService, IRecipeService recipeService)
         {
             _promotionService = promotionService;
             _ingredientService = ingredientService;
             _categoryService = categoryService;
             _mapper = mapper;
+            _recipeService = recipeService;
         }
 
         [HttpGet("ingredients")]
@@ -183,6 +185,53 @@ namespace WebAPI.Controllers
 
             return Ok();
         }
+
+        [HttpGet("/recipes")]
+        public async Task<IActionResult> GetRecipesWebSocket(
+            [FromQuery] RecipeStatusEnum? recipeStatus,
+            [FromQuery] Guid? categoryId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null
+        )
+        {
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+
+                try
+                {
+                    while (webSocket.State == WebSocketState.Open)
+                    {
+                        var recipes = await _recipeService.GetAllRecipesAsync(
+                                search, sortBy, isDescending, recipeStatus, categoryId, startDate, endDate, page, pageSize);
+
+                        var recipeRes = _mapper.Map<IEnumerable<RecipeResponse>>(recipes);
+                        string jsonString = JsonSerializer.Serialize(recipeRes);
+                        var buffer = Encoding.UTF8.GetBytes(jsonString);
+                        await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                        await Task.Delay(2000);
+                    }
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the server", CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"WebSocket error: {ex.Message}");
+                }
+            }
+            else
+            {
+                return BadRequest("WebSocket request expected.");
+            }
+
+            return Ok();
+        }
+
+
 
     }
 }

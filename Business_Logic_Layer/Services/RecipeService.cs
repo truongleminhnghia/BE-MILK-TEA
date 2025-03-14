@@ -172,6 +172,23 @@ namespace Business_Logic_Layer.Services
                 return null;
             }
         }
+        public async Task<PageResult<RecipeResponse>> GetAllRecipesAsync(
+            string? search, string? sortBy, bool isDescending,
+            RecipeStatusEnum? recipeStatus, Guid? categoryId,
+            DateTime? startDate, DateTime? endDate,
+            int page, int pageSize)
+        {
+            var (recipes, total) = await _recipeRepository.GetAllRecipesAsync(
+                search, sortBy, isDescending, recipeStatus, categoryId, startDate, endDate, page, pageSize);
+
+            return new PageResult<RecipeResponse>
+            {
+                Data = _mapper.Map<List<RecipeResponse>>(recipes),
+                PageCurrent = page,
+                PageSize = pageSize,
+                Total = total
+            };
+        }
 
     }
 }

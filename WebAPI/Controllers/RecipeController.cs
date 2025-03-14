@@ -9,7 +9,7 @@ using System.Net;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/recipe")]
+    [Route("api/v1/recipes")]
     //[Authorize(Roles = "ROLE_STAFF" )]
 
     public class RecipeController : ControllerBase

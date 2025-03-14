@@ -1,5 +1,6 @@
 ﻿using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -83,6 +84,72 @@ namespace Data_Access_Layer.Repositories
             query = query.Skip((page - 1) * pageSize).Take(pageSize);
 
             return await query.ToListAsync();
+        }
+
+        public async Task<(IEnumerable<Recipe>, int TotalCount)> GetAllRecipesAsync(
+    string? search, string? sortBy, bool isDescending,
+    RecipeStatusEnum? recipeStatus, Guid? categoryId,
+    DateTime? startDate, DateTime? endDate,
+    int page, int pageSize)
+        {
+            var query = _context.Recipes.Include(r => r.Category).AsQueryable();
+
+            // **Filtering by RecipeTitle**
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(r => r.RecipeTitle.Contains(search));
+            }
+
+            // **Filtering by RecipeStatus**
+            if (recipeStatus.HasValue)
+            {
+                query = query.Where(r => r.RecipeStatus == recipeStatus.Value);
+            }
+
+            // **Filtering by CategoryId**
+            if (categoryId.HasValue)
+            {
+                query = query.Where(r => r.CategoryId == categoryId.Value);
+            }
+
+            // **Filtering by date range (CreateAt)**
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(r => r.CreateAt >= startDate.Value && r.CreateAt <= adjustedEndDate);
+            }
+            else if (startDate.HasValue)
+            {
+                query = query.Where(r => r.CreateAt >= startDate.Value);
+            }
+            else if (endDate.HasValue)
+            {
+                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(r => r.CreateAt <= adjustedEndDate);
+                isDescending = true; // Force descending order if only endDate is provided
+            }
+
+            // **Sorting**
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                query = isDescending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
+                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
+            }
+            else
+            {
+                query = query.OrderByDescending(r => r.CreateAt); // Default sorting by CreateAt descending
+            }
+
+            int total = await query.CountAsync();
+
+            // **Pagination**
+            var recipes = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+            return (recipes, total);
         }
 
 
