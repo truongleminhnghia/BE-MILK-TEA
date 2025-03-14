@@ -36,7 +36,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("ws")]
+        [HttpGet("ingredients")]
         public async Task<IActionResult> GetIngredientsWebSocket(
                         [FromQuery] string? search,
                         [FromQuery] string? categorySearch,
@@ -88,7 +88,7 @@ namespace WebAPI.Controllers
             return Ok();
         }
 
-        [HttpGet("pr")]
+        [HttpGet("promotion")]
         public async Task<IActionResult> GetPromotionsWebSocket()
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
