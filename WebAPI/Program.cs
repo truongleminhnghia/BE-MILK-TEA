@@ -32,16 +32,20 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddHttpClient();
 builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection("VNPay"));
 
-// Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
-//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//    {
-//        Name = "Authorization",
-//        Type = SecuritySchemeType.Http,
-//        Scheme = "Bearer",
-//        BearerFormat = "JWT",
-//        In = ParameterLocation.Header,
-//        Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
-//    });
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+    // Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
+    });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
