@@ -23,6 +23,10 @@ namespace Data_Access_Layer.Repositories
         // {
         //     return await _context.Categories.AnyAsync(c => c.Id == categoryId);
         // }
+        public async Task<Ingredient> GetById(Guid id)
+        {
+            return await _context.Ingredients.FirstAsync(a => a.Id.Equals(id));
+        }
 
         public async Task<IEnumerable<Ingredient>> GetAllAsync(
             string? search,
@@ -143,6 +147,26 @@ namespace Data_Access_Layer.Repositories
         public async Task<bool> CheckCode(string code)
         {
             return !await _context.Ingredients.AnyAsync(a => a.IngredientCode.Equals(code));
+        }
+
+        public IQueryable<Ingredient> GetAll(
+            string? search,
+            string? categorySearch,
+            Guid? categoryId,
+            DateTime? startDate,
+            DateTime? endDate,
+            IngredientStatus? status,
+            decimal? minPrice,
+            decimal? maxPrice,
+            bool? isSale
+        )
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ChangeStatus(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
