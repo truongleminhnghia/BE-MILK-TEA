@@ -5,6 +5,7 @@ using Business_Logic_Layer.Services.PaymentService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace WebAPI.Controllers
 {
@@ -73,5 +74,33 @@ namespace WebAPI.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("PaymentCallbackUrl")]
+        public async Task<IActionResult> PaymentCallbackUrl([FromBody] PaymentUrlRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Received VNPay callback URL: {Url}", request.FullUrl);
+
+                // Convert URL parameters to IQueryCollection
+                var uri = new Uri(request.FullUrl);
+                var queryCollection = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+                // Convert to IQueryCollection
+                var queryDict = new QueryCollection(queryCollection.ToDictionary(k => k.Key, v => new StringValues(v.Value.ToArray())));
+
+
+                // Process callback
+                var response = await _paymentService.ProcessPaymentCallbackAsync(queryDict);
+
+                return response.Success ? Ok(response) : BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing VNPay callback.");
+                return StatusCode(500, new { message = "Internal Server Error", error = ex.Message });
+            }
+        }
+
     }
 }
