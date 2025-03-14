@@ -17,7 +17,7 @@ namespace Business_Logic_Layer.Services
         public Task<OrderDetail> CreateAsync(OrderDetail orderDetail);
         public Task<List<OrderDetailResponse>> GetAllOrderDetailsAsync(Guid orderId, string? search, string? sortBy, bool isDescending, int page, int pageSize);
         public Task<OrderDetail?> GetByIdAsync(Guid orderDetailId);
-        Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail);
+        public Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail);
         public Task<bool> DeleteByIdAsync(Guid orderDetailId);
     }
     public class OrderDetailService : IOrderDetailService
@@ -59,10 +59,9 @@ namespace Business_Logic_Layer.Services
                 // Ensure ingredientProduct is not null
                 if (ingredientProduct == null)
                 {
-                    throw new Exception($"không tìm được nguuyen6 liệu với id{orderDetail.IngredientProductId}");
+                    throw new Exception($"không tìm được nguyen liệu với id{orderDetail.IngredientProductId}");
                 }
-                orderDetail.Price = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.TotalPrice;
-                orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
+                //orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
                 return await _orderDetailRepository.CreateAsync(orderDetail);
             }
             catch (Exception ex)

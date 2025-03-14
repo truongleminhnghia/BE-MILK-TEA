@@ -1,4 +1,7 @@
 ﻿using System.Net;
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
@@ -21,7 +24,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _promotionService = promotionService;
         }
-
+        
         //Get all
         [HttpGet]
         public async Task<IActionResult> GetPromotion(
@@ -93,34 +96,23 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPromotion([FromBody] PromotionRequest promotion)
         {
-            try
-            {
-                if (promotion == null)
-                {
-                    return BadRequest(new ApiResponse(
-                        (int)HttpStatusCode.BadRequest,
-                        false,
-                        "Dữ liệu promotion lỗi."
-                    ));
-                }
-
-                var createdPromotion = await _promotionService.CreateAsync(promotion);
-
-                return Ok(new ApiResponse(
-                    (int)HttpStatusCode.OK,
-                    true,
-                    "Thêm promotion thành công!",
-                    createdPromotion
-                ));
-            }
-            catch (ArgumentException ex)
+            if (promotion == null || promotion.promotionDetailList == null || !promotion.promotionDetailList.Any())
             {
                 return BadRequest(new ApiResponse(
                     (int)HttpStatusCode.BadRequest,
                     false,
-                    ex.Message
+                    "Dữ liệu promotion lỗi hoặc không có PromotionDetail."
                 ));
             }
+
+            var createdPromotion = await _promotionService.CreateAsync(promotion);
+
+            return Ok(new ApiResponse(
+                (int)HttpStatusCode.OK,
+                true,
+                "Thêm promotion thành công!",
+                createdPromotion
+            ));
         }
         //UPDATE
         [HttpPut("{promotionId}")]

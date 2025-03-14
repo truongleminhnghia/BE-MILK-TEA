@@ -23,6 +23,7 @@ namespace Data_Access_Layer.Repositories
         Task<IngredientQuantity> AddAsync(IngredientQuantity entity);
         Task UpdateAsync(IngredientQuantity entity);
         Task<IngredientQuantity> GetById(Guid id);
+        Task<IngredientQuantity> GetByIdAndProductType(Guid ingredientId, ProductType ProductType);
     }
 
 }
