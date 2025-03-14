@@ -215,7 +215,9 @@ builder.Services.AddScoped<IIngredientQuantityService, IngredientQuantityService
 builder.Services.AddScoped<IIngredientQuantityRepository, IngredientQuantityRepository>();
 builder.Services.AddScoped<IPromotionDetailRepository, PromotionDetailRepository>();
 builder.Services.AddScoped<IPromotionDetailService, PromotionDetailService>();
-
+builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();

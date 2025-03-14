@@ -153,5 +153,14 @@ namespace Business_Logic_Layer.Services.IngredientService
                 throw new Exception("Lỗi khi truy vấn IngredientQuantity: " + ex.Message);
             }
         }
-    }
+        public async Task<IngredientQuantity> Save(IngredientQuantity ingredientQuantity)
+        {
+            await _ingredientQuantityRepository.AddAsync(ingredientQuantity);
+            return ingredientQuantity;
+        }
+
+        public Task<IngredientQuantity> SaveList(Guid ingredientId, List<IngredientQuantity> ingredientQuantity)
+        {
+            throw new NotImplementedException();
+        }
 }
