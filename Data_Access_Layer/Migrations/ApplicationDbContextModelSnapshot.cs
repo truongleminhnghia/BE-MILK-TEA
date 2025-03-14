@@ -49,7 +49,6 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("first_name");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("image_url");
 
@@ -802,7 +801,6 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("category_id");
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(2000)")
                         .HasColumnName("content");
 
@@ -811,7 +809,6 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("create_at");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("image_url");
 

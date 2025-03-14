@@ -27,7 +27,7 @@ namespace Data_Access_Layer.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     phone_number = table.Column<string>(type: "varchar(15)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    image_url = table.Column<string>(type: "nvarchar(1000)", nullable: false),
+                    image_url = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     role_name = table.Column<string>(type: "varchar(200)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -249,8 +249,8 @@ namespace Data_Access_Layer.Migrations
                 {
                     recipe_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     recipe_title = table.Column<string>(type: "nvarchar(300)", nullable: false),
-                    content = table.Column<string>(type: "nvarchar(2000)", nullable: false),
-                    image_url = table.Column<string>(type: "nvarchar(1000)", nullable: false),
+                    content = table.Column<string>(type: "nvarchar(2000)", nullable: true),
+                    image_url = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     category_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     recipe_status = table.Column<int>(type: "int", nullable: false),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),

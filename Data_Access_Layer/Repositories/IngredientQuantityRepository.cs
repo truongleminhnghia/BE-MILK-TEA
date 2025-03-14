@@ -89,7 +89,9 @@ namespace Data_Access_Layer.Repositories
         }
         public async Task<IngredientQuantity> GetById(Guid id)
         {
-            return await _context.IngredientQuantities.FirstOrDefaultAsync(iq => iq.Id == id);
+            return await _context.IngredientQuantities
+            .Include(iq => iq.Ingredients)
+            .FirstOrDefaultAsync(iq => iq.Id == id);
         }
 
         public async Task<IngredientQuantity> GetByIdAndProductType(Guid ingredientId, ProductType ProductType)
