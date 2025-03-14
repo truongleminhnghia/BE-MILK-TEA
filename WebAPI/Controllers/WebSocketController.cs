@@ -186,7 +186,7 @@ namespace WebAPI.Controllers
             return Ok();
         }
 
-        [HttpGet]
+        [HttpGet("/recipes")]
         public async Task<IActionResult> GetRecipesWebSocket(
             [FromQuery] RecipeStatusEnum? recipeStatus,
             [FromQuery] Guid? categoryId,
