@@ -11,80 +11,79 @@ namespace Business_Logic_Layer.Services.IngredientProductService
     public class IngredientProductService : IIngredientProductService
     {
         private readonly IIngredientProductRepository _ingredientProductRepository;
-        private readonly IIngredientRepository _ingredientRepository;
         private readonly IMapper _mapper;
+        private readonly IIngredientRepository _ingredientRepository;
 
-        public IngredientProductService(IIngredientProductRepository ingredientProductRepository, IIngredientRepository ingredientRepository, IMapper mapper)
+        public IngredientProductService(IIngredientProductRepository ingredientProductRepository, IMapper mapper, IIngredientRepository ingredientRepository)
         {
             _ingredientProductRepository = ingredientProductRepository;
-            _ingredientRepository = ingredientRepository;
             _mapper = mapper;
+            _ingredientRepository = ingredientRepository;
         }
 
-        public async Task<IngredientProduct> CreateAsync(IngredientProductRequest request)
-        {
-            var ingredient = await _ingredientRepository.GetById(request.IngredientId);
-            if (ingredient == null)
-            {
-                throw new KeyNotFoundException("Không tìm thấy nguyên liệu.");
-            }
-            var totalPrice = request.Quantity * ingredient.PriceOrigin;
-
-            var ingredientProduct = new IngredientProduct
-            {
-                IngredientId = request.IngredientId,
-                Quantity = request.Quantity,
-                ProductType = request.ProductType,
-                TotalPrice = totalPrice
-            };
-
-            return await _ingredientProductRepository.CreateAsync(ingredientProduct);
-        }
-
-        public async Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId)
+        public async Task<IngredientProductResponse> CreateAsync(IngredientProductRequest request)
         {
             try
             {
-                return await _ingredientProductRepository.GetIngredientProductbyId(ingredientProductId);
+                if (request == null) throw new ArgumentNullException("Dữ liệu sản phẩm không hợp lệ");
+                if (request.Id != null) request.Id = null;
+                if (request.IngredientId == null) throw new ArgumentNullException("Nguyên liệu không hợp lệ");
+                var ingredientExists = await _ingredientRepository.GetById(request.IngredientId);
+                if (ingredientExists == null) throw new KeyNotFoundException("Nguyên liệu không tồn tại");
+
+                var newProduct = _mapper.Map<IngredientProduct>(request);
+                newProduct.TotalPrice = request.Quantity * ingredientExists.PriceOrigin;
+                var created = await _ingredientProductRepository.CreateAsync(newProduct);
+                var response = _mapper.Map<IngredientProductResponse>(created);
+                response.Id = created.Id;
+                return response;
+
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể lấy thông tin Ingredient Product bằng ID", ex);
+                throw new Exception("Lỗi khi tạo IngredientProduct: " + ex.Message);
             }
         }
-        
+
+        public async Task<IngredientProductResponse> GetIngredientProductbyId(Guid ingredientProductId)
+        {
+            try
+            {
+                var ingredientProduct = await _ingredientProductRepository.GetIngredientProductbyId(ingredientProductId);
+                return _mapper.Map<IngredientProductResponse>(ingredientProduct);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin Ingredient Product: " + ex.Message);
+            }
+        }
+
+        public async Task<IngredientProductResponse> UpdateAsync(Guid id, IngredientProductRequest request)
+        {
+            try
+            {
+                var ingredientProduct = await _ingredientProductRepository.GetIngredientProductbyId(id);
+                if (ingredientProduct == null)
+                {
+                    throw new KeyNotFoundException("Không tìm thấy sản phẩm");
+                }
+                var ingredientExists = await _ingredientRepository.GetById(request.IngredientId);
+                if (ingredientExists == null) throw new KeyNotFoundException("Nguyên liệu không tồn tại");
+                request.Id = id;
+                _mapper.Map(request, ingredientProduct);
+                ingredientProduct.TotalPrice = request.Quantity * ingredientExists.PriceOrigin;
+                await _ingredientProductRepository.UpdateAsync(ingredientProduct);
+                return _mapper.Map<IngredientProductResponse>(ingredientProduct);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi cập nhật IngredientProduct: " + ex.Message);
+            }
+        }
 
         public async Task<bool> IngredientExistsAsync(Guid ingredientId)
         {
             return await _ingredientProductRepository.IngredientExistsAsync(ingredientId);
-        }
-
-        public async Task<IngredientProduct> UpdateAsync(Guid ingredientProductId, IngredientProductRequest request)
-        {
-            try
-            {
-                var existingIngredientProduct = await _ingredientProductRepository.GetIngredientProductbyId(ingredientProductId);
-                if (existingIngredientProduct == null)
-                {
-                    throw new KeyNotFoundException("Không tìm thấy IngredientProduct");
-                }
-
-                var ingredient = await _ingredientRepository.GetById(existingIngredientProduct.IngredientId);
-                if (ingredient == null)
-                {
-                    throw new KeyNotFoundException("Không tìm thấy Ingredient");
-                }
-                existingIngredientProduct.Quantity = request.Quantity;
-                existingIngredientProduct.ProductType = request.ProductType;
-                existingIngredientProduct.TotalPrice = request.Quantity * ingredient.PriceOrigin;
-
-                var updatedIngredientProduct = await _ingredientProductRepository.UpdateAsync(ingredientProductId, existingIngredientProduct);
-                return updatedIngredientProduct;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Không thể update quantity, price, type", ex);
-            }
         }
         public async Task<IEnumerable<IngredientProduct>> GetAllAsync(Guid? ingredientId, int page, int pageSize)
         {
@@ -100,6 +99,5 @@ namespace Business_Logic_Layer.Services.IngredientProductService
                 .Take(pageSize)
                 .ToListAsync();
         }
-
     }
 }

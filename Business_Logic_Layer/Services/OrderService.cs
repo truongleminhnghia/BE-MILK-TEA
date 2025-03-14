@@ -95,7 +95,7 @@ namespace Business_Logic_Layer.Services
                     await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, ingredientQuantityRequest);
 
                     //tạo orderdetail
-                    var chosenIngredient = await _ingredientService.GetById(ingredientProduct.Ingredient.Id);
+                    var chosenIngredient = await _ingredientService.GetById(ingredientProduct.IngredientId);
                     orderDetails.OrderId = createdOrder.Id;
                     orderDetails.IngredientProductId = orderDetail.IngredientProductId;
                     orderDetails.Quantity = orderDetail.Quantity;

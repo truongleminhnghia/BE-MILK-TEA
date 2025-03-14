@@ -54,12 +54,14 @@ namespace Business_Logic_Layer.Services.IngredientService
                 //{
                 //    throw new KeyNotFoundException("Không tìm thấy nguyên liệu");
                 //}
-
+                if (request.Id != null) request.Id = null;
                 var newIngredientQuantity = _mapper.Map<IngredientQuantity>(request);
                 newIngredientQuantity.CreateAt = DateTime.UtcNow;
 
-                await _ingredientQuantityRepository.AddAsync(newIngredientQuantity);
-                return _mapper.Map<IngredientQuantityResponse>(newIngredientQuantity);
+                var created = await _ingredientQuantityRepository.AddAsync(newIngredientQuantity);
+                var response = _mapper.Map<IngredientQuantityResponse>(created);
+                response.Id = created.Id;
+                return response;
             }
             catch (Exception ex)
             {
