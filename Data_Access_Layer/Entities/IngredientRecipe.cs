@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Data_Access_Layer.Entities
 {
     [Table("ingredient_recipe")]
-    public class IngredientRecipe
+    public class    IngredientRecipe
     {
         [Key]
         [Column("ingredient_recipe_id")]

@@ -22,12 +22,10 @@ namespace Data_Access_Layer.Entities
         public string RecipeTitle { get; set; } = string.Empty;
 
         [Column("content", TypeName = "nvarchar(2000)")]
-        [Required]
         public string? Content { get; set; }
 
-        [Column("image_url", TypeName = "nvarchar(1000)")] // URL
-        [Required]
-        public string ImageUrl { get; set; }
+        [Column("image_url", TypeName = "nvarchar(1000)")] 
+        public string? ImageUrl { get; set; }
 
         [Column("category_id", TypeName = "char(36)")]
         [ForeignKey("CategoryId")]

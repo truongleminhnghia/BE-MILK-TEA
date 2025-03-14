@@ -95,6 +95,7 @@ namespace Data_Access_Layer.Repositories
             var query = _context.Ingredients
                 .Include(i => i.Category)
                 .Include(i => i.Images)
+                .Include(i => i.IngredientQuantities)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
@@ -148,6 +149,7 @@ namespace Data_Access_Layer.Repositories
             return await _context.Ingredients
             .Include(i => i.Images)
             .Include(i => i.Category)
+            .Include(i => i.IngredientQuantities)
             .FirstAsync(a => a.Id.Equals(id));
         }
 

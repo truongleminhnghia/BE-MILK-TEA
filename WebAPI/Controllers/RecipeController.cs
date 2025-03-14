@@ -2,6 +2,7 @@
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -9,6 +10,7 @@ namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/recipe")]
+    //[Authorize(Roles = "ROLE_STAFF" )]
 
     public class RecipeController : ControllerBase
     {
