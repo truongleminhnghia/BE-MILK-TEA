@@ -10,11 +10,11 @@ namespace Business_Logic_Layer.Services
 {
     public interface ICartItemService
     {
-        Task<List<CartItem>> GetCartItemsAsync();
+        //Task<List<CartItem>> GetCartItemsAsync();
         Task<CartItem?> GetByIdAsync(Guid id);
-        Task<CartItem> CreateAsync(CartItem cartItem);
-        Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem);
-        Task<bool> DeleteByIdAsync(Guid id);
+        Task<CartItem> AddToCartAsync(CartItem cartItem);
+        //Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem);
+        Task<bool> RemoveCartItemByIdAsync(Guid id);
     }
     public class CartItemService : ICartItemService
     {
@@ -23,14 +23,14 @@ namespace Business_Logic_Layer.Services
         {
             _cartItemRepository = cartItemRepository;
         }
-        public async Task<CartItem> CreateAsync(CartItem cartItem)
+        public async Task<CartItem> AddToCartAsync(CartItem cartItem)
         {
-            return await _cartItemRepository.CreateAsync(cartItem);
+            return await _cartItemRepository.AddToCartAsync(cartItem);
         }
 
-        public async Task<bool> DeleteByIdAsync(Guid id)
+        public async Task<bool> RemoveCartItemByIdAsync(Guid id)
         {
-            return await _cartItemRepository.DeleteByIdAsync(id);
+            return await _cartItemRepository.RemoveCartItemByIdAsync(id);
         }
 
         public async Task<CartItem?> GetByIdAsync(Guid id)
@@ -38,14 +38,14 @@ namespace Business_Logic_Layer.Services
             return await _cartItemRepository.GetByIdAsync(id);
         }
 
-        public async Task<List<CartItem>> GetCartItemsAsync()
-        {
-            return await _cartItemRepository.GetCartItemsAsync();
-        }
+        //public async Task<List<CartItem>> GetCartItemsAsync()
+        //{
+        //    return await _cartItemRepository.GetCartItemsAsync();
+        //}
 
-        public async Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem)
-        {
-            return await _cartItemRepository.UpdateAsync(id, cartItem);
-        }
+        //public async Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem)
+        //{
+        //    return await _cartItemRepository.UpdateAsync(id, cartItem);
+        //}
     }
 }

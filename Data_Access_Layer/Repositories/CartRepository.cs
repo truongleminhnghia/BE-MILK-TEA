@@ -12,14 +12,17 @@ namespace Data_Access_Layer.Repositories
 {
     public interface ICartRepository
     {
-        Task<Cart?> GetByIdAsync(Guid id);
+        Task<Cart?> GetByIdAsync(Guid accountId);
         Task<Cart> CreateAsync(Cart cart);
-        Task<Cart?> UpdateAsync(Guid id, Cart cart);
+        //Task<Cart?> UpdateAsync(Guid id, Cart cart);
     }
     public class CartRepository : ICartRepository
     {
         private readonly ApplicationDbContext _context;
-
+        public CartRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
         public async Task<Cart> CreateAsync(Cart cart)
         {
             cart.Id = Guid.NewGuid();
@@ -30,22 +33,25 @@ namespace Data_Access_Layer.Repositories
             return cart;
         }
 
-        public async Task<Cart?> GetByIdAsync(Guid id)
+        public async Task<Cart?> GetByIdAsync(Guid accountId)
         {
-            return await _context.Carts.FirstOrDefaultAsync(o => o.Id == id) ?? null;
+            return await _context.Carts
+        .Include(c => c.CartItems)  // Load danh sách CartItems
+        .FirstOrDefaultAsync(c => c.AccountId == accountId);
         }
 
-        public async Task<Cart?> UpdateAsync(Guid id, Cart cart)
-        {
-            var existingCart = await _context.Carts.FindAsync(id);
-            if (existingCart == null)
-            {
-                return null;
-            }
-            existingCart.UpdateAt = DateTime.Now;
+        //public async Task<Cart?> UpdateAsync(Guid id, Cart cart)
+        //{
+        //    var existingCart = await _context.Carts.FindAsync(id);
+        //    if (existingCart == null)
+        //    {
+        //        return null;
+        //    }
+        //    existingCart.UpdateAt = DateTime.Now;
 
-            await _context.SaveChangesAsync();
-            return existingCart;
-        }
+        //    await _context.SaveChangesAsync();
+        //    return existingCart;
+        //}
+
     }
 }

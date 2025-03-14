@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Business_Logic_Layer.Models.Requests
+namespace Business_Logic_Layer.Models.Responses
 {
-    public class RemoveCartItemRequest
+   public class CartItemResponse
     {
-        public Guid AccountId { get; set; }
+        public Guid CartItemId { get; set; }
         public Guid IngredientProductId { get; set; }
+        public int Quantity { get; set; }
     }
 }

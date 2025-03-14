@@ -33,8 +33,14 @@ namespace Data_Access_Layer.Entities
         [Required]
         public Guid IngredientProductId { get; set; }
 
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Column("updated_at")]
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public virtual Order? Orders { get; set; }
 
         public IngredientProduct? IngredientProducts { get; set; }
+
     }
 }
