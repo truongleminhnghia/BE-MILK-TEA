@@ -61,7 +61,7 @@ namespace Business_Logic_Layer.Services.IngredientReviewService
         )
         {
             // Xác thực thành phần và tài khoản tồn tại
-            var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId);
+            var ingredient = await _ingredientRepository.GetById(request.IngredientId);
             if (ingredient == null)
                 throw new ArgumentException("Không tìm thấy nguyên liệu");
 
@@ -128,7 +128,7 @@ namespace Business_Logic_Layer.Services.IngredientReviewService
             );
             var averageRating = ingredientReviews.Average(r => r.Rate);
 
-            var ingredient = await _ingredientRepository.GetByIdAsync(existingReview.IngredientId);
+            var ingredient = await _ingredientRepository.GetById(existingReview.IngredientId);
             if (ingredient != null)
             {
                 ingredient.Rate = (float)averageRating;
