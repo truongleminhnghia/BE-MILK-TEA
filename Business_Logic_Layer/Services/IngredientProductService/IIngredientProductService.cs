@@ -14,5 +14,7 @@ namespace Business_Logic_Layer.Services.IngredientProductService
         Task<bool> IngredientExistsAsync(Guid ingredientId);
         Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId);
         public Task<IngredientProduct> UpdateAsync(Guid ingredientProductId, IngredientProductRequest request);
+        Task<IEnumerable<IngredientProduct>> GetAllAsync(Guid? ingredientId, int page, int pageSize);
+
     }
 }

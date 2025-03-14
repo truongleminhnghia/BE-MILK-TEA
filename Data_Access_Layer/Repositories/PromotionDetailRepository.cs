@@ -65,12 +65,11 @@ namespace Data_Access_Layer.Repositories
             {
                 return null;
             }
-            //var promotion = await _context.PromotionDetails.FirstOrDefaultAsync(i => i.Id == promotionDetail.Id);
-            //if (promotion == null)
-            //{
-            //    throw new Exception("Ingredient not found.");
-            //}
-            
+            existingPromotionDetail.PromotionName = promotionDetail.PromotionName;
+            existingPromotionDetail.Description = promotionDetail.Description;
+            existingPromotionDetail.DiscountValue = promotionDetail.DiscountValue;
+            existingPromotionDetail.MiniValue = promotionDetail.MiniValue;
+            existingPromotionDetail.MaxValue = promotionDetail.MaxValue;
             await _context.SaveChangesAsync();
             return existingPromotionDetail;
         }

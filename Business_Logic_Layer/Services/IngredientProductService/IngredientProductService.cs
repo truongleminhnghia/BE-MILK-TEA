@@ -3,6 +3,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Business_Logic_Layer.Services.IngredientProductService
@@ -85,5 +86,20 @@ namespace Business_Logic_Layer.Services.IngredientProductService
                 throw new Exception("Không thể update quantity, price, type", ex);
             }
         }
+        public async Task<IEnumerable<IngredientProduct>> GetAllAsync(Guid? ingredientId, int page, int pageSize)
+        {
+            var query = _ingredientProductRepository.Query();
+
+            if (ingredientId.HasValue)
+            {
+                query = query.Where(ip => ip.IngredientId == ingredientId.Value);
+            }
+
+            return await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
     }
 }

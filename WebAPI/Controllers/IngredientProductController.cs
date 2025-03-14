@@ -7,6 +7,9 @@ using Data_Access_Layer.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
 
 namespace WebAPI.Controllers
 {
@@ -21,6 +24,45 @@ namespace WebAPI.Controllers
             _ingredientProductService = ingredientProductService;
             _mapper = mapper;
         }
+
+
+
+        [HttpGet("ws")]
+        public async Task<IActionResult> GetIngredientProductsWebSocket(
+    [FromQuery] Guid? ingredientId,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10)
+        {
+            if (!HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                return BadRequest("WebSocket request expected.");
+            }
+
+            using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+            try
+            {
+                while (webSocket.State == WebSocketState.Open)
+                {
+                    var ingredientProducts = await _ingredientProductService.GetAllAsync(ingredientId, page, pageSize);
+
+                    var ingredientProductRes = _mapper.Map<IEnumerable<IngredientProductResponse>>(ingredientProducts);
+                    string jsonString = JsonSerializer.Serialize(ingredientProductRes);
+                    var buffer = Encoding.UTF8.GetBytes(jsonString);
+
+                    await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                    await Task.Delay(2000); // Refresh dữ liệu mỗi 2 giây
+                }
+
+                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by server", CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"WebSocket error: {ex.Message}");
+            }
+
+            return Ok();
+        }
+
         //CREATE
         [HttpPost]
         public async Task<IActionResult> AddIngredientProduct([FromBody] IngredientProductRequest ingredientReq)

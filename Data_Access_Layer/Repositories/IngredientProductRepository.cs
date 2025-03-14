@@ -55,5 +55,24 @@ namespace Data_Access_Layer.Repositories
 
             return existingProduct;
         }
+        public async Task<IEnumerable<IngredientProduct>> GetAllAsync(Guid? ingredientId, int page, int pageSize)
+        {
+            var query = _context.IngredientProducts.AsQueryable();
+
+            if (ingredientId.HasValue)
+            {
+                query = query.Where(ip => ip.IngredientId == ingredientId.Value);
+            }
+
+            return await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        public IQueryable<IngredientProduct> Query()
+        {
+            return _context.IngredientProducts.AsQueryable();
+        }
+
     }
 }

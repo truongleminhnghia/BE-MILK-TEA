@@ -14,5 +14,8 @@ namespace Data_Access_Layer.Repositories
 
         public Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId);
         public Task<IngredientProduct> UpdateAsync(Guid ingredientProductId, IngredientProduct ingredientProduct);
+        Task<IEnumerable<IngredientProduct>> GetAllAsync(Guid? ingredientId, int page, int pageSize);
+        IQueryable<IngredientProduct> Query();
+
     }
 }
