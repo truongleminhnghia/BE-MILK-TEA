@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
 using AutoMapper;
 using Business_Logic_Layer.Models;
 using Business_Logic_Layer.Models.Requests;
@@ -65,6 +68,57 @@ namespace WebAPI.Controllers
         //         )
         //     );
         // }
+        [HttpGet("ws")]
+        public async Task<IActionResult> GetIngredientsWebSocket(
+    [FromQuery] string? search,
+    [FromQuery] string? categorySearch,
+    [FromQuery] Guid? categoryId,
+    [FromQuery] string? sortBy,
+    [FromQuery] DateTime? startDate,
+    [FromQuery] DateTime? endDate,
+    [FromQuery] IngredientStatus? status,
+    [FromQuery] decimal? minPrice,
+    [FromQuery] decimal? maxPrice,
+    [FromQuery] bool? isSale,
+    [FromQuery] bool isDescending = false,
+    [FromQuery] int pageCurrent = 1,
+    [FromQuery] int pageSize = 10)
+        {
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                try
+                {
+                    while (webSocket.State == WebSocketState.Open)
+                    {
+                        var ingredients = await _ingredientService.GetAllAsync(
+                            search, categorySearch, categoryId, sortBy, isDescending,
+                            pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale
+                        );
+
+                        var ingredientResponses = _mapper.Map<IEnumerable<IngredientResponse>>(ingredients);
+                        string jsonString = JsonSerializer.Serialize(ingredientResponses);
+                        var buffer = Encoding.UTF8.GetBytes(jsonString);
+
+                        await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+
+                        // Gửi dữ liệu mỗi 2 giây
+                        await Task.Delay(2000);
+                    }
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the server", CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"WebSocket error: {ex.Message}");
+                }
+            }
+            else
+            {
+                return BadRequest("WebSocket request expected.");
+            }
+
+            return Ok();
+        }
 
         [HttpGet]
         public async Task<IActionResult> SearchIngredients(
