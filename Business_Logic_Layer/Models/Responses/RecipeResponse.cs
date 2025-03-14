@@ -18,6 +18,7 @@ namespace Business_Logic_Layer.Models.Responses
 
     public class RecipeIngredientResponse
     {
+        public Guid Id { get; set; }
         public Guid IngredientId { get; set; }
         public string IngredientName { get; set; }
         public float WeightOfIngredient { get; set; }

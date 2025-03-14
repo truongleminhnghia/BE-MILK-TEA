@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
+using Business_Logic_Layer.Services.PromotionDetailService;
 using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
@@ -32,12 +33,16 @@ namespace Business_Logic_Layer.Services.PromotionService
     {
         private readonly IMapper _mapper;
         private readonly IPromotionRepository _promotionRepository;
+        private readonly IPromotionDetailService _promotionDetailService;
+        private readonly IPromotionDetailRepository _promotionDetailRepository;
         private readonly Source _source;
-        public PromotionService(IMapper mapper, IPromotionRepository promotionRepository,Source source)
+        public PromotionService(IMapper mapper, IPromotionRepository promotionRepository,Source source, IPromotionDetailService promotionDetailService, IPromotionDetailRepository promotionDetailRepository)
         {
             _mapper = mapper;
             _promotionRepository = promotionRepository;
             _source = source;
+            _promotionDetailService = promotionDetailService;
+            _promotionDetailRepository = promotionDetailRepository;
         }
 
         public async Task<PromotionResponse> CreateAsync(PromotionRequest promotionRequest)
@@ -50,15 +55,31 @@ namespace Business_Logic_Layer.Services.PromotionService
                 promotion.IsActive = true;
 
                 var createdPromotion = await _promotionRepository.CreateAsync(promotion);
+                List<PromotionDetail> promotionDetailList = new List<PromotionDetail>();
 
                 if (createdPromotion == null)
                 {
                     throw new Exception("Không thể tạo promotion. Hãy kiểm tra lại dữ liệu.");
                 }
 
-                return _mapper.Map<PromotionResponse>(createdPromotion);
+                if (promotionRequest.promotionDetailList != null && promotionRequest.promotionDetailList.Any())
+                {
+                    foreach (var detail in promotionRequest.promotionDetailList)
+                    {
+                        var promotionDetail = _mapper.Map<PromotionDetail>(detail);
+                        promotionDetail.PromotionId = createdPromotion.Id; // Gán PromotionId
+                        var createdDetail = await _promotionDetailRepository.CreateAsync(promotionDetail);
+                        promotionDetailList.Add(createdDetail);
+                    }
+                }
+
+                // Mapping response
+                var response = _mapper.Map<PromotionResponse>(createdPromotion);
+                response.PromotionDetails = promotionDetailList.Select(d => _mapper.Map<PromotionDetailResponse>(d)).ToList();
+
+                return response;
             }
-            catch (ArgumentException ex) 
+            catch (ArgumentException ex)
             {
                 throw new ArgumentException(ex.Message);
             }

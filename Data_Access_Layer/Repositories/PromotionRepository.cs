@@ -43,7 +43,10 @@ namespace Data_Access_Layer.Repositories
             {
                 throw new ArgumentException("StartDate không thể lớn hơn EndDate.");
             }
-
+            if (promotion.StartDate <= DateTime.UtcNow)
+            {
+                throw new ArgumentException("StartDate phải lớn hơn ngày hiện tại.");
+            }
             try
             {
                 _context.Promotions.Add(promotion);

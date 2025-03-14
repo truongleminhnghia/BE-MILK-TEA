@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
+using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Repositories;
+using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -17,48 +19,52 @@ namespace Business_Logic_Layer.Services
         private readonly IRecipeRepository _recipeRepository;
         private readonly IIngredientRepository _ingredientRepository;
         private readonly IMapper _mapper;
+        private readonly ApplicationDbContext _context;
+        private readonly IIngredientRecipeRepository _ingredientRecipeRepository;
 
-        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper)
+        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository)
         {
             _recipeRepository = recipeRepository;
             _ingredientRepository = ingredientRepository;
             _mapper = mapper;
+            _context = applicationDbContext;
+            _ingredientRecipeRepository = ingredientRecipeRepository;
         }
 
         public async Task<Recipe> CreateRecipe(RecipeRequest request)
         {
-            try
+            var strategy = _context.Database.CreateExecutionStrategy(); // Lấy chiến lược thực thi an toàn
+            return await strategy.ExecuteAsync(async () =>
             {
-                var recipe = _mapper.Map<Recipe>(request);
-
-                await _recipeRepository.CreateRecipe(recipe);
-                // Kiểm tra xem các nguyên liệu có tồn tại không
-                foreach (var ingredientRequest in request.Ingredients)
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    var ingredient = await _ingredientRepository.GetById(ingredientRequest.IngredientId);
-                    if (ingredient == null)
+                    var recipe = _mapper.Map<Recipe>(request);
+                    recipe.RecipeStatus = RecipeStatusEnum.ACTIVE;
+                    await _recipeRepository.CreateRecipe(recipe);
+                    // Kiểm tra xem các nguyên liệu có tồn tại không
+                    foreach (var ingredientRequest in request.Ingredients)
                     {
-                        throw new ArgumentException($"Nguyên liệu với ID {ingredientRequest.IngredientId} không tồn tại.");
+                        var ingredient = await _ingredientRepository.GetById(ingredientRequest.IngredientId);
+                        if (ingredient == null)
+                        {
+                            throw new ArgumentException($"Nguyên liệu với ID {ingredientRequest.IngredientId} không tồn tại.");
+                        }
+                        var ingreRecipe = _mapper.Map<IngredientRecipe>(ingredientRequest);
+                        ingreRecipe.RecipeId = recipe.Id;
+                        await _ingredientRecipeRepository.CreateIngredientRecipe(ingreRecipe);
+
                     }
-
-                    var ingredientRecipe = new IngredientRecipe
-                    {
-                        RecipeId = recipe.Id,
-                        IngredientId = ingredientRequest.IngredientId,
-                        WeightOfIngredient = ingredientRequest.WeightOfIngredient
-                    };
-
-                    recipe.IngredientRecipes.Add(ingredientRecipe);
+                    await transaction.CommitAsync();
+                    return recipe;
                 }
-
-                return recipe;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("error: " + ex.Message);
-                return null;
-            }
-
+                catch (Exception ex)
+                {
+                    Console.WriteLine("error: " + ex.Message);
+                    await transaction.RollbackAsync();
+                    throw new Exception("Error: " + ex.Message);
+                }
+            });
         }
 
         public async Task<RecipeResponse?> GetRecipeById(Guid recipeId)

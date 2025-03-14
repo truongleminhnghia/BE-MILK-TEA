@@ -22,14 +22,16 @@ namespace Business_Logic_Layer.Services.IngredientService
         private readonly ICategoryService _categoryService;
         private readonly Source _source;
         private readonly IImageService _imageSerivce;
+        private readonly IIngredientQuantityService _ingredientQuantityService;
 
-        public IngredientService(IIngredientRepository ingredientRepository, IMapper mapper, ICategoryService categoryService, Source source, IImageService imageService)
+        public IngredientService(IIngredientRepository ingredientRepository, IMapper mapper, ICategoryService categoryService, Source source, IImageService imageService, IIngredientQuantityService ingredientQuantityService)
         {
             _ingredientRepository = ingredientRepository;
             _mapper = mapper;
             _categoryService = categoryService;
             _source = source;
             _imageSerivce = imageService;
+            _ingredientQuantityService = ingredientQuantityService;
         }
 
         public async Task<bool> ChangeStatus(Guid id)
@@ -74,7 +76,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                 }
                 if (_source.CheckDate(ingredient.ExpiredDate) == 1 || _source.CheckDate(ingredient.ExpiredDate) == -1)
                 {
-                    throw new Exception("Hạng sử dụng chỉ còn 10 ngày hoặc hết hạn");
+                    throw new Exception("Hạn sử dụng chỉ còn 10 ngày hoặc hết hạn");
                 }
                 IngredientResponse ingredientResponse = _mapper.Map<IngredientResponse>(await _ingredientRepository.CreateAsync(ingredient));
 
@@ -83,6 +85,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                     throw new Exception("Tạo nguyên liệu mới không thành công");
                 }
                 List<ImageRespone> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
+                List<IngredientQuantityResponse> ingredientQuantities = await _ingredientQuantityService.CreateQuantitiesAsync(ingredientResponse.Id, request.IngredientQuantities);
                 ingredient.Images = _mapper.Map<List<Image>>(imageRespones);
                 ingredientResponse.Category = _mapper.Map<CategoryResponse>(categoryExists);
                 ingredientResponse.Images = imageRespones;
@@ -169,7 +172,12 @@ namespace Business_Logic_Layer.Services.IngredientService
                     var imageRes = await _imageSerivce.UpdateImages(request.ImageRequest, ingredient.Id);
                     if (imageRes != null) res.Images = imageRes;
                 }
-                return res;
+                if (request.IngredientQuantities != null)
+                {
+                    var quantityRes = await _ingredientQuantityService.UpdateQuantitiesAsync(ingredient.Id, request.IngredientQuantities);
+                    if (quantityRes != null) res.IngredientQuantities = quantityRes;
+                }
+                return res;                
             }
             catch (Exception ex)
             {
