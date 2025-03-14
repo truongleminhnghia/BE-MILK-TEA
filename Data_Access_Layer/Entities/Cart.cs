@@ -14,6 +14,7 @@ namespace Data_Access_Layer.Entities
         [Column("cart_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
+
         [Column("account_id")]
         [Required]
         [ForeignKey("AccountId")]

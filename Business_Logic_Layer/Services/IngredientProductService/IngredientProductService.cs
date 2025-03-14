@@ -34,6 +34,10 @@ namespace Business_Logic_Layer.Services.IngredientProductService
                 var newProduct = _mapper.Map<IngredientProduct>(request);
                 newProduct.TotalPrice = request.Quantity * ingredientExists.PriceOrigin;
                 var created = await _ingredientProductRepository.CreateAsync(newProduct);
+
+                // xử lý trừ số quantity
+                
+
                 var response = _mapper.Map<IngredientProductResponse>(created);
                 response.Id = created.Id;
                 return response;
