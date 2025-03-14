@@ -24,56 +24,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _promotionService = promotionService;
         }
-        [HttpGet("ws")]
-        public async Task<IActionResult> GetPromotionsWebSocket()
-        {
-            if (HttpContext.WebSockets.IsWebSocketRequest)
-            {
-                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                try
-                {
-                    string lastSentData = string.Empty;
-
-                    while (webSocket.State == WebSocketState.Open)
-                    {
-                        var promotions = await _promotionService.GetAllPromotionAsync(
-                            isActive: true, search: null, sortBy: null,
-                            isDescending: false, promotionType: null,
-                            startDate: null, endDate: null, page: 1, pageSize: 10
-                        );
-
-                        var promoRes = _mapper.Map<IEnumerable<PromotionResponse>>(promotions);
-                        string jsonString = JsonSerializer.Serialize(promoRes);
-
-                        //  Chỉ gửi dữ liệu nếu có thay đổi
-                        if (jsonString != lastSentData)
-                        {
-                            lastSentData = jsonString;
-                            var buffer = Encoding.UTF8.GetBytes(jsonString);
-                            await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
-                        }
-
-                        await Task.Delay(2000); // Kiểm tra dữ liệu mỗi 2 giây
-                    }
-
-                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by server", CancellationToken.None);
-                }
-                catch (WebSocketException ex)
-                {
-                    Console.WriteLine($" WebSocket Error: {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($" Error: {ex.Message}");
-                }
-            }
-            else
-            {
-                return BadRequest("WebSocket request expected.");
-            }
-
-            return Ok();
-        }
+        
         //Get all
         [HttpGet]
         public async Task<IActionResult> GetPromotion(
