@@ -70,19 +70,19 @@ namespace WebAPI.Controllers
         // }
         [HttpGet("ws")]
         public async Task<IActionResult> GetIngredientsWebSocket(
-    [FromQuery] string? search,
-    [FromQuery] string? categorySearch,
-    [FromQuery] Guid? categoryId,
-    [FromQuery] string? sortBy,
-    [FromQuery] DateTime? startDate,
-    [FromQuery] DateTime? endDate,
-    [FromQuery] IngredientStatus? status,
-    [FromQuery] decimal? minPrice,
-    [FromQuery] decimal? maxPrice,
-    [FromQuery] bool? isSale,
-    [FromQuery] bool isDescending = false,
-    [FromQuery] int pageCurrent = 1,
-    [FromQuery] int pageSize = 10)
+                        [FromQuery] string? search,
+                        [FromQuery] string? categorySearch,
+                        [FromQuery] Guid? categoryId,
+                        [FromQuery] string? sortBy,
+                        [FromQuery] DateTime? startDate,
+                        [FromQuery] DateTime? endDate,
+                        [FromQuery] IngredientStatus? status,
+                        [FromQuery] decimal? minPrice,
+                        [FromQuery] decimal? maxPrice,
+                        [FromQuery] bool? isSale,
+                        [FromQuery] bool isDescending = false,
+                        [FromQuery] int pageCurrent = 1,
+                        [FromQuery] int pageSize = 10)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
