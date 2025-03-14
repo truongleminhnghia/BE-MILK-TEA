@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -26,7 +26,9 @@ namespace Data_Access_Layer.Entities
         public double TotalPrice { get; set; }
 
         [Column("quantity")]
-        [Range(1, int.MinValue, ErrorMessage = "Quantity must be greater than 0")]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
+
+
         [Required]
         public int Quantity { get; set; }
 

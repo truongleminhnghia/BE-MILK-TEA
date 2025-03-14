@@ -24,55 +24,66 @@ namespace WebAPI.Controllers
             _orderDetailService = orderDetailService;
             _mapper = mapper;
         }
-        //Get all
-        [HttpGet("orderid/{orderId}")]
-        public async Task<IActionResult> GetAll(
-            Guid orderId,
+        [HttpGet]
+        public async Task<IActionResult> GetOrderDetails(
+            [FromQuery] Guid? orderId,
+            [FromQuery] Guid? orderDetailId,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool isDescending = false)
-
         {
-            List<OrderDetailResponse> orderDetails = await _orderDetailService.GetAllOrderDetailsAsync(orderId,search,sortBy,isDescending,page,pageSize);
-            if (orderDetails.Count == 0)
+            // Nếu nhập cả 2 ➝ Báo lỗi
+            if (orderId.HasValue && orderDetailId.HasValue)
             {
+                return BadRequest(new ApiResponse(
+                    ((int)HttpStatusCode.BadRequest),
+                    false,
+                    "Chỉ được nhập một trong hai: orderId hoặc orderDetailId."
+                ));
+            }
+
+            // Nếu không nhập gì ➝ Báo lỗi
+            if (!orderId.HasValue && !orderDetailId.HasValue)
+            {
+                return BadRequest(new ApiResponse(
+                    ((int)HttpStatusCode.BadRequest),
+                    false,
+                    "Vui lòng nhập một trong hai: orderId hoặc orderDetailId."
+                ));
+            }
+
+            // Nếu có orderDetailId ➝ Lấy chi tiết đơn hàng
+            if (orderDetailId.HasValue)
+            {
+                var orderDetail = await _orderDetailService.GetByIdAsync(orderDetailId.Value);
                 return Ok(new ApiResponse(
                     ((int)HttpStatusCode.OK),
                     true,
-                    "Không có đơn hàng nào cả.",
-                    null
+                    orderDetail != null ? "Lấy dữ liệu thành công!" : "Không có đơn hàng nào có ID đó cả.",
+                    orderDetail
                 ));
             }
-            return Ok(new ApiResponse(
-                    ((int)HttpStatusCode.OK),
-                    true,
-                    "Lấy dữ liệu thành công!",
-                    orderDetails
-                ));
-        }
 
-        //Get by id
-        [HttpGet("{orderDetailId}")]
-        public async Task<IActionResult> GetById(Guid orderDetailId)
-        {
-            var orderDetails = await _orderDetailService.GetByIdAsync(orderDetailId);
-            if (orderDetails == null)
+            // Nếu có orderId ➝ Lấy danh sách chi tiết đơn hàng
+            if (orderId.HasValue)
             {
+                var orderDetails = await _orderDetailService.GetAllOrderDetailsAsync(orderId.Value, search, sortBy, isDescending, page, pageSize);
                 return Ok(new ApiResponse(
                     ((int)HttpStatusCode.OK),
                     true,
-                    "Không có đơn hàng nào có ID đó cả.",
-                    null
-                ));
-            }
-            return Ok(new ApiResponse(
-                    ((int)HttpStatusCode.OK),
-                    true,
-                    "Lấy dữ liệu thành công!",
+                    orderDetails.Count != 0 ? "Lấy dữ liệu thành công!" : "Không có đơn hàng nào cả.",
                     orderDetails
                 ));
+            }
+
+            // Trường hợp không hợp lệ (không nên xảy ra)
+            return BadRequest(new ApiResponse(
+                ((int)HttpStatusCode.BadRequest),
+                false,
+                "Yêu cầu không hợp lệ."
+            ));
         }
         ////Create
         [HttpPost]

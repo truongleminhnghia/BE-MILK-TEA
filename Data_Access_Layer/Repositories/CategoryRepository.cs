@@ -14,7 +14,7 @@ namespace Data_Access_Layer.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(
+        public async Task<(IEnumerable<Category>, int TotalCount)> GetAllCategoriesAsync(
             string? search, string? sortBy, bool isDescending,
             CategoryStatus? categoryStatus, CategoryType? categoryType,
             DateTime? startDate, DateTime? endDate,
@@ -71,11 +71,16 @@ namespace Data_Access_Layer.Repositories
                 query = query.OrderByDescending(c => c.CreateAt); // Default sorting by CreateAt descending
             }
 
+            int total = await query.CountAsync();
+
 
             // **Pagination**
-            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+            var categories = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
-            return await query.ToListAsync();
+            return (categories, total);
         }
 
         public async Task<Category?> GetByIdAsync(Guid id)
@@ -102,9 +107,9 @@ namespace Data_Access_Layer.Repositories
         {
             var existingCategory = await _context.Categories.FindAsync(id);
             if (existingCategory == null)
-        {
+            {
                 return null;
-        }
+            }
 
             existingCategory.CategoryName = category.CategoryName;
             existingCategory.CategoryStatus = category.CategoryStatus;
@@ -140,43 +145,30 @@ namespace Data_Access_Layer.Repositories
             return true;
         }
 
+        public async Task<List<Dictionary<string, object>>> GetBySomeField(List<string> fields, CategoryStatus status)
+        {
+            var query = _context.Categories.AsQueryable();
+            if (!string.IsNullOrEmpty(status.ToString()))
+            {
+                query = query.Where(c => status.Equals(c.CategoryStatus));
+            }
+            var categories = await query.ToListAsync();
+            // lấy field được yêu cầu
+            var result = categories.Select(category =>
+            {
+                var dict = new Dictionary<string, object>();
+                foreach (var field in fields)
+                {
+                    var prop = typeof(Category).GetProperty(field, System.Reflection.BindingFlags.IgnoreCase | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                    if (prop != null)
+                    {
+                        dict[field] = prop.GetValue(category);
+                    }
+                }
+                return dict;
+            }).ToList();
+            return result;
+        }
+
     }
 }
-
-
-
-//using AutoMapper;
-//using Business_Logic_Layer.Services;
-//using Business_Logic_Layer.Services.IngredientService;
-//using Data_Access_Layer.Entities;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
-
-//namespace WebAPI.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class CategoryController : ControllerBase
-//    {
-//        private readonly ICategoryService _categorytService;
-//        private readonly IMapper _mapper;
-
-//        public CategoryController(ICategoryService categorytService, IMapper mapper)
-//        {
-//            _categorytService = categorytService;
-//            _mapper = mapper;
-//        }
-
-//        [HttpPost]
-//        public async Task<IActionResult> Add([FromBody] Category ingredient)
-//        {
-//            if (ingredient == null)
-//            {
-//                return BadRequest(new { message = "Invalid ingredient data" });
-//            }
-
-//            var createdIngredient = await _categorytService.CreateAsync(ingredient);
-//            return Ok(ingredient);
-//        }
-//    }
-//}

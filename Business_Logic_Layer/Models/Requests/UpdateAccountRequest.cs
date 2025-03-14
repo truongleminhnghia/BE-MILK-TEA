@@ -8,6 +8,7 @@ namespace Business_Logic_Layer.Models.Requests
         public string LastName { get; set; }
         public string FirstName { get; set; }
         public string PhoneNumber { get; set; }
+        public string ImgUrl { get; set; }
 
         public UpdateCustomerRequest? Customer { get; set; }
         public UpdateStaffRequest? Employee { get; set; }

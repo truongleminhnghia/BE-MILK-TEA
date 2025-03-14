@@ -25,15 +25,60 @@ namespace Data_Access_Layer.Repositories
             return ingredientProduct;
         }
 
-        public async Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId)
+        public async Task UpdateAsync(IngredientProduct ingredientProduct)
         {
-
-            return await _context.IngredientProducts.FirstOrDefaultAsync(n => n.Id.Equals(ingredientProductId));
+            _context.IngredientProducts.Update(ingredientProduct);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> IngredientExistsAsync(Guid ingredientId)
         {
             return await _context.Ingredients.AnyAsync(i => i.Id == ingredientId);
         }
+
+        public async Task<IngredientProduct> GetIngredientProductbyId(Guid ingredientProductId)
+        {
+            return await _context.IngredientProducts.FirstOrDefaultAsync(n => n.Id.Equals(ingredientProductId));
+        }
+
+        public async Task<IngredientProduct> UpdateAsync(Guid ingredientProductId, IngredientProduct ingredientProduct)
+        {
+            var existingProduct = await _context.IngredientProducts.FirstOrDefaultAsync(p => p.Id == ingredientProductId);
+
+            if (existingProduct == null)
+            {
+                throw new KeyNotFoundException("không tìm thấy Ingredient Product.");
+            }
+
+            // Cập nhật giá trị của existingProduct từ dữ liệu đầu vào
+            existingProduct.TotalPrice = ingredientProduct.TotalPrice;
+            existingProduct.Quantity = ingredientProduct.Quantity;
+            existingProduct.ProductType = ingredientProduct.ProductType;
+
+            _context.IngredientProducts.Update(existingProduct);
+            // Lưu thay đổi vào database
+            await _context.SaveChangesAsync();
+
+            return existingProduct;
+        }
+        public async Task<IEnumerable<IngredientProduct>> GetAllAsync(Guid? ingredientId, int page, int pageSize)
+        {
+            var query = _context.IngredientProducts.AsQueryable();
+
+            if (ingredientId.HasValue)
+            {
+                query = query.Where(ip => ip.IngredientId == ingredientId.Value);
+            }
+
+            return await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        public IQueryable<IngredientProduct> Query()
+        {
+            return _context.IngredientProducts.AsQueryable();
+        }
+
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250301084253_InitCreate")]
+    [Migration("20250310173904_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
@@ -50,6 +50,10 @@ namespace Data_Access_Layer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(300)")
                         .HasColumnName("first_name");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("image_url");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -431,6 +435,41 @@ namespace Data_Access_Layer.Migrations
                     b.ToTable("ingredient_promotion");
                 });
 
+            modelBuilder.Entity("Data_Access_Layer.Entities.IngredientQuantity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("ingredient_quantity_id");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("create_at");
+
+                    b.Property<Guid>("IngredientId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("ingredient_id");
+
+                    b.Property<string>("ProductType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("product_type");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int")
+                        .HasColumnName("quantity");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("update_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IngredientId");
+
+                    b.ToTable("ingredient_quantity");
+                });
+
             modelBuilder.Entity("Data_Access_Layer.Entities.IngredientRecipe", b =>
                 {
                     b.Property<Guid>("Id")
@@ -556,7 +595,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("ref_code");
 
-                    b.Property<double>("TotlaPrice")
+                    b.Property<double>("TotalPrice")
                         .HasColumnType("double")
                         .HasColumnName("total_price");
 
@@ -765,13 +804,20 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("category_id");
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(2000)")
                         .HasColumnName("content");
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("image_url");
+
+                    b.Property<int>("RecipeStatus")
+                        .HasColumnType("int")
+                        .HasColumnName("recipe_status");
 
                     b.Property<string>("RecipeTitle")
                         .IsRequired()
@@ -912,6 +958,17 @@ namespace Data_Access_Layer.Migrations
                     b.Navigation("Ingredient");
 
                     b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("Data_Access_Layer.Entities.IngredientQuantity", b =>
+                {
+                    b.HasOne("Data_Access_Layer.Entities.Ingredient", "Ingredients")
+                        .WithMany("IngredientQuantities")
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ingredients");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.IngredientRecipe", b =>
@@ -1066,6 +1123,8 @@ namespace Data_Access_Layer.Migrations
                     b.Navigation("IngredientProducts");
 
                     b.Navigation("IngredientPromotions");
+
+                    b.Navigation("IngredientQuantities");
 
                     b.Navigation("IngredientRecipes");
 

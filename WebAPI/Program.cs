@@ -18,6 +18,10 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+// using Business_Logic_Layer.Utils;
+using Microsoft.OpenApi.Models;
+using Business_Logic_Layer.Services.PromotionService;
+using Business_Logic_Layer.Services.PromotionDetailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,26 +43,26 @@ builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection(
 //        Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
 //    });
 
-//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            Array.Empty<string>()
-//        }
-//    });
-//});
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 
 Env.Load();
 
-//var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
+// var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
 var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
 var _port = Environment.GetEnvironmentVariable("PORT_LOCAL");
@@ -68,9 +72,9 @@ var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
 var connectionString =
-    $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+  $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
-//var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
+// var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -101,11 +105,11 @@ var _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
-
-if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
-{
-    throw new InvalidOperationException("JWT environment variables are not set properly.");
-}
+//muốn chạy thì comment từ đây lại, + xóa Migration
+// if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
+// {
+//   throw new InvalidOperationException("JWT environment variables are not set properly.");
+// }
 
 // đăng kí xác thực
 builder
@@ -132,40 +136,6 @@ builder
             ) // phải mã khóa serect_key lại nhé
             ,
         };
-
-        // cấu hình cho thông báo về JWT Token
-        // Xử lý lỗi JWT Token
-        //options.Events = new JwtBearerEvents
-        //{
-        //    OnMessageReceived = context =>
-        //    {
-        //        // Không có Token
-        //        if (string.IsNullOrEmpty(context.Token))
-        //        {
-        //            context.NoResult();
-        //            context.Response.StatusCode = 401;
-        //            context.Response.ContentType = "application/json";
-        //            return context.Response.WriteAsync("{\"message\": \"Không có token, vui lòng đăng nhập!\"}");
-        //        }
-        //        return Task.CompletedTask;
-        //    },
-        //    OnAuthenticationFailed = context =>
-        //    {
-        //        // Token không hợp lệ
-        //        context.NoResult();
-        //        context.Response.StatusCode = 401;
-        //        context.Response.ContentType = "application/json";
-        //        return context.Response.WriteAsync("{\"message\": \"Tài khoản không hợp lệ hoặc đã hết hạn!\"}");
-        //    },
-        //    OnForbidden = context =>
-        //    {
-        //        // Không có quyền truy cập (403 Forbidden)
-        //        context.NoResult();
-        //        context.Response.StatusCode = 403;
-        //        context.Response.ContentType = "application/json";
-        //        return context.Response.WriteAsync("{\"message\": \"Bạn không có quyền truy cập!\"}");
-        //    }
-        //};
     });
 
 // Add services to the container.
@@ -183,7 +153,8 @@ builder.Services.AddAutoMapper(
     typeof(ImageMapper),
     typeof(IngredientProductMapper),
     typeof(AccountMapper),
-    typeof(CategoryMapper)
+    typeof(CategoryMapper),
+    typeof(PromotionDetailMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
@@ -206,6 +177,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IIngredientProductService, IngredientProductService>();
 builder.Services.AddScoped<IIngredientProductRepository, IngredientProductRepository>();
+builder.Services.AddScoped<IIngredientQuantityService, IngredientQuantityService>();
+builder.Services.AddScoped<IIngredientQuantityRepository, IngredientQuantityRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
@@ -227,6 +200,7 @@ builder.Services.AddScoped<Source>();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
+
 // config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 
@@ -236,13 +210,11 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
-            policy
-                .WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app") // Replace with your frontend URL
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        }
-    );
+            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500") // Replace with your frontend URL
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
 });
 
 builder.Services.AddHttpClient<AuthenService>();

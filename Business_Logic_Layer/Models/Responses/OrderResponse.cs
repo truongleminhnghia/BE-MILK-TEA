@@ -18,7 +18,6 @@ namespace Business_Logic_Layer.Models.Responses
         public String? PhoneShipping { get; set; }
         public String? EmailShipping { get; set; }
         public String? NoteShipping { get; set; }
-        public OrderStatus OrderStatus { get; set; }
         public int Quantity { get; set; }
         public double TotalPrice { get; set; }
         public double? PriceAfterPromotion { get; set; }
