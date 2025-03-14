@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -27,14 +27,13 @@ namespace Data_Access_Layer.Entities
 
         [Column("quantity")]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
-
         [Required]
         public int Quantity { get; set; }
 
         [Column("product_type")]
+        [EnumDataType(typeof(ProductType))]
         [Required]
         public ProductType ProductType { get; set; }
-
 
         
         public Ingredient? Ingredient { get; set; }

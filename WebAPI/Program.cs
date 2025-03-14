@@ -1,11 +1,16 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Business_Logic_Layer.AutoMappers;
+using Business_Logic_Layer.Configurations;
 using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
 using Business_Logic_Layer.Services.IngredientProductService;
+using Business_Logic_Layer.Services.IngredientReviewService;
 using Business_Logic_Layer.Services.IngredientService;
+using Business_Logic_Layer.Services.NotificationService;
+using Business_Logic_Layer.Services.PaymentService;
+using Business_Logic_Layer.Services.VNPayService;
 using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Repositories;
@@ -22,6 +27,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient();
+builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection("VNPay"));
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -198,7 +207,6 @@ builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
 
-
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();
@@ -240,26 +248,28 @@ app.UseAuthorization();
 app.UseHttpsRedirection();
 
 //cấu hình tự động bỏ qua xác thực đối với một số endpoint / API cụ thể ngay từ Program.cs nếu lười dùng [AllowAnonymous] cho từng API
-app.Use(async (context, next) =>
-{
-    var path = context.Request.Path.Value.ToLower();
-
-    var publicEndpoints = new[]
+app.Use(
+    async (context, next) =>
     {
-        "/api/v1/auths/register",
-        "/api/v1/auths/login",
-        "/api/v1/auths/forgot-password"
-    };
+        var path = context.Request.Path.Value.ToLower();
 
-    // Nếu request thuộc API công khai, bỏ qua xác thực
-    if (publicEndpoints.Any(endpoint => path.StartsWith(endpoint)))
-    {
+        var publicEndpoints = new[]
+        {
+            "/api/v1/auths/register",
+            "/api/v1/auths/login",
+            "/api/v1/auths/forgot-password",
+        };
+
+        // Nếu request thuộc API công khai, bỏ qua xác thực
+        if (publicEndpoints.Any(endpoint => path.StartsWith(endpoint)))
+        {
+            await next();
+            return;
+        }
+
         await next();
-        return;
     }
-
-    await next();
-});
+);
 
 app.MapControllers();
 app.UseCors(MyAllowSpecificOrigins);

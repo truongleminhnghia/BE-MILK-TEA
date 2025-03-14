@@ -55,6 +55,20 @@ namespace Business_Logic_Layer.Services.PromotionService
                 promotion.IsActive = true;
 
                 var createdPromotion = await _promotionRepository.CreateAsync(promotion);
+
+                if (createdPromotion.PromotionType == PromotionType.PROMOTION_PRODUCT 
+                    && createdPromotion.Id != null) { 
+                    var productPromotion = new IngredientPromotion 
+                    { Id = createdPromotion.Id, PromotionId = createdPromotion.Id };
+                    await _promotionRepository.CreateProductPromotion(productPromotion);
+                }
+                else if (createdPromotion.PromotionType == PromotionType.PROMOTION_ORDER)
+                {
+                    var orderPromotion = new OrderPromotion
+                    { Id = createdPromotion.Id, PromotionId = createdPromotion.Id };
+                    await _promotionRepository.CreateOrderPromotion(orderPromotion);
+                }
+
                 List<PromotionDetail> promotionDetailList = new List<PromotionDetail>();
 
                 if (createdPromotion == null)

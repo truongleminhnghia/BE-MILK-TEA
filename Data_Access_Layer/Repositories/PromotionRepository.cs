@@ -22,6 +22,8 @@ namespace Data_Access_Layer.Repositories
         Task<Promotion?> GetByIdAsync(Guid id);
         Task<Promotion> CreateAsync(Promotion promotion);
         Task<Promotion?> UpdateAsync(Guid id, Promotion promotion);
+        Task<IngredientPromotion> CreateProductPromotion(IngredientPromotion ingredientPromotion);
+        Task<OrderPromotion> CreateOrderPromotion(OrderPromotion orderPromotion);
         //Task<bool> DeleteAsync(Guid id);
     }
 }
@@ -167,6 +169,34 @@ namespace Data_Access_Layer.Repositories
             catch (Exception ex)
             {
                 throw new Exception("Lỗi khi cập nhật promotion.", ex);
+            }
+        }
+
+        public async Task<IngredientPromotion> CreateProductPromotion(IngredientPromotion ingredientPromotion)
+        {
+            try
+            {
+                _context.IngredientPromotions.Add(ingredientPromotion);
+                await _context.SaveChangesAsync();
+                return ingredientPromotion;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi tạo Ingredient Promotion.", ex);
+            }
+        }
+
+        public async Task<OrderPromotion> CreateOrderPromotion (OrderPromotion orderPromotion)
+        {
+            try
+            {
+                _context.OrderPromotions.Add(orderPromotion);
+                await _context.SaveChangesAsync();
+                return orderPromotion;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi tạo Order Promotion.", ex);
             }
         }
     }

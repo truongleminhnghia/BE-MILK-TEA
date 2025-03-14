@@ -21,14 +21,16 @@ namespace Business_Logic_Layer.Services
         private readonly IMapper _mapper;
         private readonly ApplicationDbContext _context;
         private readonly IIngredientRecipeRepository _ingredientRecipeRepository;
+        private readonly ICategoryService _categoryService;
 
-        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository)
+        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository, ICategoryService categoryService)
         {
             _recipeRepository = recipeRepository;
             _ingredientRepository = ingredientRepository;
             _mapper = mapper;
             _context = applicationDbContext;
             _ingredientRecipeRepository = ingredientRecipeRepository;
+            _categoryService = categoryService;
         }
 
         public async Task<Recipe> CreateRecipe(RecipeRequest request)
@@ -39,6 +41,11 @@ namespace Business_Logic_Layer.Services
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
+                    var checkCate = await _categoryService.GetByIdAsync(request.CategoryId);
+                    if (checkCate.CategoryType != CategoryType.CATEGORY_RECIPE)
+                    {
+                        throw new Exception("Danh mục không phải là danh mục công thức.");
+                    }
                     var recipe = _mapper.Map<Recipe>(request);
                     recipe.RecipeStatus = RecipeStatusEnum.ACTIVE;
                     await _recipeRepository.CreateRecipe(recipe);
@@ -171,6 +178,23 @@ namespace Business_Logic_Layer.Services
                 Console.WriteLine("error: " + ex.Message);
                 return null;
             }
+        }
+        public async Task<PageResult<RecipeResponse>> GetAllRecipesAsync(
+            string? search, string? sortBy, bool isDescending,
+            RecipeStatusEnum? recipeStatus, Guid? categoryId,
+            DateTime? startDate, DateTime? endDate,
+            int page, int pageSize)
+        {
+            var (recipes, total) = await _recipeRepository.GetAllRecipesAsync(
+                search, sortBy, isDescending, recipeStatus, categoryId, startDate, endDate, page, pageSize);
+
+            return new PageResult<RecipeResponse>
+            {
+                Data = _mapper.Map<List<RecipeResponse>>(recipes),
+                PageCurrent = page,
+                PageSize = pageSize,
+                Total = total
+            };
         }
 
     }

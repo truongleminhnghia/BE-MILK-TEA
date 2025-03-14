@@ -45,17 +45,21 @@ namespace Data_Access_Layer.Entities
         public IngredientStatus IngredientStatus { get; set; }
 
         [Column("weight_per_bag")]
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public float WeightPerBag { get; set; } // trong lượng trong mỗi bịch => một bịch 500g 0.5kg......
 
         [Column("quantity_per_carton")]
+        [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public int QuantityPerCarton { get; set; } // số lượng trong mỗi thùng ==> thùng 12 bịch
 
         [Column("ingredient_type")]
+        [EnumDataType(typeof(IngredientType))]
         [Required]
         public IngredientType IngredientType  { get; set; } // Thêm Enum mới
 
         [Column("unit", TypeName = "nvarchar(50)")]
-        public string Unit { get; set; } = string.Empty; // đơn vị là string, viết kilogram hoặc gram
+        [EnumDataType(typeof(UnitOfIngredientEnum))]
+        public UnitOfIngredientEnum Unit { get; set; } // đơn vị là string, viết kilogram hoặc gram
 
         [Column("price_origin")]
         [Required]
