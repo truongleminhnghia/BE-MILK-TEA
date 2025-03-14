@@ -135,6 +135,22 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
+        public async Task<IngredientQuantityResponse> GetByIdAndProductType(Guid ingredientId, ProductType ProductType)
+        {
+            try
+            {
+                var ingredientQuantity = await _ingredientQuantityRepository.GetByIdAndProductType(ingredientId, ProductType);
+                if (ingredientQuantity == null)
+                {
+                    throw new KeyNotFoundException("Không tìm thấy nguyên liệu với loại sản phẩm đã chỉ định");
+                }
+                return _mapper.Map<IngredientQuantityResponse>(ingredientQuantity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi truy vấn IngredientQuantity: " + ex.Message);
+            }
+        }
         public async Task<IngredientQuantity> Save(IngredientQuantity ingredientQuantity)
         {
             await _ingredientQuantityRepository.AddAsync(ingredientQuantity);

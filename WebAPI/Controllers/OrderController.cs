@@ -166,18 +166,6 @@ namespace WebAPI.Controllers
             );
         }
 
-        //Delete by id
-        //[HttpDelete("{orderId}")]
-        //public async Task<IActionResult> DeleteOrder(Guid orderId)
-        //{
-        //    var result = await _orderService.DeleteByIdAsync(orderId);
 
-        //    if (!result)
-        //    {
-        //        return NotFound(new { message = "Order not found" });
-        //    }
-
-        //    return Ok(new { message = "Order deleted successfully" });
-        //}
     }
 }
