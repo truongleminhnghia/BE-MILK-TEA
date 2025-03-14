@@ -12,7 +12,6 @@ namespace Data_Access_Layer.Repositories
 {
     public class AccountRepository : IAccountRepository
     {
-
         private readonly ApplicationDbContext _context;
 
         public AccountRepository(ApplicationDbContext context)
@@ -39,7 +38,8 @@ namespace Data_Access_Layer.Repositories
             try
             {
                 response = await _context.Accounts.FirstOrDefaultAsync(a => a.Email == _email);
-             } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -48,8 +48,8 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Account?> GetById(Guid _id)
         {
-            return await _context.Accounts
-                .Include(a => a.Employee)
+            return await _context
+                .Accounts.Include(a => a.Employee)
                 .Include(a => a.Customer)
                 .FirstOrDefaultAsync(a => a.Id == _id);
         }
@@ -65,19 +65,29 @@ namespace Data_Access_Layer.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Account>> GetAllAccounts (
-    string? search, string? sortBy, bool isDescending,
-    AccountStatus? accountStatus, RoleName? role, int page, int pageSize)
+        public async Task<IEnumerable<Account>> GetAllAccounts(
+            string? search,
+            string? sortBy,
+            bool isDescending,
+            AccountStatus? accountStatus,
+            RoleName? role,
+            int page,
+            int pageSize
+        )
         {
-            var query = _context.Accounts
-                .Include(a => a.Employee)
+            var query = _context
+                .Accounts.Include(a => a.Employee)
                 .Include(a => a.Customer)
                 .AsQueryable();
 
             // **Tìm kiếm theo Email hoặc Username**
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(a => a.Email.Contains(search) || a.FirstName.Contains(search) || a.LastName.Contains(search));
+                query = query.Where(a =>
+                    a.Email.Contains(search)
+                    || a.FirstName.Contains(search)
+                    || a.LastName.Contains(search)
+                );
             }
 
             // **Lọc theo trạng thái tài khoản**
@@ -105,5 +115,12 @@ namespace Data_Access_Layer.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<Account> GetAccountByOrderIdAsync(Guid orderId)
+        {
+            return await _context
+                .Orders.Where(o => o.Id == orderId)
+                .Select(o => o.Account)
+                .FirstOrDefaultAsync();
+        }
     }
 }
