@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,16 +35,23 @@ namespace Business_Logic_Layer.Services
             throw new NotImplementedException();
         }
 
-        public async Task<CartResponse?> GetByAccountAsync(Guid id)
+        public async Task<CartResponse> GetByAccountAsync(Guid id)
         {
-            CartResponse cartResponse = null;
+            CartResponse cartResponse = new CartResponse();
             var account = await _accountRepository.GetById(id);
             if (account == null)
             {
                 throw new Exception("Tài khoảng không tồn tại");
             }
-            var cartEixst = await _cartRepository.GetByAccountAsync(account.Id);
-            if (cartEixst == null)
+            Cart? cartEixst = await _cartRepository.GetByAccountAsync(account.Id);
+            if (cartEixst != null)
+            {
+                cartResponse.Id = cartEixst.Id;
+                cartResponse.AccountResponse = _mapper.Map<AccountResponse>(cartEixst.Account);
+                cartResponse.CarItemResponse = _mapper.Map<CartItemResponse>(cartEixst.CartItems);
+                cartResponse.TotalCartItem = await SumCartItem(cartEixst.Id, cartEixst.CartItems.ToList());
+            }
+            else
             {
                 Cart cart = new Cart();
                 cart.AccountId = account.Id;
@@ -54,13 +62,11 @@ namespace Business_Logic_Layer.Services
                 }
                 cartResponse.Id = result.Id;
                 cartResponse.AccountResponse = _mapper.Map<AccountResponse>(account);
-                cartResponse.CarItemResponse = null;
+                // cartResponse.CarItemResponse = null;
                 cartResponse.TotalCartItem = 0;
             }
-            cartResponse.Id = cartEixst.Id;
-            cartResponse.AccountResponse = _mapper.Map<AccountResponse>(cartEixst.Account);
-            cartResponse.CarItemResponse = _mapper.Map<CartItemResponse>(cartEixst.CartItems);
-            cartResponse.TotalCartItem = 0;
+
+            return cartResponse;
         }
 
         public Task<bool?> UpdateAsync(Guid id, CartRequest request)
@@ -68,12 +74,17 @@ namespace Business_Logic_Layer.Services
             throw new NotImplementedException();
         }
 
-        private int SumCartItem(List<CartItem> cartItems)
+        private async Task<int> SumCartItem(Guid id, List<CartItem> cartItems)
         {
             try
             {
                 int count = 0;
-                // List
+                IEnumerable<CartItem> cartItemsFromDb = await _cartItemRepository.GetByCart(id);
+                if (cartItemsFromDb == null)
+                {
+                    count = 0;
+                }
+                count = cartItemsFromDb.Count();
                 return count;
             }
             catch (Exception ex)
