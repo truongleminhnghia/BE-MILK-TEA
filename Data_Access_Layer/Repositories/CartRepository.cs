@@ -24,9 +24,7 @@ namespace Data_Access_Layer.Repositories
         public async Task<Cart?> GetByAccountAsync(Guid id)
         {
             return await _context.Carts
-            .Include(c => c.Account)
-            .Include(c => c.CartItems)
-            .FirstOrDefaultAsync(c => c.AccountId == id) ?? null;
+                .FirstOrDefaultAsync(c => c.AccountId == id);
         }
 
         public async Task<Cart?> GetByIdAsync(Guid id)

@@ -11,7 +11,7 @@ namespace Business_Logic_Layer.Services
     public interface ICartService
     {
         public Task<CartResponse?> GetByIdAsync(Guid id);
-        public Task<CartResponse?> GetByAccountAsync(Guid id);
+        public Task<CartResponse> GetByAccountAsync(Guid id);
         public Task<CartResponse> CreateAsync(CartRequest request);
         public Task<bool?> UpdateAsync(Guid id, CartRequest request);
     }
