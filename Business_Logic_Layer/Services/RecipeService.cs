@@ -161,7 +161,8 @@ namespace Business_Logic_Layer.Services
             catch (Exception ex)
             {
                 Console.WriteLine("error: " + ex.Message);
-                return null;
+                throw new Exception("Có lỗi khi cập nhật Recipe: " + ex.Message); // Return false in case of an error
+
             }
         }
 

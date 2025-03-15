@@ -32,7 +32,14 @@ namespace Data_Access_Layer.Repositories
             return await _context.Recipes
                 .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
-                    .ThenInclude(ir => ir.Ingredient).ThenInclude(ca => ca.Category)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Category)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Images)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.IngredientQuantities)
                 .FirstOrDefaultAsync(r => r.Id == recipeId);
         }
 
@@ -61,6 +68,13 @@ namespace Data_Access_Layer.Repositories
                 .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
                     .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Category)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Images)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.IngredientQuantities)
                 .AsQueryable();
 
             // **Lọc theo trạng thái**
