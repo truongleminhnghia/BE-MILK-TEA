@@ -30,10 +30,12 @@ namespace Data_Access_Layer.Repositories
         public async Task<Recipe?> GetRecipeById(Guid recipeId)
         {
             return await _context.Recipes
+                .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
-                .ThenInclude(ir => ir.Ingredient)
+                    .ThenInclude(ir => ir.Ingredient).ThenInclude(ca => ca.Category)
                 .FirstOrDefaultAsync(r => r.Id == recipeId);
         }
+
 
         public async Task<Recipe?> UpdateRecipe(Recipe recipe)
         {

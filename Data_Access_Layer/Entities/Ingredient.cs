@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
@@ -77,7 +78,7 @@ namespace Data_Access_Layer.Entities
 
         [Column("rate")]
         public float Rate { get; set; } // tính TB 4 + 5 /2
-         // bổ sung bình luận
+                                        // bổ sung bình luận
 
         public ICollection<Image>? Images { get; set; }
         public ICollection<IngredientReview>? IngredientReviews { get; set; }

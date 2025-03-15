@@ -86,13 +86,20 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAllRecipes(
-            string? search, string? sortBy, RecipeStatusEnum recipeStatusEnum,
-            bool isDescending = false, Guid? categoryId = null, int page = 1, int pageSize = 10)
+            string? search,
+            string? sortBy,
+            RecipeStatusEnum recipeStatusEnum,
+            bool isDescending = false,
+            Guid? categoryId = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            int page = 1,
+            int pageSize = 10)
         {
             try
             {
-                var recipes = await _recipeService.GetAllRecipes(
-                    search, sortBy, isDescending, categoryId, page, pageSize, recipeStatusEnum);
+                var recipes = await _recipeService.GetAllRecipesAsync(
+                    search, sortBy, isDescending, recipeStatusEnum, categoryId, startDate, endDate, page, pageSize);
 
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),

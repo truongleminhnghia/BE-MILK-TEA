@@ -7,12 +7,9 @@ namespace Business_Logic_Layer.Services
 {
     public interface IRecipeService
     {
-        Task<Recipe> CreateRecipe(RecipeRequest request);
+        Task<RecipeResponse> CreateRecipe(RecipeRequest request);
         Task<RecipeResponse?> GetRecipeById(Guid recipeId);
-        Task<RecipeResponse?> UpdateRecipe(Guid recipeId, RecipeRequest request);
-        Task<IEnumerable<RecipeResponse>> GetAllRecipes(
-            string? search, string? sortBy, bool isDescending,
-            Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus);
+        Task<RecipeResponse?> UpdateRecipe(Guid recipeId, RecipeRequest request);        
         Task<PageResult<RecipeResponse>> GetAllRecipesAsync(
             string? search, string? sortBy, bool isDescending,
             RecipeStatusEnum? recipeStatus, Guid? categoryId,

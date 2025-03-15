@@ -34,7 +34,7 @@ namespace Business_Logic_Layer.Services
             _categoryService = categoryService;
         }
 
-        public async Task<Recipe> CreateRecipe(RecipeRequest request)
+        public async Task<RecipeResponse> CreateRecipe(RecipeRequest request)
         {
             var strategy = _context.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync(async () =>
@@ -83,7 +83,7 @@ namespace Business_Logic_Layer.Services
                     }
 
                     await transaction.CommitAsync();
-                    return recipe;
+                    return _mapper.Map<RecipeResponse>(recipe);
                 }
                 catch (Exception ex)
                 {
@@ -100,16 +100,20 @@ namespace Business_Logic_Layer.Services
             try
             {
                 var recipe = await _recipeRepository.GetRecipeById(recipeId);
-                if (recipe == null) throw new Exception("Lấy thông tin thất bại!");
+                if (recipe == null)
+                {
+                    throw new Exception("Không tìm thấy công thức!");
+                }
 
                 return _mapper.Map<RecipeResponse>(recipe);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("error: " + ex.Message);
+                Console.WriteLine($"Lỗi khi lấy công thức: {ex.Message}");
                 return null;
             }
         }
+
 
         public async Task<RecipeResponse?> UpdateRecipe(Guid recipeId, RecipeRequest request)
         {
@@ -152,58 +156,12 @@ namespace Business_Logic_Layer.Services
                 await _recipeRepository.UpdateRecipe(recipe);
 
                 // Trả về DTO
-                return new RecipeResponse
-                {
-                    Id = recipe.Id,
-                    RecipeTitle = recipe.RecipeTitle,
-                    Content = recipe.Content,
-                    CategoryId = recipe.CategoryId,
-                    Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
-                    {
-                        IngredientId = ir.IngredientId,
-                        IngredientName = ir.Ingredient.IngredientName,
-                        WeightOfIngredient = ir.WeightOfIngredient
-                    }).ToList()
-                };
+                return _mapper.Map<RecipeResponse>(recipe);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("error: " + ex.Message);
                 return null;
-            }
-        }
-
-
-
-        public async Task<IEnumerable<RecipeResponse>> GetAllRecipes(
-    string? search, string? sortBy, bool isDescending,
-    Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus)
-        {
-            try
-            {
-                var recipes = await _recipeRepository.GetAllRecipes(
-                    search, sortBy, isDescending, categoryId, page, pageSize, recipeStatus);
-
-                return recipes.Select(recipe => new RecipeResponse
-                {
-                    Id = recipe.Id,
-                    RecipeTitle = recipe.RecipeTitle,
-                    Content = recipe.Content,
-                    CategoryId = recipe.CategoryId,
-                    CategoryName = recipe.Category?.CategoryName,
-                    RecipeStatus = recipe.RecipeStatus,
-                    Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
-                    {
-                        IngredientId = ir.IngredientId,
-                        IngredientName = ir.Ingredient.IngredientName,
-                        WeightOfIngredient = ir.WeightOfIngredient
-                    }).ToList()
-                }).ToList();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi lấy danh sách công thức: {ex.Message}");
-                return new List<RecipeResponse>();
             }
         }
 
@@ -244,20 +202,7 @@ namespace Business_Logic_Layer.Services
                 await _recipeRepository.UpdateRecipe(recipe);
 
                 // Trả về Response
-                return new RecipeResponse
-                {
-                    Id = recipe.Id,
-                    RecipeTitle = recipe.RecipeTitle,
-                    Content = recipe.Content,
-                    CategoryId = recipe.CategoryId,
-                    RecipeStatus = recipe.RecipeStatus,
-                    Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
-                    {
-                        IngredientId = ir.IngredientId,
-                        IngredientName = ir.Ingredient.IngredientName,
-                        WeightOfIngredient = ir.WeightOfIngredient
-                    }).ToList()
-                };
+                return _mapper.Map<RecipeResponse>(recipe);
             }
             catch (Exception ex)
             {
@@ -280,5 +225,65 @@ namespace Business_Logic_Layer.Services
         {
             return Regex.IsMatch(input, @"^[a-zA-Z0-9À-Ỷà-ỷ\s]+$"); // Chỉ cho phép chữ cái, số và khoảng trắng
         }
+        /*
+        private RecipeResponse ComplexRecipeResponse(Recipe recipe)
+        {
+            if (recipe == null)
+                throw new ArgumentNullException(nameof(recipe), "Recipe không thể là null!");
+
+            return new RecipeResponse
+            {
+                Id = recipe.Id,
+                RecipeTitle = recipe.RecipeTitle,
+                Content = recipe.Content,
+                Category = recipe.Category != null ? new Category
+                {
+                    Id = recipe.Category.Id,
+                    CategoryName = recipe.Category.CategoryName,
+                    CreateAt = recipe.Category.CreateAt ?? DateTime.MinValue, // Tránh ép kiểu null
+                    CategoryStatus = recipe.Category.CategoryStatus,
+                    CategoryType = recipe.Category.CategoryType,
+                } : null, // Tránh lỗi nếu Category null
+                ImageUrl = recipe.ImageUrl,
+                RecipeStatus = recipe.RecipeStatus,
+                Ingredients = (recipe.IngredientRecipes ?? new List<IngredientRecipe>()).Select(ir => new RecipeIngredientResponse
+                {
+                    Id = ir.Id,
+                    IngredientId = ir.IngredientId,
+                    WeightOfIngredient = ir.WeightOfIngredient,
+                    Ingredient = ir.Ingredient != null ? new Ingredient
+                    {
+                        Id = ir.Ingredient.Id,
+                        IngredientCode = ir.Ingredient.IngredientCode,
+                        Supplier = ir.Ingredient.Supplier,
+                        IngredientName = ir.Ingredient.IngredientName,
+                        Description = ir.Ingredient.Description,
+                        FoodSafetyCertification = ir.Ingredient.FoodSafetyCertification,
+                        ExpiredDate = ir.Ingredient.ExpiredDate,
+                        IngredientStatus = ir.Ingredient.IngredientStatus,
+                        WeightPerBag = ir.Ingredient.WeightPerBag,
+                        QuantityPerCarton = ir.Ingredient.QuantityPerCarton,
+                        IngredientType = ir.Ingredient.IngredientType,
+                        Unit = ir.Ingredient.Unit,
+                        PriceOrigin = ir.Ingredient.PriceOrigin,
+                        PricePromotion = ir.Ingredient.PricePromotion,
+                        CategoryId = ir.Ingredient.CategoryId,
+                        Category = ir.Ingredient.Category != null ? new Category
+                        {
+                            Id = ir.Ingredient.CategoryId,
+                            CategoryName = ir.Ingredient.Category.CategoryName,
+                            CreateAt = ir.Ingredient.Category.CreateAt ?? DateTime.MinValue, // Tránh ép kiểu null
+                            CategoryStatus = ir.Ingredient.Category.CategoryStatus,
+                            CategoryType = ir.Ingredient.Category.CategoryType,
+                        } : null, // Tránh lỗi nếu Category null
+                        IsSale = ir.Ingredient.IsSale,
+                        Rate = ir.Ingredient.Rate,
+                        CreateAt = ir.Ingredient.CreateAt ?? DateTime.MinValue, // Tránh ép kiểu null
+                        UpdateAt = ir.Ingredient.UpdateAt ?? DateTime.MinValue
+                    } : null // Tránh lỗi nếu Ingredient null
+                }).ToList()
+            };
+        }
+        */
     }
 }
