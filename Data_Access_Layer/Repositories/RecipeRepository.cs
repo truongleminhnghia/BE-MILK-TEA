@@ -29,8 +29,16 @@ namespace Data_Access_Layer.Repositories
         public async Task<Recipe?> GetRecipeById(Guid recipeId)
         {
             return await _context.Recipes
+                .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
-                .ThenInclude(ir => ir.Ingredient)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Category)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Images)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.IngredientQuantities)
                 .FirstOrDefaultAsync(r => r.Id == recipeId);
         }
 
@@ -58,6 +66,13 @@ namespace Data_Access_Layer.Repositories
                 .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
                     .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Category)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Images)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.IngredientQuantities)
                 .AsQueryable();
 
             // **Tìm kiếm theo tiêu đề hoặc nội dung**

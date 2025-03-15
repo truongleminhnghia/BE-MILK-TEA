@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Business_Logic_Layer.Models;
 
 namespace Business_Logic_Layer.Services
 {
@@ -86,13 +87,58 @@ namespace Business_Logic_Layer.Services
                     Id = recipe.Id,
                     RecipeTitle = recipe.RecipeTitle,
                     Content = recipe.Content,
-                    CategoryId = recipe.CategoryId,
-                    Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
+
+                    Category = recipe.Category == null ? null : new CategoryResponse
                     {
-                        IngredientId = ir.Ingredient.Id,
+                        Id = recipe.Category.Id,
+                        CategoryName = recipe.Category.CategoryName,
+                        CreateAt = recipe.Category.CreateAt,
+                        CategoryStatus = recipe.Category.CategoryStatus,
+                        CategoryType = recipe.Category.CategoryType
+                    },
+                    Ingredients = recipe.IngredientRecipes.Select(ir => new IngredientResponse
+                    {
+                        Id = ir.Ingredient.Id,
+                        IngredientCode = ir.Ingredient.IngredientCode,
+                        Supplier = ir.Ingredient.Supplier,
                         IngredientName = ir.Ingredient.IngredientName,
-                        WeightOfIngredient = ir.WeightOfIngredient
+                        Description = ir.Ingredient.Description,
+                        FoodSafetyCertification = ir.Ingredient.FoodSafetyCertification,
+                        ExpiredDate = ir.Ingredient.ExpiredDate,
+                        IngredientStatus = ir.Ingredient.IngredientStatus,
+                        WeightPerBag = ir.Ingredient.WeightPerBag,
+                        QuantityPerCarton = ir.Ingredient.QuantityPerCarton,
+                        Unit = ir.Ingredient.Unit,
+                        PriceOrigin = ir.Ingredient.PriceOrigin,
+                        PricePromotion = ir.Ingredient.PricePromotion,
+                        Category = ir.Ingredient.Category == null ? null : new CategoryResponse
+                        {
+                            Id = ir.Ingredient.Category.Id,
+                            CategoryName = ir.Ingredient.Category.CategoryName,
+                            CreateAt = ir.Ingredient.Category.CreateAt,
+                            CategoryStatus = ir.Ingredient.Category.CategoryStatus,
+                            CategoryType = ir.Ingredient.Category.CategoryType
+                        },
+                        IsSale = ir.Ingredient.IsSale,
+                        Rate = ir.Ingredient.Rate,
+                        CreateAt = ir.Ingredient.CreateAt,
+                        UpdateAt = ir.Ingredient.UpdateAt,
+                        IngredientType = ir.Ingredient.IngredientType.ToString(),
+                        Images = ir.Ingredient.Images?.Select(img => new ImageRespone
+                        {
+                            Id = img.Id,
+                            ImageUrl = img.ImageUrl,
+                            IngredientId = img.IngredientId
+                        }).ToList(),
+                        IngredientQuantities = ir.Ingredient.IngredientQuantities?.Select(iq => new IngredientQuantityResponse
+                        {
+                            Id = iq.Id,
+                            IngredientId = iq.IngredientId,
+                            Quantity = iq.Quantity,
+                            ProductType = iq.ProductType
+                        }).ToList()
                     }).ToList()
+
                 };
             }
             catch (Exception ex)
@@ -102,7 +148,7 @@ namespace Business_Logic_Layer.Services
             }
         }
 
-        public async Task<RecipeResponse?> UpdateRecipe(Guid recipeId, RecipeRequest request)
+        public async Task<bool> UpdateRecipe(Guid recipeId, RecipeRequest request)
         {
             try
             {
@@ -127,25 +173,14 @@ namespace Business_Logic_Layer.Services
 
                 await _recipeRepository.UpdateRecipe(recipe);
 
-                // Trả về DTO
-                return new RecipeResponse
-                {
-                    Id = recipe.Id,
-                    RecipeTitle = recipe.RecipeTitle,
-                    Content = recipe.Content,
-                    CategoryId = recipe.CategoryId,
-                    Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
-                    {
-                        IngredientId = ir.IngredientId,
-                        IngredientName = ir.Ingredient.IngredientName,
-                        WeightOfIngredient = ir.WeightOfIngredient
-                    }).ToList()
-                };
+                return true; // Return true if update is successful
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine("error: " + ex.Message);
-                return null;
+                return false; // Return false in case of an error
+
             }
         }
 
@@ -157,19 +192,62 @@ namespace Business_Logic_Layer.Services
             {
                 var recipes = await _recipeRepository.GetAllRecipes(
                 search, sortBy, isDescending, categoryId, page, pageSize);
-
+            
                 return recipes.Select(recipe => new RecipeResponse
                 {
                     Id = recipe.Id,
                     RecipeTitle = recipe.RecipeTitle,
                     Content = recipe.Content,
-                    CategoryId = recipe.CategoryId,
-                    CategoryName = recipe.Category?.CategoryName,
-                    Ingredients = recipe.IngredientRecipes.Select(ir => new RecipeIngredientResponse
+                    Category = recipe.Category == null ? null : new CategoryResponse
                     {
-                        IngredientId = ir.IngredientId,
+                        Id = recipe.Category.Id,
+                        CategoryName = recipe.Category.CategoryName,
+                        CreateAt = recipe.Category.CreateAt,
+                        CategoryStatus = recipe.Category.CategoryStatus,
+                        CategoryType = recipe.Category.CategoryType
+                    },
+
+                    Ingredients = recipe.IngredientRecipes.Select(ir => new IngredientResponse
+                    {
+                        Id = ir.Ingredient.Id,
+                        IngredientCode = ir.Ingredient.IngredientCode,
+                        Supplier = ir.Ingredient.Supplier,
                         IngredientName = ir.Ingredient.IngredientName,
-                        WeightOfIngredient = ir.WeightOfIngredient
+                        Description = ir.Ingredient.Description,
+                        FoodSafetyCertification = ir.Ingredient.FoodSafetyCertification,
+                        ExpiredDate = ir.Ingredient.ExpiredDate,
+                        IngredientStatus = ir.Ingredient.IngredientStatus,
+                        WeightPerBag = ir.Ingredient.WeightPerBag,
+                        QuantityPerCarton = ir.Ingredient.QuantityPerCarton,
+                        Unit = ir.Ingredient.Unit,
+                        PriceOrigin = ir.Ingredient.PriceOrigin,
+                        PricePromotion = ir.Ingredient.PricePromotion,
+                        Category = ir.Ingredient.Category == null ? null : new CategoryResponse
+                        {
+                            Id = ir.Ingredient.Category.Id,
+                            CategoryName = ir.Ingredient.Category.CategoryName,
+                            CreateAt = ir.Ingredient.Category.CreateAt,
+                            CategoryStatus = ir.Ingredient.Category.CategoryStatus,
+                            CategoryType = ir.Ingredient.Category.CategoryType
+                        },
+                        IsSale = ir.Ingredient.IsSale,
+                        Rate = ir.Ingredient.Rate,
+                        CreateAt = ir.Ingredient.CreateAt,
+                        UpdateAt = ir.Ingredient.UpdateAt,
+                        IngredientType = ir.Ingredient.IngredientType.ToString(),
+                        Images = ir.Ingredient.Images?.Select(img => new ImageRespone
+                        {
+                            Id = img.Id,
+                            ImageUrl = img.ImageUrl,
+                            IngredientId = img.IngredientId
+                        }).ToList(),
+                        IngredientQuantities = ir.Ingredient.IngredientQuantities?.Select(iq => new IngredientQuantityResponse
+                        {
+                            Id = iq.Id,
+                            IngredientId = iq.IngredientId,
+                            Quantity = iq.Quantity,
+                            ProductType = iq.ProductType
+                        }).ToList()
                     }).ToList()
                 }).ToList();
             }
