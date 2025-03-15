@@ -86,20 +86,20 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAllRecipes(
-    string? search, string? sortBy, bool isDescending = false,
-    Guid? categoryId = null, int page = 1, int pageSize = 10, RecipeStatusEnum recipeStatusEnum)
+            string? search, string? sortBy, RecipeStatusEnum recipeStatusEnum,
+            bool isDescending = false, Guid? categoryId = null, int page = 1, int pageSize = 10)
         {
             try
             {
                 var recipes = await _recipeService.GetAllRecipes(
-                search, sortBy, isDescending, categoryId, page, pageSize, recipeStatusEnum);
+                    search, sortBy, isDescending, categoryId, page, pageSize, recipeStatusEnum);
 
                 return Ok(new ApiResponse(
-                                HttpStatusCode.OK.GetHashCode(),
-                                true,
-                "Lấy danh sách công thức thành công",
-                                recipes
-                            ));
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Lấy danh sách công thức thành công",
+                    recipes
+                ));
             }
             catch (Exception ex)
             {

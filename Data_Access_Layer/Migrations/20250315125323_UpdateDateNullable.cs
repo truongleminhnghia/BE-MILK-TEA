@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data_Access_Layer.Migrations
 {
     /// <inheritdoc />
-    public partial class DateNullable : Migration
+    public partial class UpdateDateNullable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
