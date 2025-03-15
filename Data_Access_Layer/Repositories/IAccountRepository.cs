@@ -16,14 +16,8 @@ namespace Data_Access_Layer.Repositories
         Task<Account> GetByPhoneNumber(string phoneNumber);
         Task UpdateAccount(Account account);
         Task<Account> GetAccountByOrderIdAsync(Guid orderId);
-        Task<IEnumerable<Account>> GetAllAccounts(
-            string? search,
-            string? sortBy,
-            bool isDescending,
-            AccountStatus? accountStatus,
-            RoleName? role,
-            int page,
-            int pageSize
-        );
+        Task<(IEnumerable<Account>, int TotalCount)> GetAllAccountsAsync(
+    string? search, AccountStatus? accountStatus, RoleName? roleName,
+    string? sortBy, bool isDescending, int page, int pageSize);
     }
 }
