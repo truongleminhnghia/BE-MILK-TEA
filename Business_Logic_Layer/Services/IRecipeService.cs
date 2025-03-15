@@ -9,7 +9,7 @@ namespace Business_Logic_Layer.Services
     {
         Task<Recipe> CreateRecipe(RecipeRequest request);
         Task<RecipeResponse?> GetRecipeById(Guid recipeId);
-        Task<RecipeResponse?> UpdateRecipe(Guid recipeId, RecipeRequest request);
+        Task<bool> UpdateRecipe(Guid recipeId, RecipeRequest request);
         Task<IEnumerable<RecipeResponse>> GetAllRecipes(string? search, string? sortBy, bool isDescending, Guid? categoryId, int page, int pageSize);
         Task<PageResult<RecipeResponse>> GetAllRecipesAsync(
             string? search, string? sortBy, bool isDescending,
