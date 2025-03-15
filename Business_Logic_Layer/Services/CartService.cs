@@ -14,13 +14,7 @@ using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace Business_Logic_Layer.Services
 {
-    public interface ICartService
-    {
-        public Task<CartResponse?> GetByIdAsync(Guid accountId);
-        public Task AddToCartAsync(Guid accountId, Guid ingredientProductId, int quantity);
-        public Task<bool> RemoveItemAsync(Guid accountId, Guid ingredientProductId);
-
-    }
+   
     public class CartService : ICartService
     {
         private readonly ICartRepository _cartRepository;
@@ -98,6 +92,30 @@ namespace Business_Logic_Layer.Services
             }
 
             return false;
+        }
+        public async Task<bool> UpdateCartItemQuantityAsync(Guid accountId, Guid ingredientProductId, int quantity)
+        {
+            var cart = await _cartRepository.GetOrCreateCartAsync(accountId);
+            if (cart.CartItems == null || !cart.CartItems.Any())
+                return false;
+
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.IngredientProductId == ingredientProductId);
+            if (cartItem == null)
+                return false;
+
+            cartItem.Quantity = quantity;
+            await _cartRepository.UpdateCartItemQuantityAsync(accountId, ingredientProductId, quantity);
+            return true;
+        }
+
+        public async Task<bool> ClearCartAsync(Guid accountId)
+        {
+            var cart = await _cartRepository.GetOrCreateCartAsync(accountId);
+            if (cart.CartItems == null || !cart.CartItems.Any())
+                return false;
+
+            await _cartRepository.ClearCartAsync(accountId);
+            return true;
         }
     }
 }

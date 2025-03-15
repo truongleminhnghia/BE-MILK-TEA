@@ -10,12 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
 {
-    public interface ICartRepository
-    {
-        Task<Cart> GetOrCreateCartAsync(Guid accountId);
-        Task<Cart> CreateAsync(Cart cart);
-        //Task<Cart?> UpdateAsync(Guid id, Cart cart);
-    }
+    
     public class CartRepository : ICartRepository
     {
         private readonly ApplicationDbContext _context;
@@ -23,6 +18,9 @@ namespace Data_Access_Layer.Repositories
         {
             _context = context;
         }
+
+   
+
         public async Task<Cart> CreateAsync(Cart cart)
         {
             cart.Id = Guid.NewGuid();
@@ -58,18 +56,33 @@ namespace Data_Access_Layer.Repositories
             return cart;
         }
 
-        //public async Task<Cart?> UpdateAsync(Guid id, Cart cart)
-        //{
-        //    var existingCart = await _context.Carts.FindAsync(id);
-        //    if (existingCart == null)
-        //    {
-        //        return null;
-        //    }
-        //    existingCart.UpdateAt = DateTime.Now;
+        public async Task UpdateCartItemQuantityAsync(Guid accountId, Guid ingredientProductId, int quantity)
+        {
+            var cart = await GetOrCreateCartAsync(accountId);
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.IngredientProductId == ingredientProductId);
 
-        //    await _context.SaveChangesAsync();
-        //    return existingCart;
-        //}
+            if (cartItem != null)
+            {
+                cartItem.Quantity = quantity;
+                cart.UpdateAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+
+        public async Task ClearCartAsync(Guid accountId)
+        {
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.AccountId == accountId);
+
+            if (cart != null && cart.CartItems.Any())
+            {
+                _context.CartItems.RemoveRange(cart.CartItems);
+                cart.UpdateAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+        }
 
     }
     }

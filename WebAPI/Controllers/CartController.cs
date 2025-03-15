@@ -29,7 +29,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _context = context;
         }
-
+        //get cart
         [HttpGet("{accountId}")]
         public async Task<IActionResult> GetCartDetails(Guid accountId)
         {
@@ -58,7 +58,7 @@ namespace WebAPI.Controllers
                 }
             });
         }
-
+        //remove item from cart
         [HttpDelete("remove")]
         public async Task<IActionResult> RemoveFromCart([FromBody] RemoveCartItemRequest request)
         {
@@ -83,6 +83,7 @@ namespace WebAPI.Controllers
                 return StatusCode(500, new { message = "Lỗi hệ thống!", error = ex.Message });
             }
         }
+        //add item to cart
         [HttpPost("add")]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
         {
@@ -102,6 +103,42 @@ namespace WebAPI.Controllers
             {
                 return StatusCode(500, new { message = "Lỗi add to cart", error = ex.Message });
             }
+        }
+
+        //update quantity of cart item
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateCartItem([FromBody] UpdateCartItemRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var success = await _cartService.UpdateCartItemQuantityAsync(request.AccountId, request.IngredientProductId, request.Quantity);
+            if (!success)
+            {
+                return NotFound(new { message = "Sản phẩm không tồn tại trong giỏ hàng!" });
+            }
+
+            return Ok(new { message = "Cập nhật số lượng thành công!" });
+        }
+
+        //clear cart
+        [HttpDelete("clear")]
+        public async Task<IActionResult> ClearCart([FromQuery] Guid accountId)
+        {
+            if (accountId == Guid.Empty)
+            {
+                return BadRequest(new { message = "Account ID không hợp lệ!" });
+            }
+
+            var success = await _cartService.ClearCartAsync(accountId);
+            if (!success)
+            {
+                return NotFound(new { message = "Giỏ hàng đã trống hoặc không tồn tại!" });
+            }
+
+            return Ok(new { message = "Giỏ hàng đã được xóa toàn bộ item thành công!" });
         }
     }
 }
