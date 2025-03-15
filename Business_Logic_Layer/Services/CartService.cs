@@ -49,11 +49,12 @@ namespace Business_Logic_Layer.Services
                 cartResponse.Id = cartEixst.Id;
                 cartResponse.AccountResponse = _mapper.Map<AccountResponse>(cartEixst.Account);
                 cartResponse.CarItemResponse = cartEixst.CartItems != null
-            ? _mapper.Map<CartItemResponse>(cartEixst.CartItems)
-            : new CartItemResponse();
+                        ? _mapper.Map<CartItemResponse>(cartEixst.CartItems)
+                        : null;
+
                 cartResponse.TotalCartItem = await SumCartItem(
-            cartEixst.Id,
-            cartEixst.CartItems?.ToList() ?? new List<CartItem>() // Ensure no null issue
+                        cartEixst.Id,
+                        cartEixst.CartItems?.ToList() ?? new List<CartItem>() // Ensure no null issue
         );
             }
             else
