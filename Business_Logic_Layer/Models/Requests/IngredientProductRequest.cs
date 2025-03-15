@@ -16,9 +16,9 @@ namespace Business_Logic_Layer.Models.Requests
         public Guid IngredientId { get; set; }
 
         [Required(ErrorMessage = "Chưa có số lượng.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public int Quantity { get; set; }
 
-        [Required(ErrorMessage = "Chưa có tổng giá.")]
         public double TotalPrice { get; set; }
 
         [Required(ErrorMessage = "Chưa có loại hàng.")]

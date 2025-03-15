@@ -2,6 +2,7 @@
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
 using Microsoft.EntityFrameworkCore;
 
