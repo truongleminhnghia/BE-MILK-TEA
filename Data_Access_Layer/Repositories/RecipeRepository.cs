@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Data_Access_Layer.Repositories
@@ -52,7 +53,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<IEnumerable<Recipe>> GetAllRecipes(
     string? search, string? sortBy, bool isDescending,
-    Guid? categoryId, int page, int pageSize)
+    Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus)
         {
             var query = _context.Recipes
                 .Include(r => r.Category)
@@ -60,10 +61,20 @@ namespace Data_Access_Layer.Repositories
                     .ThenInclude(ir => ir.Ingredient)
                 .AsQueryable();
 
+            // **Lọc theo trạng thái**
+            if (recipeStatus.HasValue)
+            {
+                query = query.Where(r => r.RecipeStatus == recipeStatus.Value);
+            }
+
             // **Tìm kiếm theo tiêu đề hoặc nội dung**
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(r => r.RecipeTitle.Contains(search) || r.Content.Contains(search));
+                string trimmedSearch = Regex.Replace(search.Trim(), @"\s+", " "); // Bỏ khoảng trắng thừa
+                query = query.Where(r =>
+                    r.RecipeTitle.Contains(trimmedSearch) ||
+                    (r.Content != null && r.Content.Contains(trimmedSearch))
+                );
             }
 
             // **Lọc theo danh mục**
@@ -72,8 +83,9 @@ namespace Data_Access_Layer.Repositories
                 query = query.Where(r => r.CategoryId == categoryId.Value);
             }
 
-            // **Sắp xếp**
-            if (!string.IsNullOrEmpty(sortBy))
+            // **Sắp xếp dữ liệu**
+            var validSortColumns = new HashSet<string> { "RecipeTitle", "CategoryId", "RecipeStatus" };
+            if (!string.IsNullOrEmpty(sortBy) && validSortColumns.Contains(sortBy))
             {
                 query = isDescending
                     ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
@@ -85,6 +97,7 @@ namespace Data_Access_Layer.Repositories
 
             return await query.ToListAsync();
         }
+
 
         public async Task<(IEnumerable<Recipe>, int TotalCount)> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
@@ -150,6 +163,12 @@ namespace Data_Access_Layer.Repositories
                     .ToListAsync();
 
             return (recipes, total);
+        }
+
+        public async Task<Recipe?> GetByTitleAsync(string title)
+        {
+            return await _context.Recipes
+                .FirstOrDefaultAsync(r => r.RecipeTitle.Trim().ToLower() == title.Trim().ToLower());
         }
 
 
