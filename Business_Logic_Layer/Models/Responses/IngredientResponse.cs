@@ -21,17 +21,18 @@ namespace Business_Logic_Layer.Models.Responses
         public IngredientStatus IngredientStatus { get; set; }
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
-        public string IngredientType { get; set; }
         public UnitOfIngredientEnum Unit { get; set; }
         public double PriceOrigin { get; set; }
         public double PricePromotion { get; set; }
+        public CategoryResponse? Category { get; set; }
         public bool IsSale { get; set; }
         public float Rate { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
+        public string IngredientType { get; set; }
 
-        public CategoryResponse? Category { get; set; }
         public List<ImageRespone?> Images { get; set; }
+
         public List<IngredientQuantityResponse>? IngredientQuantities { get; set; }
     }
 }

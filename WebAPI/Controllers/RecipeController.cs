@@ -69,14 +69,15 @@ namespace WebAPI.Controllers
             try
             {
                 var isUpdated = await _recipeService.UpdateRecipe(id, request);
-                if (isUpdated != null)
+                if (isUpdated == null)
                     return NotFound(new { success = false, message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
 
 
                 return Ok(new ApiResponse(
                                 HttpStatusCode.OK.GetHashCode(),
                                 true,
-                "Cập nhật công thức thành công!"
+                                "Cập nhật công thức thành công!",
+                                isUpdated
                             ));
             }
             catch (Exception ex)

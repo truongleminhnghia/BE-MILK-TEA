@@ -1,4 +1,5 @@
-﻿using Data_Access_Layer.Entities;
+﻿using Business_Logic_Layer.Models.Requests;
+using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using System;
 using System.Collections.Generic;
@@ -14,20 +15,16 @@ namespace Business_Logic_Layer.Models.Responses
         public Guid Id { get; set; }
         public string RecipeTitle { get; set; }
         public string Content { get; set; }
-        public string ImageUrl { get; set; }
-        public DateTime? CreateAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public RecipeStatusEnum RecipeStatus { get; set; }
-        public List<RecipeIngredientResponse> Ingredients { get; set; } = new();
         public CategoryResponse Category { get; set; }
-
+        public List<IngredientResponse> Ingredients { get; set; } = new();
+        public List<RecipeIngredientResponse> IngredientRecipeResponse { get; set; } = new List<RecipeIngredientResponse>();
     }
 
-    public class RecipeIngredientResponse
+        public class RecipeIngredientResponse
     {
         public Guid Id { get; set; }
-        public Guid IngredientId { get; set; }        
+        public Guid IngredientId { get; set; }
+        public string IngredientName { get; set; }
         public float WeightOfIngredient { get; set; }
-        public Ingredient? Ingredient { get; set; }
     }
 }

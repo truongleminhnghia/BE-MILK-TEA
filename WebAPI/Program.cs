@@ -158,9 +158,15 @@ builder.Services.AddAutoMapper(
     typeof(IngredientMapper),
     typeof(ImageMapper),
     typeof(IngredientProductMapper),
-    typeof(AccountMapper),
-    typeof(CategoryMapper),
-    typeof(PromotionDetailMapper)
+    typeof(PromotionDetailMapper),
+    typeof(IngredientProductMapper),
+    typeof(IngredientQuantityMapper),
+    typeof(IngredientRecipeMapper),
+    typeof(OrderMapper),
+    typeof(OrderDetailMapper),
+    typeof(CartItemMapper),
+    typeof(PromotionMapper),
+    typeof(RecipeMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
