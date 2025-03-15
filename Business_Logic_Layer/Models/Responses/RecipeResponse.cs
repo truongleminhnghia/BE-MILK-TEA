@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Data_Access_Layer.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Business_Logic_Layer.Models.Responses
         public string Content { get; set; }
         public Guid CategoryId { get; set; }
         public string? CategoryName { get; set;  }
+        public RecipeStatusEnum RecipeStatus { get; set; }
         public List<RecipeIngredientResponse> Ingredients { get; set; } = new();
     }
 

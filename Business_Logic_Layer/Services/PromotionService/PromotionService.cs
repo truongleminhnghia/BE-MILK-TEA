@@ -49,6 +49,24 @@ namespace Business_Logic_Layer.Services.PromotionService
         {
             try
             {
+                //check validation
+                if (promotionRequest.StartDate >= promotionRequest.EndDate)
+                {
+                    throw new ArgumentException("StartDate không thể lớn hơn hoặc bằng EndDate.");
+                }
+                if (promotionRequest.StartDate < DateTime.UtcNow)
+                {
+                    throw new ArgumentException("StartDate phải lớn hơn hoặc là thời điểm hiện tại.");
+                }
+                if (promotionRequest.EndDate < DateTime.UtcNow)
+                {
+                    throw new ArgumentException("EndDate phải lớn hơn hoặc là thời điểm hiện tại.");
+                }
+                if (promotionRequest.PromotionType == null)
+                {
+                    throw new ArgumentException("PromotionType không được để trống.");
+                }
+
                 var promotion = _mapper.Map<Promotion>(promotionRequest);
                 promotion.PromotionCode = "PR" + _source.GenerateRandom8Digits();
                 promotion.CreateAt = DateTime.Now;

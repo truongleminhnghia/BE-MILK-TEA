@@ -2,6 +2,7 @@
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -85,20 +86,20 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAllRecipes(
-    string? search, string? sortBy, bool isDescending = false,
-    Guid? categoryId = null, int page = 1, int pageSize = 10)
+            string? search, string? sortBy, RecipeStatusEnum recipeStatusEnum,
+            bool isDescending = false, Guid? categoryId = null, int page = 1, int pageSize = 10)
         {
             try
             {
                 var recipes = await _recipeService.GetAllRecipes(
-                search, sortBy, isDescending, categoryId, page, pageSize);
+                    search, sortBy, isDescending, categoryId, page, pageSize, recipeStatusEnum);
 
                 return Ok(new ApiResponse(
-                                HttpStatusCode.OK.GetHashCode(),
-                                true,
-                "Lấy danh sách công thức thành công",
-                                recipes
-                            ));
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Lấy danh sách công thức thành công",
+                    recipes
+                ));
             }
             catch (Exception ex)
             {

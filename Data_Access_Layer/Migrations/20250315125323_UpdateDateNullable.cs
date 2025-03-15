@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data_Access_Layer.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class UpdateDateNullable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,8 +30,8 @@ namespace Data_Access_Layer.Migrations
                     image_url = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     role_name = table.Column<string>(type: "varchar(200)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -49,8 +49,8 @@ namespace Data_Access_Layer.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     category_type = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -70,8 +70,8 @@ namespace Data_Access_Layer.Migrations
                     end_date = table.Column<DateTime>(type: "datetime", nullable: false),
                     promotion_type = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -100,8 +100,8 @@ namespace Data_Access_Layer.Migrations
                 {
                     cart_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     account_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -126,8 +126,8 @@ namespace Data_Access_Layer.Migrations
                     address = table.Column<string>(type: "nvarchar(500)", nullable: false),
                     account_level = table.Column<int>(type: "int", nullable: false),
                     purchased = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -149,8 +149,8 @@ namespace Data_Access_Layer.Migrations
                     account_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ref_code = table.Column<string>(type: "varchar(200)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -228,8 +228,8 @@ namespace Data_Access_Layer.Migrations
                     category_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     is_sale = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     rate = table.Column<float>(type: "float", nullable: false),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -253,8 +253,8 @@ namespace Data_Access_Layer.Migrations
                     image_url = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     category_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     recipe_status = table.Column<int>(type: "int", nullable: false),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -424,8 +424,8 @@ namespace Data_Access_Layer.Migrations
                     ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     quantity = table.Column<int>(type: "int", nullable: false),
                     product_type = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -502,8 +502,8 @@ namespace Data_Access_Layer.Migrations
                     quantity = table.Column<int>(type: "int", nullable: false),
                     cart_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ingredient_product_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
