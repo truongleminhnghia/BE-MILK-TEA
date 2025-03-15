@@ -14,6 +14,11 @@ namespace Data_Access_Layer.Repositories
     {
         private readonly ApplicationDbContext _context;
 
+        public CartRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public async Task<Cart> CreateAsync(Cart cart)
         {
             _context.Carts.Add(cart);

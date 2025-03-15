@@ -41,15 +41,20 @@ namespace Business_Logic_Layer.Services
             var account = await _accountRepository.GetById(id);
             if (account == null)
             {
-                throw new Exception("Tài khoảng không tồn tại");
+                throw new Exception("Tài khoản không tồn tại");
             }
             Cart? cartEixst = await _cartRepository.GetByAccountAsync(account.Id);
             if (cartEixst != null)
             {
                 cartResponse.Id = cartEixst.Id;
                 cartResponse.AccountResponse = _mapper.Map<AccountResponse>(cartEixst.Account);
-                cartResponse.CarItemResponse = _mapper.Map<CartItemResponse>(cartEixst.CartItems);
-                cartResponse.TotalCartItem = await SumCartItem(cartEixst.Id, cartEixst.CartItems.ToList());
+                cartResponse.CarItemResponse = cartEixst.CartItems != null
+            ? _mapper.Map<CartItemResponse>(cartEixst.CartItems)
+            : new CartItemResponse();
+                cartResponse.TotalCartItem = await SumCartItem(
+            cartEixst.Id,
+            cartEixst.CartItems?.ToList() ?? new List<CartItem>() // Ensure no null issue
+        );
             }
             else
             {
