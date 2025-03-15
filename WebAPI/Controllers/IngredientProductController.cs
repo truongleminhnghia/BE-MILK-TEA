@@ -73,7 +73,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] IngredientProductRequest request)
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] IngredientProductRequest request, [FromQuery] bool isCart)
         {
             try
             {
@@ -85,7 +85,7 @@ namespace WebAPI.Controllers
                         "Dữ liệu không hợp lệ"));
                 }
                 var ingredientProductUpdate = _mapper.Map<IngredientProduct>(request);
-                await _ingredientProductService.UpdateAsync(id, request);
+                await _ingredientProductService.UpdateAsync(id, request, isCart);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
@@ -100,6 +100,32 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(Guid id)
+        {
+            try
+            {
+                var result = await _ingredientProductService.DeleteAsync(id);
+                if (!result)
+                {
+                    return NotFound(new ApiResponse(
+                        HttpStatusCode.NotFound.GetHashCode(),
+                        false,
+                        "Không tìm thấy sản phẩm"));
+                }
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Xóa sản phẩm thành công"));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    false,
+                    e.Message));
+            }
+        }
     }
 }
 
