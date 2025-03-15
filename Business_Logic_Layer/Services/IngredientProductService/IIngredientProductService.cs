@@ -11,7 +11,7 @@ namespace Business_Logic_Layer.Services.IngredientProductService
 {
     public interface IIngredientProductService
     {
-        Task<IngredientProductResponse> CreateAsync(IngredientProductRequest request);
+        Task<IngredientProductResponse> CreateAsync(IngredientProductRequest request, bool isCart);
         Task<IngredientProductResponse> GetIngredientProductbyId(Guid ingredientProductId);
         Task<IngredientProductResponse> UpdateAsync(Guid id, IngredientProductRequest request);
         Task<bool> IngredientExistsAsync(Guid ingredientId);

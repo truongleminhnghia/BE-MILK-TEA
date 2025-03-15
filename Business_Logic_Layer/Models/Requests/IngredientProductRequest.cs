@@ -10,8 +10,6 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class IngredientProductRequest
     {
-        public Guid? Id { get; set; }
-
         [Required(ErrorMessage = "Chưa có nguyên liệu.")]
         public Guid IngredientId { get; set; }
 
