@@ -10,29 +10,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
 {
-    public interface ICartRepository
-    {
-        Task<Cart?> GetByIdAsync(Guid id);
-        Task<Cart> CreateAsync(Cart cart);
-        Task<Cart?> UpdateAsync(Guid id, Cart cart);
-    }
     public class CartRepository : ICartRepository
     {
         private readonly ApplicationDbContext _context;
 
+        public CartRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public async Task<Cart> CreateAsync(Cart cart)
         {
-            cart.Id = Guid.NewGuid();
-            cart.CreateAt = DateTime.Now;
-
             _context.Carts.Add(cart);
             await _context.SaveChangesAsync();
             return cart;
         }
 
+        public async Task<Cart?> GetByAccountAsync(Guid id)
+        {
+            return await _context.Carts
+                .FirstOrDefaultAsync(c => c.AccountId == id);
+        }
+
         public async Task<Cart?> GetByIdAsync(Guid id)
         {
-            return await _context.Carts.FirstOrDefaultAsync(o => o.Id == id) ?? null;
+            return await _context.Carts
+            .Include(c => c.Account)
+            .Include(c => c.CartItems)
+            .FirstOrDefaultAsync(c => c.Id == id) ?? null;
         }
 
         public async Task<Cart?> UpdateAsync(Guid id, Cart cart)

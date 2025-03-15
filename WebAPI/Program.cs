@@ -195,6 +195,11 @@ builder.Services.AddScoped<IIngredientReviewService, IngredientReviewService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+
 
 
 // Register ImageRepository and ImageService

@@ -23,10 +23,10 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
         //Get by id
-        [HttpGet("{cartId}")]
-        public async Task<IActionResult> GetById(Guid cartId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var carts = await _cartService.GetByIdAsync(cartId);
+            var carts = await _cartService.GetByAccountAsync(id);
             if (carts == null)
             {
                 return Ok(new ApiResponse(
@@ -58,26 +58,26 @@ namespace WebAPI.Controllers
         }
 
         //UPDATE
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCart(
-        Guid id,
-            [FromBody] CartRequest cartRequest
-        )
-        {
-            if (cartRequest == null)
-            {
-                return BadRequest(new { message = "Invalid cart data" });
-            }
+        // [HttpPut("{id}")]
+        // public async Task<IActionResult> UpdateCart(
+        // Guid id,
+        //     [FromBody] CartRequest cartRequest
+        // )
+        // {
+        //     if (cartRequest == null)
+        //     {
+        //         return BadRequest(new { message = "Invalid cart data" });
+        //     }
 
-            var cart = _mapper.Map<Cart>(cartRequest);
-            var updatedCart = await _cartService.UpdateAsync(id, cart);
+        //     var cart = _mapper.Map<Cart>(cartRequest);
+        //     var updatedCart = await _cartService.UpdateAsync(id, cart);
 
-            if (updatedCart == null)
-            {
-                return NotFound(new { message = "Cart not found" });
-            }
+        //     if (updatedCart == null)
+        //     {
+        //         return NotFound(new { message = "Cart not found" });
+        //     }
 
-            return Ok(updatedCart);
-        }
+        //     return Ok(updatedCart);
+        // }
     }
 }

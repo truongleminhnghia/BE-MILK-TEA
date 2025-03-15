@@ -17,6 +17,7 @@ namespace Data_Access_Layer.Repositories
         Task<CartItem> CreateAsync(CartItem cartItem);
         Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem);
         Task<bool> DeleteByIdAsync(Guid id);
+        Task<IEnumerable<CartItem>> GetByCart(Guid id);
     }
     public class CartItemRepository : ICartItemRepository
     {
@@ -27,9 +28,6 @@ namespace Data_Access_Layer.Repositories
         }
         public async Task<CartItem> CreateAsync(CartItem cartItem)
         {
-            cartItem.Id = Guid.NewGuid();
-            cartItem.CreateAt = DateTime.Now;
-
             _context.CartItems.Add(cartItem);
             await _context.SaveChangesAsync();
             return cartItem;
@@ -67,13 +65,16 @@ namespace Data_Access_Layer.Repositories
                 return null;
             }
 
-            existingCartItem.Quantity = cartItem.Quantity;        
+            existingCartItem.Quantity = cartItem.Quantity;
             existingCartItem.UpdateAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
             return existingCartItem;
         }
 
-        
+        public async Task<IEnumerable<CartItem>> GetByCart(Guid id)
+        {
+            return await _context.CartItems.Where(c => c.CartId == id).ToListAsync();
+        }
     }
 }
