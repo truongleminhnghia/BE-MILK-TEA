@@ -5,6 +5,7 @@ using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,15 +18,18 @@ namespace WebAPI.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
+        private readonly ICartRepository _cartRepository;
         private readonly IMapper _mapper;
         private readonly ApplicationDbContext _context;
 
-        public CartController(ICartService cartService, IMapper mapper, ApplicationDbContext context)
+        public CartController(ICartService cartService, IMapper mapper, ApplicationDbContext context, ICartRepository cartRepository)
         {
+            _cartRepository = cartRepository;
             _cartService = cartService;
             _mapper = mapper;
             _context = context;
         }
+
         [HttpGet("{accountId}")]
         public async Task<IActionResult> GetCartDetails(Guid accountId)
         {
@@ -34,36 +38,27 @@ namespace WebAPI.Controllers
                 return BadRequest(new { message = "Account ID không hợp lệ!" });
             }
 
-            var cart = await _context.Carts
-                .Include(c => c.CartItems) // Lấy luôn danh sách CartItems
-                .FirstOrDefaultAsync(c => c.AccountId == accountId);
+            var cart = await _cartService.GetByIdAsync(accountId);
 
             if (cart == null)
             {
                 return NotFound(new { message = "Không tìm thấy giỏ hàng!" });
             }
 
-            var cartDetails = cart.CartItems.Select(item => new
-            {
-                item.Id,
-                item.IngredientProductId,
-                item.Quantity,
-                //item.Price
-            }).ToList();
-
             return Ok(new
             {
                 code = 200,
-                message = "Lấy dữ liệu thành công!",
+                message = cart.CartItems.Any() ? "Lấy dữ liệu thành công!" : "Giỏ hàng của bạn hiện đang trống.",
                 success = true,
                 data = new
                 {
-                    cartId = cart.Id,
+                    cartId = cart.CartId,
                     accountId = cart.AccountId,
-                    cartItems = cartDetails
+                    cartItems = cart.CartItems
                 }
             });
         }
+
         [HttpDelete("remove")]
         public async Task<IActionResult> RemoveFromCart([FromBody] RemoveCartItemRequest request)
         {
@@ -76,8 +71,10 @@ namespace WebAPI.Controllers
             {
                 var result = await _cartService.RemoveItemAsync(request.AccountId, request.IngredientProductId);
 
-                if (result.HasValue && result.Value)
-                    return Ok(new { message = "Xóa sản phẩm khỏi giỏ hàng thành công!" });
+                if (result)
+                {
+                    return Ok(new { message = "Xóa sản phẩm thành công!" });
+                }
 
                 return BadRequest(new { message = "Không thể xóa sản phẩm khỏi giỏ hàng!" });
             }

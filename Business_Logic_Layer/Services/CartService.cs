@@ -18,7 +18,8 @@ namespace Business_Logic_Layer.Services
     {
         public Task<CartResponse?> GetByIdAsync(Guid accountId);
         public Task AddToCartAsync(Guid accountId, Guid ingredientProductId, int quantity);
-        public Task<bool?> RemoveItemAsync(Guid accountId, Guid ingredientProductId);
+        public Task<bool> RemoveItemAsync(Guid accountId, Guid ingredientProductId);
+
     }
     public class CartService : ICartService
     {
@@ -35,15 +36,7 @@ namespace Business_Logic_Layer.Services
 
         public async Task AddToCartAsync(Guid accountId, Guid ingredientProductId, int quantity)
         {
-            var cart = await _context.Carts
-                .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.AccountId == accountId);
-
-            if (cart == null)
-            {
-                cart = new Cart { AccountId = accountId };
-                cart = await _cartRepository.CreateAsync(cart);
-            }
+            var cart = await _cartRepository.GetOrCreateCartAsync(accountId);
 
             var existingCartItem = cart.CartItems.FirstOrDefault(ci => ci.IngredientProductId == ingredientProductId);
 
@@ -65,43 +58,42 @@ namespace Business_Logic_Layer.Services
                 }
                 catch (Exception ex)
                 {
-                Console.WriteLine("error: " + ex.Message);
+                    Console.WriteLine("Error: " + ex.Message);
                 }
             }
         }
 
-        public async Task<CartResponse?> GetByIdAsync(Guid accountId)
+        public async Task<CartResponse> GetByIdAsync(Guid accountId)
         {
-            var cart = await _cartRepository.GetByIdAsync(accountId);
-            if(cart == null)
-            {
-                return null;
-            }
+            var cart = await _cartRepository.GetOrCreateCartAsync(accountId);
+
             return new CartResponse
             {
                 CartId = cart.Id,
                 AccountId = accountId,
                 CartItems = cart.CartItems?.Select(ci => new CartItemResponse
                 {
-                    CartItemId=ci.Id,
-                    IngredientProductId=ci.IngredientProductId,
-                    Quantity=ci.Quantity
+                    CartItemId = ci.Id,
+                    IngredientProductId = ci.IngredientProductId,
+                    Quantity = ci.Quantity
                 }).ToList() ?? new List<CartItemResponse>()
             };
-            
         }
 
-        public async Task<bool?> RemoveItemAsync(Guid accountId, Guid ingredientProductId)
-        {
-            var cart = await _cartRepository.GetByIdAsync(accountId);
 
-            if (cart == null) return false;
+        public async Task<bool> RemoveItemAsync(Guid accountId, Guid ingredientProductId)
+        {
+            var cart = await _cartRepository.GetOrCreateCartAsync(accountId);
+
+            if (!cart.CartItems.Any())
+                return false;
 
             var cartItem = cart.CartItems.FirstOrDefault(ci => ci.IngredientProductId == ingredientProductId);
 
             if (cartItem != null)
             {
-                _cartItemRepository.RemoveCartItemByIdAsync(cartItem.Id);
+                await _cartItemRepository.RemoveCartItemByIdAsync(cartItem.Id);
+                await _context.SaveChangesAsync();
                 return true;
             }
 
