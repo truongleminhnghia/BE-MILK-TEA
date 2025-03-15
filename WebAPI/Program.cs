@@ -22,6 +22,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Business_Logic_Layer.Services.PromotionService;
 using Business_Logic_Layer.Services.PromotionDetailService;
+using Business_Logic_Layer.Services.DashboardService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -197,6 +198,16 @@ builder.Services.AddScoped<IIngredientReviewService, IngredientReviewService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+
+
+
 
 
 // Register ImageRepository and ImageService
