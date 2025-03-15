@@ -20,18 +20,18 @@ namespace Business_Logic_Layer.AutoMappers
             CreateMap<Recipe, RecipeResponse>().ReverseMap();
             CreateMap<RecipeRequest, RecipeResponse>().ReverseMap();
             CreateMap<Recipe, RecipeResponse>()
-            .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category ?? null))
-            .ForMember(dest => dest.Ingredients, opt => opt.MapFrom(src => src.IngredientRecipes));
+            .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.CreateAt))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdateAt));
 
             CreateMap<Category, CategoryResponse>()
-            .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.CreateAt ?? DateTime.MinValue));
+                .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.CreateAt ?? DateTime.MinValue));
 
-            CreateMap<IngredientRecipe, RecipeIngredientResponse>()
-                .ForMember(dest => dest.Ingredient, opt => opt.MapFrom(src => src.Ingredient));
+            CreateMap<IngredientRecipe, RecipeIngredientResponse>();
 
             CreateMap<Ingredient, IngredientResponse>()
                 .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.CreateAt ?? DateTime.MinValue))
                 .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => src.UpdateAt ?? DateTime.MinValue));
+
         }
 
     }

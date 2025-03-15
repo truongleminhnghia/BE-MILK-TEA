@@ -31,9 +31,7 @@ namespace Business_Logic_Layer.Models.Responses
         public DateTime UpdateAt { get; set; }
 
         public CategoryResponse? Category { get; set; }
-        [JsonIgnore]
         public List<ImageRespone?> Images { get; set; }
-        [JsonIgnore]
         public List<IngredientQuantityResponse>? IngredientQuantities { get; set; }
     }
 }

@@ -15,6 +15,8 @@ namespace Business_Logic_Layer.Models.Responses
         public string RecipeTitle { get; set; }
         public string Content { get; set; }
         public string ImageUrl { get; set; }
+        public DateTime? CreateAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public RecipeStatusEnum RecipeStatus { get; set; }
         public List<RecipeIngredientResponse> Ingredients { get; set; } = new();
         public CategoryResponse Category { get; set; }
