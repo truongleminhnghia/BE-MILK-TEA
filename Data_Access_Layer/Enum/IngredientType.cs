@@ -3,6 +3,7 @@
     public enum IngredientType
     {
         Bot,
-        Tra
+        Tra,
+        Topping
     }
 }
