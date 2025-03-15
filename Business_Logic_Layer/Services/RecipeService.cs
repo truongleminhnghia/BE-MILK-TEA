@@ -175,7 +175,7 @@ namespace Business_Logic_Layer.Services
 
 
 
-        public async Task<IEnumerable<RecipeResponse>> GetAllRecipesAsync(
+        public async Task<IEnumerable<RecipeResponse>> GetAllRecipes(
     string? search, string? sortBy, bool isDescending,
     Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus)
         {
