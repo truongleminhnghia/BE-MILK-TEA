@@ -73,7 +73,7 @@ namespace Business_Logic_Layer.Services
                     account = await _accountRepository.GetByEmail(request.Email);
                     if (account == null)
                     {
-                        throw new Exception("Account does not exist");
+                        throw new Exception("Tài khoản không tồn tại");
                     }
                     bool checkPassword = _passwordHasher.VerifyPassword(request.Password, account.Password);
                     if (checkPassword)
@@ -82,7 +82,7 @@ namespace Business_Logic_Layer.Services
                     }
                     else
                     {
-                        throw new Exception("Invalid password");
+                        throw new Exception("Mật khẩu không hợp lệ");
                     }
                 }
                 else if (type.Trim().Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
@@ -108,7 +108,7 @@ namespace Business_Logic_Layer.Services
                 }
                 else
                 {
-                    throw new Exception("Invalid login type");
+                    throw new Exception("Login Type không hợp lệ");
                 }
 
                 AccountResponse _accountResponse = _mapper.Map<AccountResponse>(account);
