@@ -12,8 +12,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
+<<<<<<<< HEAD:Data_Access_Layer/Migrations/20250315094748_DateNullable.Designer.cs
     [Migration("20250315094748_DateNullable")]
     partial class DateNullable
+========
+    [Migration("20250314181319_InitCreate")]
+    partial class InitCreate
+>>>>>>>> feature/fix-project:Data_Access_Layer/Migrations/20250314181319_InitCreate.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

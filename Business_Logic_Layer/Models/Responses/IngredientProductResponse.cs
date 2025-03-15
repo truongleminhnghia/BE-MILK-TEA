@@ -1,4 +1,5 @@
-﻿using Data_Access_Layer.Enum;
+﻿using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -19,5 +20,7 @@ namespace Business_Logic_Layer.Models.Responses
         public double TotalPrice { get; set; }
 
         public ProductType ProductType { get; set; }
+        public Ingredient? Ingredient { get; set; }
+
     }
 }

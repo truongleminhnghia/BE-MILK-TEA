@@ -23,37 +23,11 @@ namespace WebAPI.Controllers
         }
         //CREATE
         [HttpPost]
-        public async Task<IActionResult> AddIngredientProduct([FromBody] IngredientProductRequest ingredientReq)
+        public async Task<IActionResult> AddIngredientProduct([FromBody] IngredientProductRequest ingredientReq, [FromQuery] bool isCart)
         {
-            //    if (ingredientReq == null)
-            //    {
-            //        return BadRequest(new ApiResponse(
-            //            HttpStatusCode.BadRequest.GetHashCode(),
-            //            false,
-            //            "Dữ liệu không hợp lệ"));
-            //    }
-
-            //var ingredientExists = await _ingredientProductService.IngredientExistsAsync(ingredientReq.IngredientId);
-            //if (!ingredientExists)
-            //{
-            //    return BadRequest(new ApiResponse(
-            //        HttpStatusCode.BadRequest.GetHashCode(),
-            //        false,
-            //        "Nguyên liệu không tồn tại"));
-            //}
-
-
-            //var ingredientProduct = _mapper.Map<IngredientProduct>(ingredientReq);
-            //await _ingredientProductService.CreateAsync(ingredientProduct);
-
-            //return Ok(new ApiResponse(
-            //            HttpStatusCode.OK.GetHashCode(),
-            //            true,
-            //            "Thêm nguyên liệu vào sản phẩm thành công"));
-
             try
             {
-                var ingredientProduct = await _ingredientProductService.CreateAsync(ingredientReq);
+                var ingredientProduct = await _ingredientProductService.CreateAsync(ingredientReq, isCart);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
@@ -99,7 +73,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct (Guid id, [FromBody] IngredientProductRequest request)
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] IngredientProductRequest request)
         {
             try
             {

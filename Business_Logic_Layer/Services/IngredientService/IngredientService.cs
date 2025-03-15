@@ -99,7 +99,7 @@ namespace Business_Logic_Layer.Services.IngredientService
 
                 List<ImageRespone> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
 
-                List<IngredientQuantityResponse> ingredientQuantities = await _ingredientQuantityService.CreateQuantitiesAsync(ingredientResponse.Id, request.IngredientQuantities);
+                // List<IngredientQuantityResponse> ingredientQuantities = await _ingredientQuantityService.CreateQuantitiesAsync(ingredientResponse.Id, request.IngredientQuantities);
 
                 ingredient.Images = _mapper.Map<List<Image>>(imageRespones);
                 ingredientResponse.Category = _mapper.Map<CategoryResponse>(categoryExists);
