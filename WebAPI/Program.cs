@@ -78,7 +78,9 @@ var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 // var connectionString =
 //   $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
-var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
+//var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
+
+var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -156,9 +158,15 @@ builder.Services.AddAutoMapper(
     typeof(IngredientMapper),
     typeof(ImageMapper),
     typeof(IngredientProductMapper),
-    typeof(AccountMapper),
-    typeof(CategoryMapper),
-    typeof(PromotionDetailMapper)
+    typeof(PromotionDetailMapper),
+    typeof(IngredientProductMapper),
+    typeof(IngredientQuantityMapper),
+    typeof(IngredientRecipeMapper),
+    typeof(OrderMapper),
+    typeof(OrderDetailMapper),
+    typeof(CartItemMapper),
+    typeof(PromotionMapper),
+    typeof(RecipeMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>

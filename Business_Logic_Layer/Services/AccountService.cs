@@ -110,13 +110,22 @@ namespace Business_Logic_Layer.Services
             }
         }
 
-        public async Task<IEnumerable<Account>> GetAllAccounts(
-            string? search, string? sortBy, bool isDescending,
-            AccountStatus? accountStatus, RoleName? role, int page, int pageSize)
+        public async Task<PageResult<AccountResponse>> GetAllAccountsAsync(
+    string? search, AccountStatus? accountStatus, RoleName? roleName,
+    string? sortBy, bool isDescending, int page, int pageSize)
         {
-            return await _accountRepository.GetAllAccounts(
-                search, sortBy, isDescending, accountStatus, role, page, pageSize);
+            var (accounts, total) = await _accountRepository.GetAllAccountsAsync(
+                search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
+
+            return new PageResult<AccountResponse>
+            {
+                Data = _mapper.Map<List<AccountResponse>>(accounts),
+                PageCurrent = page,
+                PageSize = pageSize,
+                Total = total
+            };
         }
+
 
     }
 }

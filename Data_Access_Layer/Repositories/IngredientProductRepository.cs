@@ -25,10 +25,11 @@ namespace Data_Access_Layer.Repositories
             return ingredientProduct;
         }
 
-        public async Task UpdateAsync(IngredientProduct ingredientProduct)
+        public async Task<IngredientProduct> UpdateAsync(IngredientProduct ingredientProduct)
         {
             _context.IngredientProducts.Update(ingredientProduct);
             await _context.SaveChangesAsync();
+            return ingredientProduct;
         }
 
         public async Task<bool> IngredientExistsAsync(Guid ingredientId)
@@ -78,6 +79,12 @@ namespace Data_Access_Layer.Repositories
         public IQueryable<IngredientProduct> Query()
         {
             return _context.IngredientProducts.AsQueryable();
+        }
+
+        public async Task<bool> DeleteAsync(IngredientProduct ingredientProduct)
+        {
+            _context.IngredientProducts.Remove(ingredientProduct);
+            return await _context.SaveChangesAsync() > 0;
         }
 
     }

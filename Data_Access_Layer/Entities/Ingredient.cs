@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
@@ -41,7 +42,6 @@ namespace Data_Access_Layer.Entities
         public DateTime ExpiredDate { get; set; }
 
         [Column("ingredient_status")]
-        [Required]
         public IngredientStatus IngredientStatus { get; set; }
 
         [Column("weight_per_bag")]
@@ -66,7 +66,6 @@ namespace Data_Access_Layer.Entities
         public double PriceOrigin { get; set; } // giá ban đầu, không khuyến mãi
 
         [Column("price_promotion")]
-        [Required]
         public double PricePromotion { get; set; } // giá khuyến mãi
 
         [Column("category_id")]
@@ -75,12 +74,11 @@ namespace Data_Access_Layer.Entities
         public Guid CategoryId { get; set; }
 
         [Column("is_sale")]
-        [Required]
         public bool IsSale { get; set; }
 
         [Column("rate")]
         public float Rate { get; set; } // tính TB 4 + 5 /2
-         // bổ sung bình luận
+                                        // bổ sung bình luận
 
         public ICollection<Image>? Images { get; set; }
         public ICollection<IngredientReview>? IngredientReviews { get; set; }

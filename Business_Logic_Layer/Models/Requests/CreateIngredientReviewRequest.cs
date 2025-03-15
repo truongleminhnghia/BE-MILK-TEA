@@ -19,7 +19,7 @@ namespace Business_Logic_Layer.Models.Requests
         public string? Comment { get; set; }
 
         [Range(0, 5)]
-        [Required]
+        [Required(ErrorMessage = "Bạn chưa nhập số sao đánh giá.")]
         public double Rate { get; set; }
     }
 
