@@ -28,7 +28,6 @@ namespace Data_Access_Layer.Entities
         public string Address { get; set; } = string.Empty;
 
         [Column("account_level")]
-        [Required]
         public AccountLevelEnum AccountLevel { get; set; } = AccountLevelEnum.NORMAL;
 
         [Column("purchased")]

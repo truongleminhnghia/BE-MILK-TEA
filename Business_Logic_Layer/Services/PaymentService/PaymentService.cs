@@ -138,7 +138,7 @@ namespace Business_Logic_Layer.Services.PaymentService
                         {
                             // Cập nhật trạng thái thanh toán
                             var order = await _orderRepository.GetByIdAsync(response.OrderId);
-                            order.OrderStatus = OrderStatus.CONFIRM;
+                            order.OrderStatus = OrderStatus.PENDING_SHIPMENT;
                             pendingPayment.PaymentStatus = PaymentStatus.Success;
                             pendingPayment.TranscationId = response.TransactionId;
                             pendingPayment.AmountPaid = response.Amount;

@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AutoMapper;
 using Azure;
@@ -32,8 +33,9 @@ namespace WebAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IRecipeService _recipeService;
         private readonly IDashboardService _dashboardService;
+        private readonly IAccountService _accountService;
 
-        public WebSocketController(ICategoryService categoryService, IIngredientService ingredientService, IMapper mapper, IPromotionService promotionService, IRecipeService recipeService, IDashboardService dashboardService)
+        public WebSocketController(ICategoryService categoryService, IIngredientService ingredientService, IMapper mapper, IPromotionService promotionService, IRecipeService recipeService, IDashboardService dashboardService, IAccountService accountService)
         {
             _promotionService = promotionService;
             _ingredientService = ingredientService;
@@ -41,6 +43,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _recipeService = recipeService;
             _dashboardService = dashboardService;
+            _accountService = accountService;
         }
 
         [HttpGet("ingredients")]
@@ -191,6 +194,7 @@ namespace WebAPI.Controllers
             return Ok();
         }
 
+
         [HttpGet("/recipes")]
         public async Task<IActionResult> GetRecipesWebSocket(
             [FromQuery] RecipeStatusEnum? recipeStatus,
@@ -271,6 +275,53 @@ namespace WebAPI.Controllers
             }
             return Ok();
 
+        }
+
+        [HttpGet("/accounts")]
+        public async Task<IActionResult> GetAccountsWebSocket(
+            [FromQuery] string? search = null,
+            [FromQuery] AccountStatus? accountStatus = null,
+            [FromQuery] RoleName? roleName = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                try
+                {
+                    while (webSocket.State == WebSocketState.Open)
+                    {
+                        var accounts = await _accountService.GetAllAccountsAsync(
+                            search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
+
+                        var accountResponses = _mapper.Map<IEnumerable<AccountResponse>>(accounts);
+                        string jsonString = JsonSerializer.Serialize(accountResponses, new JsonSerializerOptions
+                        {
+                            WriteIndented = true,
+                            Converters = { new JsonStringEnumConverter() }
+                        });
+
+                        var buffer = Encoding.UTF8.GetBytes(jsonString);
+                        await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                        await Task.Delay(2000);
+                    }
+
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the server", CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"WebSocket error: {ex.Message}");
+                }
+            }
+            else
+            {
+                return BadRequest("WebSocket request expected.");
+            }
+
+            return Ok();
         }
 
 

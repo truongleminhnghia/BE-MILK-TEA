@@ -141,28 +141,89 @@ namespace Business_Logic_Layer.Services.IngredientProductService
             }
         }
 
-        public async Task<IngredientProductResponse> UpdateAsync(Guid id, IngredientProductRequest request)
+        public async Task<IngredientProductResponse> UpdateAsync(Guid id, IngredientProductRequest request, bool isCart)
         {
             try
             {
-                var ingredientProduct = await _ingredientProductRepository.GetIngredientProductbyId(id);
-                if (ingredientProduct == null)
+                if (request == null) throw new ArgumentNullException("Dữ liệu cập nhật không hợp lệ.");
+                if (id == Guid.Empty) throw new ArgumentNullException("Id không hợp lệ.");
+                if (request.IngredientId == Guid.Empty) throw new ArgumentNullException("Nguyên liệu không hợp lệ.");
+
+                // Kiểm tra sản phẩm có tồn tại hay không
+                var existingProduct = await _ingredientProductRepository.GetIngredientProductbyId(id);
+                if (existingProduct == null)
                 {
-                    throw new KeyNotFoundException("Không tìm thấy sản phẩm");
+                    throw new Exception("Sản phẩm không tồn tại.");
                 }
-                var ingredientExists = await _ingredientRepository.GetById(request.IngredientId);
-                if (ingredientExists == null) throw new KeyNotFoundException("Nguyên liệu không tồn tại");
-                // request.Id = id;
-                _mapper.Map(request, ingredientProduct);
-                ingredientProduct.TotalPrice = request.Quantity * ingredientExists.PriceOrigin;
-                await _ingredientProductRepository.UpdateAsync(ingredientProduct);
-                return _mapper.Map<IngredientProductResponse>(ingredientProduct);
+
+                // Kiểm tra nguyên liệu có hợp lệ không
+                var ingredient = await _ingredientRepository.GetById(request.IngredientId);
+                if (ingredient == null)
+                {
+                    throw new Exception("Nguyên liệu không tồn tại.");
+                }
+
+                // Kiểm tra số lượng có hợp lệ không
+                bool isValidQuantity = await CheckQuantity(request.Quantity, request.ProductType, ingredient.Id);
+                if (!isValidQuantity)
+                {
+                    throw new Exception("Số lượng không hợp lệ.");
+                }
+
+                // Cập nhật thông tin sản phẩm
+                existingProduct.IngredientId = request.IngredientId;
+                existingProduct.Quantity = request.Quantity;
+                existingProduct.ProductType = request.ProductType;
+
+                // Nếu là cart thì không tính giá
+                if (isCart)
+                {
+                    existingProduct.TotalPrice = 0;
+                }
+                else
+                {
+                    existingProduct.TotalPrice = (ingredient.PricePromotion > 0)
+                        ? ingredient.PricePromotion * request.Quantity
+                        : ingredient.PriceOrigin * request.Quantity;
+                }
+
+                // Thực hiện cập nhật vào database
+                var updatedProduct = await _ingredientProductRepository.UpdateAsync(existingProduct);
+
+                // Trả về response
+                return _mapper.Map<IngredientProductResponse>(updatedProduct);
             }
             catch (Exception ex)
             {
                 throw new Exception("Lỗi khi cập nhật IngredientProduct: " + ex.Message);
             }
         }
+
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                    throw new ArgumentNullException("Id không hợp lệ.");
+
+                // Tìm sản phẩm theo ID
+                var existingProduct = await _ingredientProductRepository.GetIngredientProductbyId(id);
+                if (existingProduct == null)
+                    throw new Exception("Sản phẩm không tồn tại.");
+
+                // Xóa sản phẩm khỏi database
+                var isDeleted = await _ingredientProductRepository.DeleteAsync(existingProduct);
+                if (!isDeleted)
+                    throw new Exception("Xóa sản phẩm thất bại.");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi xóa IngredientProduct: " + ex.Message);
+            }
+        }
+
 
         public async Task<bool> IngredientExistsAsync(Guid ingredientId)
         {
