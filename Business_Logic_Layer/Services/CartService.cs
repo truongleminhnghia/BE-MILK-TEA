@@ -68,31 +68,42 @@ namespace Business_Logic_Layer.Services
 
         public async Task<CartResponse> GetByIdAsync(Guid accountId)
         {
+            CartResponse cartResponse = new CartResponse();
             var account = await _accountRepository.GetById(accountId);
             if (account == null)
             {
                 throw new Exception("Tài khoản không tồn tại");
             }
-
-            // Lấy giỏ hàng hoặc tạo mới nếu chưa có
-            var cart = await _cartRepository.GetOrCreateCartAsync(accountId);
-
-            // Chuyển đổi danh sách CartItem thành CartItemResponse
-            var cartItemsResponse = cart.CartItems?.Select(ci => new CartItemResponse
+            Cart? cartEixst = await _cartRepository.GetByAccountAsync(account.Id);
+            if (cartEixst != null)
             {
-                CartItemId = ci.Id,
-                IngredientProductId = ci.IngredientProductId,
-                Quantity = ci.Quantity
-            }).ToList() ?? new List<CartItemResponse>();
+                cartResponse.CartId = cartEixst.Id;
+                cartResponse.AccountResponse = _mapper.Map<AccountResponse>(cartEixst.Account);
+                cartResponse.CarItemResponse = cartEixst.CartItems != null
+                        ? _mapper.Map<CartItemResponse>(cartEixst.CartItems)
+                        : null;
 
-            // Tạo đối tượng phản hồi
-            return new CartResponse
+                cartResponse.TotalCartItem = await SumCartItem(
+                        cartEixst.Id,
+                        cartEixst.CartItems?.ToList() ?? new List<CartItem>() // Ensure no null issue
+        );
+            }
+            else
             {
-                CartId = cart.Id,
-                AccountResponse = _mapper.Map<AccountResponse>(account),
-                CartItems = cartItemsResponse,
-                TotalCartItem = cartItemsResponse.Sum(ci => ci.Quantity) // Tổng số lượng sản phẩm trong giỏ
-            };
+                Cart cart = new Cart();
+                cart.AccountId = account.Id;
+                var result = await _cartRepository.CreateAsync(cart);
+                if (result == null)
+                {
+                    throw new Exception("Tạo cart không thành công");
+                }
+                cartResponse.CartId = result.Id;
+                cartResponse.AccountResponse = _mapper.Map<AccountResponse>(account);
+                // cartResponse.CarItemResponse = null;
+                cartResponse.TotalCartItem = 0;
+            }
+
+            return cartResponse;
         }
 
 
@@ -158,13 +169,13 @@ namespace Business_Logic_Layer.Services
                 return -1;
             }
         }
-
-        public async Task<CartResponse> CreateAsync(CartRequest request)
+        public async Task<CartResponse> CreateAsync(CartRequest cart)
         {
             try
             {
+                var reqCart = _mapper.Map<Cart>(cart);
                 // Gọi hàm repo để tạo giỏ hàng
-                var createdCart = await _cartRepository.GetOrCreateCartAsync(request.AccountId);
+                var createdCart = await _cartRepository.CreateAsync(reqCart);
                 var cartResponse = _mapper.Map<CartResponse>(createdCart);
 
                 return cartResponse;
@@ -174,5 +185,6 @@ namespace Business_Logic_Layer.Services
                 throw new Exception("Không thể tạo giỏ hàng", ex);
             }
         }
+
     }
 }

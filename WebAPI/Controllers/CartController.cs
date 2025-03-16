@@ -51,34 +51,6 @@ namespace WebAPI.Controllers
                     carts
                 ));
         }
-        //[HttpGet("{accountId}")]
-        //public async Task<IActionResult> GetCartDetails(Guid accountId)
-        //{
-        //    if (accountId == Guid.Empty)
-        //    {
-        //        return BadRequest(new { message = "Account ID không hợp lệ!" });
-        //    }
-
-        //    var cart = await _cartService.GetByIdAsync(accountId);
-
-        //    if (cart == null)
-        //    {
-        //        return NotFound(new { message = "Không tìm thấy giỏ hàng!" });
-        //    }
-
-        //    return Ok(new
-        //    {
-        //        code = 200,
-        //        message = cart.CartItems.Any() ? "Lấy dữ liệu thành công!" : "Giỏ hàng của bạn hiện đang trống.",
-        //        success = true,
-        //        data = new
-        //        {
-        //            cartId = cart.CartId,
-        //            accountId = cart.AccountId,
-        //            cartItems = cart.CartItems
-        //        }
-        //    });
-        //}
 
         //Create
         [HttpPost]

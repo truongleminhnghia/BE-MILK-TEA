@@ -83,6 +83,16 @@ namespace Data_Access_Layer.Repositories
                 await _context.SaveChangesAsync();
             }
         }
-
+        public async Task<Cart?> GetByAccountAsync(Guid id)
+        {
+            return await _context.Carts
+                .FirstOrDefaultAsync(c => c.AccountId == id);
+        }
+        public async Task<Cart> CreateAsync(Cart cart)
+        {
+            _context.Carts.Add(cart);
+            await _context.SaveChangesAsync();
+            return cart;
+        }
     }
     }
