@@ -63,16 +63,36 @@ namespace Business_Logic_Layer.Services.IngredientProductService
                 {
                     throw new Exception("Ingredient no existing");
                 }
-                var newProduct = _mapper.Map<IngredientProduct>(request);
-                if (isCart)
-                {
-                    newProduct.TotalPrice = 0;
-                }
                 bool result = await CheckQuantity(request.Quantity, request.ProductType, ingredient.Id);
                 if (!result)
                 {
                     throw new Exception("Số lượng không phù hợp");
                 }
+                var newProduct = _mapper.Map<IngredientProduct>(request);
+                if (isCart)
+                {
+                    newProduct.TotalPrice = 0;
+                }
+                else
+                {
+                    if (ingredient.PricePromotion > 0.0 && request.ProductType.Equals(ProductType.Thung))
+                    {
+                        newProduct.TotalPrice = ingredient.PricePromotion * request.Quantity * ingredient.QuantityPerCarton;
+                    }
+                    else if (ingredient.PricePromotion > 0.0 && request.ProductType.Equals(ProductType.Bich))
+                    {
+                        newProduct.TotalPrice = ingredient.PricePromotion * request.Quantity;
+                    }
+                    else if (ingredient.PricePromotion <= 0.0 && request.ProductType.Equals(ProductType.Bich))
+                    {
+                        newProduct.TotalPrice = ingredient.PriceOrigin * request.Quantity;
+                    }
+                    else if (ingredient.PricePromotion <= 0.0 && request.ProductType.Equals(ProductType.Thung))
+                    {
+                        newProduct.TotalPrice = ingredient.PriceOrigin * request.Quantity * ingredient.QuantityPerCarton;
+                    }
+                }
+
                 // newProduct.TotalPrice = request.Quantity * ingredientExists.PriceOrigin;
                 var created = await _ingredientProductRepository.CreateAsync(newProduct);
                 var response = _mapper.Map<IngredientProductResponse>(created);
@@ -104,9 +124,11 @@ namespace Business_Logic_Layer.Services.IngredientProductService
             {
                 IngredientProductResponse ingredientProductResponse = new IngredientProductResponse();
                 var ingredientProduct = await _ingredientProductRepository.GetIngredientProductbyId(ingredientProductId);
-                if(ingredientProduct != null) {
+                if (ingredientProduct != null)
+                {
                     var ingredient = await _ingredientRepository.GetById(ingredientProduct.IngredientId);
-                    if(ingredient != null) {
+                    if (ingredient != null)
+                    {
                         ingredientProductResponse.Ingredient = ingredient;
                     }
                 }
