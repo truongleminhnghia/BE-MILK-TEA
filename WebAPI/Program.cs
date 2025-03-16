@@ -5,11 +5,14 @@ using Business_Logic_Layer.Configurations;
 using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
+using Business_Logic_Layer.Services.DashboardService;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientReviewService;
 using Business_Logic_Layer.Services.IngredientService;
 using Business_Logic_Layer.Services.NotificationService;
 using Business_Logic_Layer.Services.PaymentService;
+using Business_Logic_Layer.Services.PromotionDetailService;
+using Business_Logic_Layer.Services.PromotionService;
 using Business_Logic_Layer.Services.VNPayService;
 using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
@@ -20,9 +23,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 // using Business_Logic_Layer.Utils;
 using Microsoft.OpenApi.Models;
-using Business_Logic_Layer.Services.PromotionService;
-using Business_Logic_Layer.Services.PromotionDetailService;
-using Business_Logic_Layer.Services.DashboardService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,32 +37,36 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 
     // Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+    c.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "Bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}",
         }
-    });
-});
+    );
 
+    c.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                },
+                Array.Empty<string>()
+            },
+        }
+    );
+});
 
 Env.Load();
 
@@ -75,12 +79,11 @@ var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
 var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
-// var connectionString =
-//   $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+var connectionString =
+    $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
 //var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
 
-var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -211,11 +214,6 @@ builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
-
-
-
-
-
 // Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();
@@ -226,7 +224,6 @@ builder.Services.AddScoped<Source>();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
-
 // config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 
@@ -236,11 +233,18 @@ builder.Services.AddCors(options =>
         MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500", "http://192.168.0.2:5173") // Replace with your frontend URL
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
+            policy
+                .WithOrigins(
+                    "http://localhost:5173",
+                    "https://fe-milk-tea-project.vercel.app",
+                    "http://127.0.0.1:5500",
+                    "http://192.168.0.2:5173"
+                ) // Replace with your frontend URL
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        }
+    );
 });
 
 builder.Services.AddHttpClient<AuthenService>();
