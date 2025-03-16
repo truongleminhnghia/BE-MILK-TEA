@@ -10,7 +10,7 @@ namespace Data_Access_Layer.Repositories
     public interface ICartRepository
     {
         Task<Cart> GetOrCreateCartAsync(Guid accountId);
-        Task<Cart> CreateAsync(Cart cart);
+        //Task<Cart> CreateAsync(Cart cart);
         Task UpdateCartItemQuantityAsync(Guid accountId, Guid ingredientProductId, int quantity);
         Task ClearCartAsync(Guid accountId);
     }

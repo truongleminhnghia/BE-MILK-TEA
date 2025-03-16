@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Business_Logic_Layer.Models.Requests
 {
-    public class CartRequest
+    public class RemoveCartItemRequest
     {
-        public Guid AccountId;
+        public Guid AccountId { get; set; }
+        public Guid IngredientProductId { get; set; }
     }
 }

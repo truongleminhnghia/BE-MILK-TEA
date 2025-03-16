@@ -21,15 +21,15 @@ namespace Data_Access_Layer.Repositories
 
    
 
-        public async Task<Cart> CreateAsync(Cart cart)
-        {
-            cart.Id = Guid.NewGuid();
-            cart.CreateAt = DateTime.UtcNow;
+        //public async Task<Cart> CreateAsync(Cart cart)
+        //{
+        //    cart.Id = Guid.NewGuid();
+        //    cart.CreateAt = DateTime.UtcNow;
 
-            _context.Carts.Add(cart);
-            await _context.SaveChangesAsync();
-            return cart;
-        }
+        //    _context.Carts.Add(cart);
+        //    await _context.SaveChangesAsync();
+        //    return cart;
+        //}
 
         public async Task<Cart> GetOrCreateCartAsync(Guid accountId)
         {

@@ -10,7 +10,9 @@ namespace Business_Logic_Layer.Models.Responses
     public class CartResponse
     {
         public Guid CartId { get; set; }
-        public Guid AccountId { get; set; }
+        public AccountResponse? AccountResponse { get; set; }
+        public CartItemResponse? CarItemResponse { get; set; }
         public List<CartItemResponse> CartItems { get; set; } = new();
+        public int TotalCartItem { get; set; }
     }
 }

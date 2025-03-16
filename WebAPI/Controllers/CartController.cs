@@ -9,6 +9,7 @@ using Data_Access_Layer.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Crmf;
 
 
 namespace WebAPI.Controllers
@@ -30,98 +31,68 @@ namespace WebAPI.Controllers
             _context = context;
         }
         //get cart
-        [HttpGet("{accountId}")]
-        public async Task<IActionResult> GetCartDetails(Guid accountId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            if (accountId == Guid.Empty)
+            var carts = await _cartService.GetByIdAsync(id);
+            if (carts == null)
             {
-                return BadRequest(new { message = "Account ID không hợp lệ!" });
+                return Ok(new ApiResponse(
+                    ((int)HttpStatusCode.OK),
+                    true,
+                    "Không có cart nào có ID đó cả.",
+                    null
+                ));
             }
+            return Ok(new ApiResponse(
+                    ((int)HttpStatusCode.OK),
+                    true,
+                    "Lấy dữ liệu thành công!",
+                    carts
+                ));
+        }
+        //[HttpGet("{accountId}")]
+        //public async Task<IActionResult> GetCartDetails(Guid accountId)
+        //{
+        //    if (accountId == Guid.Empty)
+        //    {
+        //        return BadRequest(new { message = "Account ID không hợp lệ!" });
+        //    }
 
-            var cart = await _cartService.GetByIdAsync(accountId);
+        //    var cart = await _cartService.GetByIdAsync(accountId);
 
+        //    if (cart == null)
+        //    {
+        //        return NotFound(new { message = "Không tìm thấy giỏ hàng!" });
+        //    }
+
+        //    return Ok(new
+        //    {
+        //        code = 200,
+        //        message = cart.CartItems.Any() ? "Lấy dữ liệu thành công!" : "Giỏ hàng của bạn hiện đang trống.",
+        //        success = true,
+        //        data = new
+        //        {
+        //            cartId = cart.CartId,
+        //            accountId = cart.AccountId,
+        //            cartItems = cart.CartItems
+        //        }
+        //    });
+        //}
+
+        //Create
+        [HttpPost]
+        public async Task<IActionResult> AddCart([FromBody] CartRequest cart)
+        {
             if (cart == null)
             {
-                return NotFound(new { message = "Không tìm thấy giỏ hàng!" });
+                return BadRequest(new { message = "Invalid cart data" });
             }
 
-            return Ok(new
-            {
-                code = 200,
-                message = cart.CartItems.Any() ? "Lấy dữ liệu thành công!" : "Giỏ hàng của bạn hiện đang trống.",
-                success = true,
-                data = new
-                {
-                    cartId = cart.CartId,
-                    accountId = cart.AccountId,
-                    cartItems = cart.CartItems
-                }
-            });
+            var createCart = await _cartService.CreateAsync(cart);
+            return Ok(createCart);
         }
-        //remove item from cart
-        [HttpDelete("remove")]
-        public async Task<IActionResult> RemoveFromCart([FromBody] RemoveCartItemRequest request)
-        {
-            if (request == null || request.AccountId == Guid.Empty || request.IngredientProductId == Guid.Empty)
-            {
-                return BadRequest(new { message = "Dữ liệu không hợp lệ!" });
-            }
-
-            try
-            {
-                var result = await _cartService.RemoveItemAsync(request.AccountId, request.IngredientProductId);
-
-                if (result)
-                {
-                    return Ok(new { message = "Xóa sản phẩm thành công!" });
-                }
-
-                return BadRequest(new { message = "Không thể xóa sản phẩm khỏi giỏ hàng!" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống!", error = ex.Message });
-            }
-        }
-        //add item to cart
-        [HttpPost("add")]
-        public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
-        {
-            if (request == null || request.AccountId == Guid.Empty || request.IngredientProductId == Guid.Empty || request.Quantity <= 0)
-            {
-                return BadRequest(new { message = "Dữ liệu không hợp lệ!" });
-            }
-
-            try
-            {
-                // Gọi phương thức lưu dữ liệu mà không cần gán kết quả
-                await _cartService.AddToCartAsync(request.AccountId, request.IngredientProductId, request.Quantity);
-
-                return Ok(new { message = "Thành công cho item vào cart!" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi add to cart", error = ex.Message });
-            }
-        }
-
-        //update quantity of cart item
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateCartItem([FromBody] UpdateCartItemRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var success = await _cartService.UpdateCartItemQuantityAsync(request.AccountId, request.IngredientProductId, request.Quantity);
-            if (!success)
-            {
-                return NotFound(new { message = "Sản phẩm không tồn tại trong giỏ hàng!" });
-            }
-
-            return Ok(new { message = "Cập nhật số lượng thành công!" });
-        }
+       
 
         //clear cart
         [HttpDelete("clear")]

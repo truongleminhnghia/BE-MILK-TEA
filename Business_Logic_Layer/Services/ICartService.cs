@@ -16,6 +16,6 @@ namespace Business_Logic_Layer.Services
         Task<bool> RemoveItemAsync(Guid accountId, Guid ingredientProductId);
         Task<bool> UpdateCartItemQuantityAsync(Guid accountId, Guid ingredientProductId, int quantity);
         Task<bool> ClearCartAsync(Guid accountId);
-
+        public Task<CartResponse> CreateAsync(CartRequest request);
     }
 }
