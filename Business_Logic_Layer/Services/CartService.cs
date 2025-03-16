@@ -40,6 +40,8 @@ namespace Business_Logic_Layer.Services
             if (existingCartItem != null)
             {
                 existingCartItem.Quantity += quantity; // Cập nhật số lượng
+                existingCartItem.UpdateAt = DateTime.Now;
+                await _context.SaveChangesAsync();
             }
             else
             {
@@ -49,7 +51,8 @@ namespace Business_Logic_Layer.Services
                     {
                         CartId = cart.Id,
                         IngredientProductId = ingredientProductId,
-                        Quantity = quantity
+                        Quantity = quantity,
+                        UpdateAt=DateTime.Now
                     });
                     await _context.SaveChangesAsync();
                 }

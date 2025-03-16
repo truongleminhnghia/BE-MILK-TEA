@@ -80,7 +80,7 @@ var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
 //var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
 
-var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
+var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
 
 if (string.IsNullOrEmpty(connectionString))
 {
