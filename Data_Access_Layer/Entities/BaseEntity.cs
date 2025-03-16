@@ -10,11 +10,10 @@ namespace Data_Access_Layer.Entities
 {
     public abstract class BaseEntity
     {
-        [Required]
         [Column("create_at")]
-        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
+        public DateTime? CreateAt { get; set; } = DateTime.UtcNow;
 
         [Column("update_at")]
-        public DateTime UpdateAt { get; set; }
+        public DateTime? UpdateAt { get; set; }
     }
 }

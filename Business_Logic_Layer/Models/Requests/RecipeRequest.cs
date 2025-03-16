@@ -23,7 +23,7 @@ namespace Business_Logic_Layer.Models.Requests
     public class RecipeIngredientRequest
     {
         public Guid IngredientId { get; set; }
-
+        [Range(0.1, double.MaxValue, ErrorMessage = "Khối lượng của nguyên liệu phải lớn hơn 0")]
         public float WeightOfIngredient { get; set; }
     }
 

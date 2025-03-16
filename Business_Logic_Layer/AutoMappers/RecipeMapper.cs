@@ -20,10 +20,9 @@ namespace Business_Logic_Layer.AutoMappers
             CreateMap<Recipe, RecipeResponse>().ReverseMap();
             CreateMap<RecipeRequest, RecipeResponse>().ReverseMap();
             CreateMap<Recipe, RecipeResponse>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName))
+            //.ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName))
             .ForMember(dest => dest.Ingredients, opt => opt.MapFrom(src => src.IngredientRecipes));
 
-            CreateMap<IngredientRecipe, RecipeIngredientResponse>().ReverseMap();
         }
 
     }

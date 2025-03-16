@@ -21,7 +21,7 @@ namespace Business_Logic_Layer.Models.Responses
         public IngredientStatus IngredientStatus { get; set; }
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
-        public string Unit { get; set; }
+        public UnitOfIngredientEnum Unit { get; set; }
         public double PriceOrigin { get; set; }
         public double PricePromotion { get; set; }
         public CategoryResponse? Category { get; set; }

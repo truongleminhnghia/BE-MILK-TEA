@@ -89,6 +89,9 @@ namespace Data_Access_Layer.Repositories
         //    return existingCartItem;
         //}
 
-        
+        public async Task<IEnumerable<CartItem>> GetByCart(Guid id)
+        {
+            return await _context.CartItems.Where(c => c.CartId == id).ToListAsync();
+        }
     }
 }
