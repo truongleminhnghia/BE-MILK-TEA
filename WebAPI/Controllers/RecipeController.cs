@@ -2,6 +2,7 @@
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -68,14 +69,15 @@ namespace WebAPI.Controllers
             try
             {
                 var isUpdated = await _recipeService.UpdateRecipe(id, request);
-                if (!isUpdated)
+                if (isUpdated == null)
                     return NotFound(new { success = false, message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
 
 
                 return Ok(new ApiResponse(
                                 HttpStatusCode.OK.GetHashCode(),
                                 true,
-                "Cập nhật công thức thành công!"
+                                "Cập nhật công thức thành công!",
+                                isUpdated
                             ));
             }
             catch (Exception ex)
@@ -86,20 +88,27 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAllRecipes(
-    string? search, string? sortBy, bool isDescending = false,
-    Guid? categoryId = null, int page = 1, int pageSize = 10)
+            string? search,
+            string? sortBy,
+            RecipeStatusEnum recipeStatusEnum,
+            bool isDescending = false,
+            Guid? categoryId = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            int page = 1,
+            int pageSize = 10)
         {
             try
             {
-                var recipes = await _recipeService.GetAllRecipes(
-                search, sortBy, isDescending, categoryId, page, pageSize);
+                var recipes = await _recipeService.GetAllRecipesAsync(
+                    search, sortBy, isDescending, recipeStatusEnum, categoryId, startDate, endDate, page, pageSize);
 
                 return Ok(new ApiResponse(
-                                HttpStatusCode.OK.GetHashCode(),
-                                true,
-                "Lấy danh sách công thức thành công",
-                                recipes
-                            ));
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Lấy danh sách công thức thành công",
+                    recipes
+                ));
             }
             catch (Exception ex)
             {

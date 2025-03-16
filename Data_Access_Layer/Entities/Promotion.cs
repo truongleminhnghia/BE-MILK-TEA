@@ -21,7 +21,6 @@ namespace Data_Access_Layer.Entities
         public string PromotionCode { get; set; } = string.Empty;
 
         [Column("is_active")]
-        [Required]
         public bool IsActive { get; set; }
 
         [Column("start_date", TypeName = "datetime")]
@@ -34,7 +33,6 @@ namespace Data_Access_Layer.Entities
 
         [Column("promotion_type")]
         [EnumDataType(typeof(PromotionType))]
-        [Required]
         public PromotionType PromotionType { get; set; }
 
 

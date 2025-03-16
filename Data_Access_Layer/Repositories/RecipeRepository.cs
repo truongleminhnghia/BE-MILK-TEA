@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Data_Access_Layer.Repositories
@@ -42,6 +43,7 @@ namespace Data_Access_Layer.Repositories
                 .FirstOrDefaultAsync(r => r.Id == recipeId);
         }
 
+
         public async Task<Recipe?> UpdateRecipe(Recipe recipe)
         {
             _context.Recipes.Update(recipe);
@@ -60,7 +62,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<IEnumerable<Recipe>> GetAllRecipes(
     string? search, string? sortBy, bool isDescending,
-    Guid? categoryId, int page, int pageSize)
+    Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus)
         {
             var query = _context.Recipes
                 .Include(r => r.Category)
@@ -75,10 +77,20 @@ namespace Data_Access_Layer.Repositories
                         .ThenInclude(i => i.IngredientQuantities)
                 .AsQueryable();
 
+            // **Lọc theo trạng thái**
+            if (recipeStatus.HasValue)
+            {
+                query = query.Where(r => r.RecipeStatus == recipeStatus.Value);
+            }
+
             // **Tìm kiếm theo tiêu đề hoặc nội dung**
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(r => r.RecipeTitle.Contains(search) || r.Content.Contains(search));
+                string trimmedSearch = Regex.Replace(search.Trim(), @"\s+", " "); // Bỏ khoảng trắng thừa
+                query = query.Where(r =>
+                    r.RecipeTitle.Contains(trimmedSearch) ||
+                    (r.Content != null && r.Content.Contains(trimmedSearch))
+                );
             }
 
             // **Lọc theo danh mục**
@@ -87,8 +99,9 @@ namespace Data_Access_Layer.Repositories
                 query = query.Where(r => r.CategoryId == categoryId.Value);
             }
 
-            // **Sắp xếp**
-            if (!string.IsNullOrEmpty(sortBy))
+            // **Sắp xếp dữ liệu**
+            var validSortColumns = new HashSet<string> { "RecipeTitle", "CategoryId", "RecipeStatus" };
+            if (!string.IsNullOrEmpty(sortBy) && validSortColumns.Contains(sortBy))
             {
                 query = isDescending
                     ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
@@ -101,70 +114,74 @@ namespace Data_Access_Layer.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<(IEnumerable<Recipe>, int TotalCount)> GetAllRecipesAsync(
+
+        public async Task<(List<Recipe>, int)> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
     RecipeStatusEnum? recipeStatus, Guid? categoryId,
     DateTime? startDate, DateTime? endDate,
     int page, int pageSize)
         {
-            var query = _context.Recipes.Include(r => r.Category).AsQueryable();
+            var query = _context.Recipes
+                .Include(r => r.Category)
+                .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                .AsQueryable();
 
-            // **Filtering by RecipeTitle**
-            if (!string.IsNullOrEmpty(search))
+            // Apply Filters if not null
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(r => r.RecipeTitle.Contains(search));
+                query = query.Where(r => r.RecipeTitle.Contains(search) || r.Content.Contains(search));
             }
 
-            // **Filtering by RecipeStatus**
             if (recipeStatus.HasValue)
             {
                 query = query.Where(r => r.RecipeStatus == recipeStatus.Value);
             }
 
-            // **Filtering by CategoryId**
             if (categoryId.HasValue)
             {
                 query = query.Where(r => r.CategoryId == categoryId.Value);
             }
 
-            // **Filtering by date range (CreateAt)**
-            if (startDate.HasValue && endDate.HasValue)
-            {
-                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
-                query = query.Where(r => r.CreateAt >= startDate.Value && r.CreateAt <= adjustedEndDate);
-            }
-            else if (startDate.HasValue)
+            if (startDate.HasValue)
             {
                 query = query.Where(r => r.CreateAt >= startDate.Value);
             }
-            else if (endDate.HasValue)
+
+            if (endDate.HasValue)
             {
-                DateTime adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
-                query = query.Where(r => r.CreateAt <= adjustedEndDate);
-                isDescending = true; // Force descending order if only endDate is provided
+                query = query.Where(r => r.CreateAt <= endDate.Value);
             }
 
-            // **Sorting**
-            if (!string.IsNullOrEmpty(sortBy))
+            // Sorting
+            if (!string.IsNullOrWhiteSpace(sortBy))
             {
                 query = isDescending
-                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
-                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
+                    ? query.OrderByDescending(r => EF.Property<object>(r, sortBy))
+                    : query.OrderBy(r => EF.Property<object>(r, sortBy));
             }
             else
             {
-                query = query.OrderByDescending(r => r.CreateAt); // Default sorting by CreateAt descending
+                query = query.OrderByDescending(r => r.CreateAt); // Default sort by latest created
             }
 
+            // Get Total Count Before Pagination
             int total = await query.CountAsync();
 
-            // **Pagination**
+            // Apply Pagination
             var recipes = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             return (recipes, total);
+        }
+
+
+        public async Task<Recipe?> GetByTitleAsync(string title)
+        {
+            return await _context.Recipes
+                .FirstOrDefaultAsync(r => r.RecipeTitle.Trim().ToLower() == title.Trim().ToLower());
         }
 
 
