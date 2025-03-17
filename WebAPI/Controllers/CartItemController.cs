@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Services;
+using Data_Access_Layer.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -92,7 +93,12 @@ namespace WebAPI.Controllers
                 return NotFound(new { message = "Sản phẩm không tồn tại trong giỏ hàng!" });
             }
 
-            return Ok(new { message = "Cập nhật số lượng thành công!" });
+            return Ok(new
+            {
+                success = true,
+                code = 200,
+                message = "Cap nhat thành công!"
+            });
         }
 
         //remove item from cart

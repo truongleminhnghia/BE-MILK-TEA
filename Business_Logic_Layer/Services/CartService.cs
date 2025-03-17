@@ -74,32 +74,36 @@ namespace Business_Logic_Layer.Services
             {
                 throw new Exception("Tài khoản không tồn tại");
             }
+
             Cart? cartEixst = await _cartRepository.GetByAccountAsync(account.Id);
             if (cartEixst != null)
             {
                 cartResponse.Id = cartEixst.Id;
                 cartResponse.AccountResponse = _mapper.Map<AccountResponse>(cartEixst.Account);
-                cartResponse.CarItemResponse = cartEixst.CartItems != null
-                         ? _mapper.Map<CartItemResponse>(cartEixst.CartItems)
-                         : null;
+
+                // ✅ Fix: Map `CartItems` to `List<CartItemResponse>`
+                cartResponse.CartItemResponse = cartEixst.CartItems != null
+                    ? _mapper.Map<List<CartItemResponse>>(cartEixst.CartItems)
+                    : new List<CartItemResponse>();
 
                 cartResponse.TotalCartItem = await SumCartItem(
-                        cartEixst.Id,
-                        cartEixst.CartItems?.ToList() ?? new List<CartItem>() // Ensure no null issue
-        );
+                    cartEixst.Id,
+                    cartEixst.CartItems?.ToList() ?? new List<CartItem>()
+                );
             }
             else
             {
-                Cart cart = new Cart();
-                cart.AccountId = account.Id;
+                // Handle case when cart does not exist
+                Cart cart = new Cart { AccountId = account.Id };
                 var result = await _cartRepository.CreateAsync(cart);
                 if (result == null)
                 {
                     throw new Exception("Tạo cart không thành công");
                 }
+
                 cartResponse.Id = result.Id;
                 cartResponse.AccountResponse = _mapper.Map<AccountResponse>(account);
-                // cartResponse.CarItemResponse = null;
+                cartResponse.CartItemResponse = new List<CartItemResponse>(); // ✅ Initialize empty list
                 cartResponse.TotalCartItem = 0;
             }
 
