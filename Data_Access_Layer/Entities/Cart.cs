@@ -22,7 +22,7 @@ namespace Data_Access_Layer.Entities
 
         public Account Account { get; set; }
 
-        public ICollection<CartItem> CartItems { get; set; }
+        public ICollection<CartItem>? CartItems { get; set; }
 
 
         // relationship

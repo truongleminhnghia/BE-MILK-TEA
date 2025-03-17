@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-//using Business_Logic_Layer.DTO;
+using Business_Logic_Layer.DTO;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Data;
@@ -77,11 +77,11 @@ namespace Business_Logic_Layer.Services
             Cart? cartEixst = await _cartRepository.GetByAccountAsync(account.Id);
             if (cartEixst != null)
             {
-                cartResponse.CartId = cartEixst.Id;
+                cartResponse.Id = cartEixst.Id;
                 cartResponse.AccountResponse = _mapper.Map<AccountResponse>(cartEixst.Account);
                 cartResponse.CarItemResponse = cartEixst.CartItems != null
-                        ? _mapper.Map<CartItemResponse>(cartEixst.CartItems)
-                        : null;
+                         ? _mapper.Map<CartItemResponse>(cartEixst.CartItems)
+                         : null;
 
                 cartResponse.TotalCartItem = await SumCartItem(
                         cartEixst.Id,
@@ -97,7 +97,7 @@ namespace Business_Logic_Layer.Services
                 {
                     throw new Exception("Tạo cart không thành công");
                 }
-                cartResponse.CartId = result.Id;
+                cartResponse.Id = result.Id;
                 cartResponse.AccountResponse = _mapper.Map<AccountResponse>(account);
                 // cartResponse.CarItemResponse = null;
                 cartResponse.TotalCartItem = 0;

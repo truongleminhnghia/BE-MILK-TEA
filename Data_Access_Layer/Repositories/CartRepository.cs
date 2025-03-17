@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 
 
 namespace Data_Access_Layer.Repositories
@@ -86,7 +87,7 @@ namespace Data_Access_Layer.Repositories
         public async Task<Cart?> GetByAccountAsync(Guid id)
         {
             return await _context.Carts
-                .FirstOrDefaultAsync(c => c.AccountId == id);
+                 .FirstOrDefaultAsync(c => c.AccountId == id);
         }
         public async Task<Cart> CreateAsync(Cart cart)
         {

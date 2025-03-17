@@ -9,12 +9,14 @@ namespace WebAPI.Controllers
     [ApiController]
     public class CartItemController : ControllerBase
     {
+        private readonly ICartItemService _cartItemService;
         private readonly ICartService _cartService;
         private readonly IMapper _mapper;
-        public CartItemController(ICartService cartService, IMapper mapper)
+        public CartItemController(ICartService cartService, IMapper mapper, ICartItemService cartItemService)
         {
             _cartService = cartService;
             _mapper = mapper;
+            _cartItemService = cartItemService;
         }
 
         //add item to cart
@@ -31,12 +33,48 @@ namespace WebAPI.Controllers
                 // Gọi phương thức lưu dữ liệu mà không cần gán kết quả
                 await _cartService.AddToCartAsync(request.AccountId, request.IngredientProductId, request.Quantity);
 
-                return Ok(new { message = "Thành công cho item vào cart!" });
+                return Ok(new
+                {
+                    success = true,
+                    code = 200,
+                    message = "Thành công cho item vào cart!",
+                    data = new
+                    {
+                        accountId = request.AccountId,
+                        ingredientProductId = request.IngredientProductId,
+                        quantity = request.Quantity
+                    }
+                });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Lỗi add to cart", error = ex.Message });
             }
+        }
+
+        //get cart item detail
+        [HttpGet("{cartItemId}")]
+        public async Task<IActionResult> GetCartItemById(Guid cartItemId)
+        {
+            if (cartItemId == Guid.Empty)
+            {
+                return BadRequest(new { message = "Cart Item ID không hợp lệ!" });
+            }
+
+            var cartItem = await _cartItemService.GetByIdAsync(cartItemId);
+
+            if (cartItem == null)
+            {
+                return NotFound(new { message = "Không tìm thấy mục trong giỏ hàng!" });
+            }
+
+            return Ok(new
+            {
+                success = true,
+                code = 200,
+                message = "Lấy dữ liệu thành công!",
+                data = cartItem
+            });
         }
 
         //update quantity of cart item
