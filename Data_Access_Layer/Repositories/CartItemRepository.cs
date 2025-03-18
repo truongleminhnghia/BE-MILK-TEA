@@ -14,9 +14,9 @@ namespace Data_Access_Layer.Repositories
     {
         Task<List<CartItem>> GetCartItemsAsync();
         Task<CartItem?> GetByIdAsync(Guid id);
-        Task<CartItem> CreateAsync(CartItem cartItem);
+        Task<CartItem> AddToCartAsync(CartItem cartItem);   
         Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem);
-        Task<bool> DeleteByIdAsync(Guid id);
+        Task<bool> RemoveCartItemByIdAsync(Guid id);
         Task<IEnumerable<CartItem>> GetByCart(Guid id);
 
         Task<List<CartItem>> GetByCartIdAsync(Guid cartId);
@@ -28,14 +28,32 @@ namespace Data_Access_Layer.Repositories
         {
             _context = context;
         }
-        public async Task<CartItem> CreateAsync(CartItem cartItem)
+        public async Task<CartItem> AddToCartAsync(CartItem cartItem)
         {
-            _context.CartItems.Add(cartItem);
+            var existingItem = await _context.CartItems
+                .FirstOrDefaultAsync(c => c.CartId == cartItem.CartId && c.IngredientProductId == cartItem.IngredientProductId);
+
+            if (existingItem != null)
+            {
+                // Update the quantity instead of inserting a new row
+                existingItem.Quantity += cartItem.Quantity;
+                existingItem.UpdateAt = DateTime.UtcNow;
+                _context.CartItems.Update(existingItem);
+            }
+            else
+            {
+                // Assign a new ID for new items and set timestamps
+                cartItem.Id = Guid.NewGuid();
+                cartItem.CreateAt = DateTime.UtcNow;
+                cartItem.UpdateAt = DateTime.UtcNow;
+                await _context.CartItems.AddAsync(cartItem);
+            }
+
             await _context.SaveChangesAsync();
-            return cartItem;
+            return existingItem ?? cartItem;
         }
 
-        public async Task<bool> DeleteByIdAsync(Guid id)
+        public async Task<bool> RemoveCartItemByIdAsync(Guid id)
         {
             var existingCartItem = await _context.CartItems.FindAsync(id);
             if (existingCartItem == null)

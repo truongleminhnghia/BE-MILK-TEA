@@ -122,10 +122,6 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("cart_id");
 
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("create_at");
-
                     b.Property<Guid>("IngredientProductId")
                         .HasColumnType("char(36)")
                         .HasColumnName("ingredient_product_id");
@@ -134,14 +130,9 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("int")
                         .HasColumnName("quantity");
 
-                    b.Property<DateTime?>("UpdateAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("update_at");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CartId")
-                        .IsUnique();
+                    b.HasIndex("CartId");
 
                     b.HasIndex("IngredientProductId");
 
