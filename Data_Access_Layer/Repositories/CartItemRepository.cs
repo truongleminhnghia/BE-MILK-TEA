@@ -18,6 +18,8 @@ namespace Data_Access_Layer.Repositories
         Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem);
         Task<bool> DeleteByIdAsync(Guid id);
         Task<IEnumerable<CartItem>> GetByCart(Guid id);
+
+        Task<List<CartItem>> GetByCartIdAsync(Guid cartId);
     }
     public class CartItemRepository : ICartItemRepository
     {
@@ -75,6 +77,14 @@ namespace Data_Access_Layer.Repositories
         public async Task<IEnumerable<CartItem>> GetByCart(Guid id)
         {
             return await _context.CartItems.Where(c => c.CartId == id).ToListAsync();
+        }
+
+        public async Task<List<CartItem>> GetByCartIdAsync(Guid cartId)
+        {
+            return await _context.CartItems
+                .Where(ci => ci.CartId == cartId)
+                .Include(ci => ci.IngredientProduct) // Nếu cần thông tin của IngredientProduct
+                .ToListAsync();
         }
     }
 }
