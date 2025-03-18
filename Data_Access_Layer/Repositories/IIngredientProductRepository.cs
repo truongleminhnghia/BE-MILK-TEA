@@ -18,5 +18,8 @@ namespace Data_Access_Layer.Repositories
         Task<IEnumerable<IngredientProduct>> GetAllAsync(Guid? ingredientId, int page, int pageSize);
         IQueryable<IngredientProduct> Query();
         Task<bool> DeleteAsync(IngredientProduct ingredientProduct);
+
+        Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid ingredientId);
+
     }
 }

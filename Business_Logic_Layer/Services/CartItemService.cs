@@ -15,6 +15,8 @@ namespace Business_Logic_Layer.Services
         Task<CartItem> CreateAsync(CartItem cartItem);
         Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem);
         Task<bool> DeleteByIdAsync(Guid id);
+
+        Task<List<CartItem>> GetByCartIdAsync(Guid cartId);
     }
     public class CartItemService : ICartItemService
     {
@@ -46,6 +48,11 @@ namespace Business_Logic_Layer.Services
         public async Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem)
         {
             return await _cartItemRepository.UpdateAsync(id, cartItem);
+        }
+
+        public async Task<List<CartItem>> GetByCartIdAsync(Guid cartId)
+        {
+            return await _cartItemRepository.GetByCartIdAsync(cartId);
         }
     }
 }

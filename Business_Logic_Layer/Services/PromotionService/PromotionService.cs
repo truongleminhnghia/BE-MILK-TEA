@@ -19,7 +19,7 @@ namespace Business_Logic_Layer.Services.PromotionService
     public interface IPromotionService
     {
         Task<IEnumerable<Promotion>> GetAllPromotionAsync(
-            bool isActive, string? search, string? sortBy, 
+            bool isActive, string? search, string? sortBy,
             bool isDescending, PromotionType? promotionType,
             DateTime? startDate, DateTime? endDate,
             int page, int pageSize);
@@ -27,7 +27,11 @@ namespace Business_Logic_Layer.Services.PromotionService
         Task<PromotionResponse> CreateAsync(PromotionRequest promotion);
         //Task<Promotion?> GetByNameAsync(string name);
         Task<Promotion?> UpdateAsync(Guid id, Promotion promotion);
-       
+
+        Task<PageResult<PromotionResponse>> GetAllPromotions(
+            bool isActive, string? search, string? sortBy, bool isDescending,
+            PromotionType? promotionType, string? promotionCode, string? promotionName,
+            DateTime? startDate, DateTime? endDate, int page, int pageSize);
     }
     public class PromotionService : IPromotionService
     {
@@ -36,7 +40,7 @@ namespace Business_Logic_Layer.Services.PromotionService
         private readonly IPromotionDetailService _promotionDetailService;
         private readonly IPromotionDetailRepository _promotionDetailRepository;
         private readonly Source _source;
-        public PromotionService(IMapper mapper, IPromotionRepository promotionRepository,Source source, IPromotionDetailService promotionDetailService, IPromotionDetailRepository promotionDetailRepository)
+        public PromotionService(IMapper mapper, IPromotionRepository promotionRepository, Source source, IPromotionDetailService promotionDetailService, IPromotionDetailRepository promotionDetailRepository)
         {
             _mapper = mapper;
             _promotionRepository = promotionRepository;
@@ -74,9 +78,10 @@ namespace Business_Logic_Layer.Services.PromotionService
 
                 var createdPromotion = await _promotionRepository.CreateAsync(promotion);
 
-                if (createdPromotion.PromotionType == PromotionType.PROMOTION_PRODUCT 
-                    && createdPromotion.Id != null) { 
-                    var productPromotion = new IngredientPromotion 
+                if (createdPromotion.PromotionType == PromotionType.PROMOTION_PRODUCT
+                    && createdPromotion.Id != null)
+                {
+                    var productPromotion = new IngredientPromotion
                     { Id = createdPromotion.Id, PromotionId = createdPromotion.Id };
                     await _promotionRepository.CreateProductPromotion(productPromotion);
                 }
@@ -170,5 +175,26 @@ namespace Business_Logic_Layer.Services.PromotionService
                 throw new Exception("Lỗi khi cập nhật promotion.", ex);
             }
         }
+
+        public async Task<PageResult<PromotionResponse>> GetAllPromotions(
+        bool isActive, string? search, string? sortBy, bool isDescending,
+        PromotionType? promotionType, string? promotionCode, string? promotionName,
+        DateTime? startDate, DateTime? endDate, int page, int pageSize)
+        {
+            var (promotions, total) = await _promotionRepository.GetAllPromotions(
+                isActive, search, sortBy, isDescending, promotionType,
+                promotionCode, promotionName, startDate, endDate, page, pageSize);
+
+            var promotionResponses = _mapper.Map<List<PromotionResponse>>(promotions);
+
+            return new PageResult<PromotionResponse>
+            {
+                Data = promotionResponses,
+                PageCurrent = page,
+                PageSize = pageSize,
+                Total = total
+            };
+        }
+
     }
 }
