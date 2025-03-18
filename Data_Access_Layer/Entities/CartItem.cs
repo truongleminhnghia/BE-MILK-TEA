@@ -29,10 +29,6 @@ namespace Data_Access_Layer.Entities
         [Required]
         [ForeignKey("IngredientProductId")]
         public Guid IngredientProductId { get; set; }
-
-        // relationship
-        // N-1 Cart
-        // 1-1 Product
         public Cart? Cart { get; set; }
         public IngredientProduct? IngredientProduct { get; set; }
     }
