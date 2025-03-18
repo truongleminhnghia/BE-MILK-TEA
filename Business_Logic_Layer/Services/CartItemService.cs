@@ -10,15 +10,15 @@ namespace Business_Logic_Layer.Services
 {
     public interface ICartItemService
     {
-        //Task<List<CartItem>> GetCartItemsAsync();
         Task<CartItem?> GetByIdAsync(Guid id);
         Task<CartItem> AddToCartAsync(CartItem cartItem);
-        //Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem);
         Task<bool> RemoveCartItemByIdAsync(Guid id);
+
     }
     public class CartItemService : ICartItemService
     {
         private readonly ICartItemRepository _cartItemRepository;
+        
         public CartItemService(ICartItemRepository cartItemRepository)
         {
             _cartItemRepository = cartItemRepository;

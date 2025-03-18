@@ -87,5 +87,12 @@ namespace Data_Access_Layer.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public async Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid ingredientId)
+        {
+            return await _context.IngredientProducts
+                .Where(ip => ip.IngredientId == ingredientId)
+                .Include(ip => ip.Ingredient)
+                .ToListAsync();
+        }
     }
 }

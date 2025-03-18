@@ -243,5 +243,10 @@ namespace Business_Logic_Layer.Services.IngredientProductService
                 .Take(pageSize)
                 .ToListAsync();
         }
+
+        public async Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid ingredientId)
+        {
+            return await _ingredientProductRepository.GetByIngredientIdAsync(ingredientId);
+        }
     }
 }

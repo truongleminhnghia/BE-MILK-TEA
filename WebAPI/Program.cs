@@ -75,12 +75,16 @@ var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
 var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
-// var connectionString =
-//   $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+var connectionString =
+  $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
 //var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
 
-var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
+
+//var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
+
+ var connectionString = $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
+
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -227,9 +231,13 @@ builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeReposito
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<ICartItemService, CartItemService>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IPromotionDetailService, PromotionDetailService>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IPromotionDetailRepository, PromotionDetailRepository>();
 
 
 
