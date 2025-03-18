@@ -48,13 +48,11 @@ namespace WebAPI.Controllers
                 var accounts = await _accountService.GetAllAccountsAsync(
                             search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
 
-                var accountResponses = _mapper.Map<IEnumerable<AccountResponse>>(accounts);
-
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
                     "Lấy danh sách tài khoản thành công",
-                    accountResponses
+                    accounts
                 ));
             }
             catch (Exception ex)

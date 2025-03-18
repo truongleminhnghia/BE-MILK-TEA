@@ -126,6 +126,30 @@ namespace WebAPI.Controllers
                     e.Message));
             }
         }
+
+        [HttpGet("by-ingredient/{ingredientId}")]
+        public async Task<IActionResult> GetByIngredientId(Guid ingredientId)
+        {
+            try
+            {
+                var ingredientProducts = await _ingredientProductService.GetByIngredientIdAsync(ingredientId);
+                if (ingredientProducts == null || !ingredientProducts.Any())
+                {
+                    return NotFound("Không tìm thấy Ingredient Id.");
+                }
+                return Ok(new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Lấy danh sách sản phẩm thành công"));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    false,
+                    "Đã có lỗi khi lấy danh sách: " + e.Message));
+            }
+        }
     }
 }
 

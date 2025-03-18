@@ -24,24 +24,26 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _promotionService = promotionService;
         }
-        
+
         //Get all
         [HttpGet]
         public async Task<IActionResult> GetPromotion(
-            [FromQuery] bool IsActive,
-            [FromQuery] PromotionType? promotionType,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] string? search = null,
-            [FromQuery] string? sortBy = null,
-            [FromQuery] bool isDescending = false,
-            [FromQuery] DateTime? StartDate = null,
-            [FromQuery] DateTime? EndDate = null
-            )
+    [FromQuery] bool isActive,
+    [FromQuery] string? promotionCode,
+    [FromQuery] string? promotionName,
+    [FromQuery] PromotionType? promotionType,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? search = null,
+    [FromQuery] string? sortBy = null,
+    [FromQuery] bool isDescending = false,
+    [FromQuery] DateTime? startDate = null,
+    [FromQuery] DateTime? endDate = null)
         {
+            {
             try
             {
-                if (StartDate.HasValue && EndDate.HasValue && StartDate > EndDate)
+                if (startDate.HasValue && endDate.HasValue && startDate > endDate)
                 {
                     return BadRequest(new ApiResponse(
                         (int)HttpStatusCode.BadRequest,
@@ -50,14 +52,14 @@ namespace WebAPI.Controllers
                     ));
                 }
 
-                var promotions = await _promotionService.GetAllPromotionAsync(
-                 IsActive, search, sortBy, isDescending, promotionType, StartDate, EndDate, page, pageSize
-             );
+                var promotions = await _promotionService.GetAllPromotions(
+                    isActive, search, sortBy, isDescending, promotionType,
+                    promotionCode, promotionName, startDate, endDate, page, pageSize);
 
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
                     true,
-                    promotions != null ? "Lấy dữ liệu thành công!" : " Không có Promotion nào phù hợp",
+                    promotions.Data != null ? "Lấy dữ liệu thành công!" : " Không có Promotion nào phù hợp",
                     promotions
                 ));
             }
@@ -71,6 +73,8 @@ namespace WebAPI.Controllers
                 ));
             }
         }
+    }
+        
         ////Get by id
         [HttpGet("{promotionId}")]
         public async Task<IActionResult> GetById(Guid promotionId)
