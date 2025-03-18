@@ -15,14 +15,14 @@ namespace Business_Logic_Layer.AutoMappers
     {
         public CartItemMapper()
         {
-            CreateMap<CartItemRequest, CartItem>().ReverseMap();
-            CreateMap<CartItem, CartItemResponse>().ReverseMap();
-
-            CreateMap<Cart, CartResponse>()
-    .ForMember(dest => dest.CartItemResponse, opt => opt.MapFrom(src => src.CartItems));
             CreateMap<CartItem, CartItemResponse>()
-    .ForMember(dest => dest.IngredientProductResponse, opt => opt.MapFrom(src => src.IngredientProduct));
+            .ForMember(dest => dest.IngredientProductResponse, opt => opt.MapFrom(src => src.IngredientProduct));
 
+            CreateMap<IngredientProduct, CartIngredientProductResponse>()
+                .ForMember(dest => dest.Ingredient, opt => opt.MapFrom(src => src.Ingredient));
+
+            CreateMap<Ingredient, CartIngredientResponse>()
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Select(img => img.ImageUrl).ToList()));
         }
     }
 }

@@ -23,6 +23,7 @@ namespace Business_Logic_Layer.Services
         {
             _cartItemRepository = cartItemRepository;
         }
+
         public async Task<CartItem> AddToCartAsync(CartItem cartItem)
         {
             return await _cartItemRepository.AddToCartAsync(cartItem);
@@ -38,14 +39,6 @@ namespace Business_Logic_Layer.Services
             return await _cartItemRepository.GetByIdAsync(id);
         }
 
-        //public async Task<List<CartItem>> GetCartItemsAsync()
-        //{
-        //    return await _cartItemRepository.GetCartItemsAsync();
-        //}
 
-        //public async Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem)
-        //{
-        //    return await _cartItemRepository.UpdateAsync(id, cartItem);
-        //}
     }
 }

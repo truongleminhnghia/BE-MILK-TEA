@@ -88,7 +88,9 @@ namespace Data_Access_Layer.Repositories
         {
             return await _context.Carts
         .Include(c => c.CartItems)               
-        .ThenInclude(ci => ci.IngredientProduct) 
+        .ThenInclude(ci => ci.IngredientProduct)
+        .ThenInclude(ip => ip.Ingredient)
+        .ThenInclude(i => i.Images) // Include images
         .FirstOrDefaultAsync(c => c.AccountId == id);
         }
         public async Task<Cart> CreateAsync(Cart cart)

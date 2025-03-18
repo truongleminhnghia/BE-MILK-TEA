@@ -81,7 +81,7 @@ namespace Business_Logic_Layer.Services
                 cartResponse.Id = cartEixst.Id;
                 cartResponse.AccountResponse = _mapper.Map<AccountResponse>(cartEixst.Account);
 
-                // ✅ Fix: Map `CartItems` to `List<CartItemResponse>`
+        
                 cartResponse.CartItemResponse = cartEixst.CartItems != null
                     ? _mapper.Map<List<CartItemResponse>>(cartEixst.CartItems)
                     : new List<CartItemResponse>();
@@ -98,7 +98,7 @@ namespace Business_Logic_Layer.Services
                 var result = await _cartRepository.CreateAsync(cart);
                 if (result == null)
                 {
-                    throw new Exception("Tạo cart không thành công");
+                    throw new Exception("Lay cart không thành công");
                 }
 
                 cartResponse.Id = result.Id;
