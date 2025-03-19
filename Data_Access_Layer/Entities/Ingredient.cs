@@ -77,8 +77,9 @@ namespace Data_Access_Layer.Entities
         public bool IsSale { get; set; }
 
         [Column("rate")]
-        public float Rate { get; set; } // tính TB 4 + 5 /2
-                                        // bổ sung bình luận
+        public float Rate { get; set; }
+
+        public ICollection<CartItem>? CartItems { get; set; }
 
         public ICollection<Image>? Images { get; set; }
         public ICollection<IngredientReview>? IngredientReviews { get; set; }
@@ -90,6 +91,3 @@ namespace Data_Access_Layer.Entities
     }
     
 }
-
-// isStaff = true ==> crud
-// customer: xemmmm

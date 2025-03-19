@@ -1,26 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Data_Access_Layer.Repositories
 {
-    public interface ICartItemRepository
-    {
-        Task<List<CartItem>> GetCartItemsAsync();
-        Task<CartItem?> GetByIdAsync(Guid id);
-        Task<CartItem> AddToCartAsync(CartItem cartItem);   
-        Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem);
-        Task<bool> RemoveCartItemByIdAsync(Guid id);
-        Task<IEnumerable<CartItem>> GetByCart(Guid id);
-
-        Task<List<CartItem>> GetByCartIdAsync(Guid cartId);
-    }
     public class CartItemRepository : ICartItemRepository
     {
         private readonly ApplicationDbContext _context;
@@ -28,81 +15,42 @@ namespace Data_Access_Layer.Repositories
         {
             _context = context;
         }
-        public async Task<CartItem> AddToCartAsync(CartItem cartItem)
-        {
-            var existingItem = await _context.CartItems
-                .FirstOrDefaultAsync(c => c.CartId == cartItem.CartId && c.IngredientProductId == cartItem.IngredientProductId);
 
-            if (existingItem != null)
+        public async Task<bool> DeleteCartItem(CartItem cartItem)
+        {
+            _context.CartItems.Remove(cartItem);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<CartItem>> GetByCart(Guid cartId)
+        {
+            return await _context.CartItems.Include(ci => ci.Ingredient).Include(ci => ci.Cart).Where(ci => ci.CartId == cartId).ToListAsync();
+        }
+
+        public async Task<CartItem> GetById(Guid id)
+        {
+            return await _context.CartItems.Include(ci => ci.Ingredient).Include(ci => ci.Cart).FirstOrDefaultAsync(ci => ci.Id == id);
+        }
+
+        public async Task<CartItem> SaveCartItem(CartItem cartItem)
+        {
+            try
             {
-                // Update the quantity instead of inserting a new row
-                existingItem.Quantity += cartItem.Quantity;
-                existingItem.UpdateAt = DateTime.UtcNow;
-                _context.CartItems.Update(existingItem);
+                _context.CartItems.Add(cartItem);
+                await _context.SaveChangesAsync();
+                return cartItem;
             }
-            else
+            catch (Exception ex)
             {
-                // Assign a new ID for new items and set timestamps
-                cartItem.Id = Guid.NewGuid();
-                cartItem.CreateAt = DateTime.UtcNow;
-                cartItem.UpdateAt = DateTime.UtcNow;
-                await _context.CartItems.AddAsync(cartItem);
+                Console.WriteLine("Error: " + ex.InnerException?.Message);
+                throw;
             }
-
-            await _context.SaveChangesAsync();
-            return existingItem ?? cartItem;
         }
 
-        public async Task<bool> RemoveCartItemByIdAsync(Guid id)
+        public async Task<bool> UpdateCartItem(CartItem cartItem)
         {
-            var existingCartItem = await _context.CartItems.FindAsync(id);
-            if (existingCartItem == null)
-            {
-                return false;
-            }
-
-            _context.CartItems.Remove(existingCartItem);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-
-        public async Task<List<CartItem>> GetCartItemsAsync()
-        {
-            return await _context.CartItems.ToListAsync();
-        }
-
-        public async Task<CartItem?> GetByIdAsync(Guid id)
-        {
-            return await _context.CartItems.FirstOrDefaultAsync(c => c.Id == id);
-        }
-
-        public async Task<CartItem?> UpdateAsync(Guid id, CartItem cartItem)
-        {
-            var existingCartItem = await _context.CartItems.FindAsync(id);
-            if (existingCartItem == null)
-            {
-                return null;
-            }
-
-            existingCartItem.Quantity = cartItem.Quantity;
-            existingCartItem.UpdateAt = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-            return existingCartItem;
-        }
-
-        public async Task<IEnumerable<CartItem>> GetByCart(Guid id)
-        {
-            return await _context.CartItems.Where(c => c.CartId == id).ToListAsync();
-        }
-
-        public async Task<List<CartItem>> GetByCartIdAsync(Guid cartId)
-        {
-            return await _context.CartItems
-                .Where(ci => ci.CartId == cartId)
-                .Include(ci => ci.IngredientProduct) // Nếu cần thông tin của IngredientProduct
-                .ToListAsync();
+            _context.CartItems.Update(cartItem);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }
