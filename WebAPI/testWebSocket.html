@@ -6,7 +6,7 @@
     <title>Document</title>
   </head>
   <script>
-    const socket = new WebSocket('wss://localhost:7190/api/ws?categoryStatus=ACTIVE&categoryType=CATEGORY_PRODUCT&page=1');
+    const socket = new WebSocket('wss://localhost:7190/api/v1/ws?categoryStatus=ACTIVE&categoryType=CATEGORY_PRODUCT&page=1');
     socket.onopen = () => {
         console.log ("Connected to the server via WebSocket");
     };
