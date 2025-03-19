@@ -44,7 +44,7 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
-        public async Task<List<ImageRespone>> AddImages(Guid ingredientId, List<ImageRequest> request)
+        public async Task<List<ImageResponse>> AddImages(Guid ingredientId, List<ImageRequest> request)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                     Image savedImage = await AddImageAsync(image);
                     images.Add(image);
                 }
-                return _mapper.Map<List<ImageRespone>>(images);
+                return _mapper.Map<List<ImageResponse>>(images);
             }
             catch (Exception ex)
             {
@@ -101,7 +101,7 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
-        public async Task<ImageRespone> GetById(Guid id)
+        public async Task<ImageResponse> GetById(Guid id)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                 {
                     throw new Exception("Hình ảnh không tồn tại");
                 }
-                return _mapper.Map<ImageRespone>(image);
+                return _mapper.Map<ImageResponse>(image);
             }
             catch (Exception ex)
             {
@@ -119,7 +119,7 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
-        public async Task<List<ImageRespone>> GetByIngredient(Guid ingredientId)
+        public async Task<List<ImageResponse>> GetByIngredient(Guid ingredientId)
         {
             try
             {
@@ -127,7 +127,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                 {
                     throw new Exception("IdIngredient không được phép null");
                 }
-                return _mapper.Map<List<ImageRespone>>(await _imageRepository.GetByIngredient(ingredientId));
+                return _mapper.Map<List<ImageResponse>>(await _imageRepository.GetByIngredient(ingredientId));
             }
             catch (Exception ex)
             {
@@ -136,7 +136,7 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
-        public async Task<ImageRespone> UpdateImageAsync(Guid id, Guid ingredientId, ImageRequest request)
+        public async Task<ImageResponse> UpdateImageAsync(Guid id, Guid ingredientId, ImageRequest request)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                 {
                     throw new Exception("Cập nhật thất bại");
                 }
-                return _mapper.Map<ImageRespone>(await _imageRepository.GetIdAndIngredient(id, ingredientId));
+                return _mapper.Map<ImageResponse>(await _imageRepository.GetIdAndIngredient(id, ingredientId));
             }
             catch (Exception ex)
             {
@@ -154,11 +154,11 @@ namespace Business_Logic_Layer.Services.IngredientService
             }
         }
 
-        public async Task<List<ImageRespone>> UpdateImages(List<ImageRequest> request, Guid ingredientId)
+        public async Task<List<ImageResponse>> UpdateImages(List<ImageRequest> request, Guid ingredientId)
         {
             try
             {
-                List<ImageRespone> imageRespones = new List<ImageRespone>();
+                List<ImageResponse> imageRespones = new List<ImageResponse>();
                 foreach (var item in request)
                 {
                     var imageExisting = await _imageRepository.GetIdAndIngredient(item.Id, ingredientId);
@@ -167,7 +167,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                         throw new Exception("Hình Ảnh không tồn tại");
                     }
                     imageExisting.ImageUrl = item.ImageUrl;
-                    var imageModified = _mapper.Map<ImageRespone>(imageExisting);
+                    var imageModified = _mapper.Map<ImageResponse>(imageExisting);
                     imageRespones.Add(imageModified);
                 }
                 if (imageRespones == null)

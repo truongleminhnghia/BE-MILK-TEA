@@ -8,6 +8,7 @@ using Business_Logic_Layer.Models.Responses;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Business_Logic_Layer.Services.Carts
 {
@@ -171,9 +172,20 @@ namespace Business_Logic_Layer.Services.Carts
             return cartItemResponse;
         }
 
-        public Task<bool> UpdateCartItem(Guid id, CartItemRequest request)
+        public async Task<bool> UpdateCartItem(Guid id, UpdateCartItemRequest request)
         {
-            throw new NotImplementedException();
+            var cartItem = await _cartItemRepository.GetById(id);
+
+            if (cartItem == null)
+            {
+                return false; // Không tìm thấy cart item
+            }
+            // Cập nhật quantity và product type
+            cartItem.Quantity = request.Quantity;
+            //cartItem.ProductType = request.ProductType;
+
+            _cartItemRepository.UpdateCartItem(cartItem);
+            return true;
         }
     }
 }
