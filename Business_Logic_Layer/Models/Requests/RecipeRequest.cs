@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data_Access_Layer.Enum;
 
 namespace Business_Logic_Layer.Models.Requests
 {
@@ -16,6 +17,8 @@ namespace Business_Logic_Layer.Models.Requests
         public string ImageUrl { get; set; } = string.Empty;
 
         public Guid CategoryId { get; set; }
+
+        public RecipeLevelEnum recipeLevel { get; set; }
 
         public List<RecipeIngredientRequest> Ingredients { get; set; } = new();
     }
