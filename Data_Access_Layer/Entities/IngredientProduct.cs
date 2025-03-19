@@ -37,8 +37,6 @@ namespace Data_Access_Layer.Entities
         
         public Ingredient? Ingredient { get; set; }
 
-        public ICollection<CartItem>? CartItems { get; set; }
-
         public ICollection<OrderDetail>? OrderDetails { get; set; }
     }    
 }

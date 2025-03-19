@@ -82,8 +82,6 @@ var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 var connectionString =
     $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
-//var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
-
 var connectionString =
     $"Server=localhost;Port=3306;User Id=root;Password=12345;Database=DB_MILK_TEA;SslMode=Required;";
 
@@ -169,9 +167,10 @@ builder.Services.AddAutoMapper(
     typeof(IngredientRecipeMapper),
     typeof(OrderMapper),
     typeof(OrderDetailMapper),
-    typeof(CartItemMapper),
     typeof(PromotionMapper),
-    typeof(RecipeMapper)
+    typeof(RecipeMapper),
+    typeof(CartMapper),
+    typeof(CartItemMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
@@ -211,12 +210,6 @@ builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
 
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<ICartItemService, CartItemService>();
-
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
@@ -229,10 +222,6 @@ builder.Services.AddScoped<IIngredientReviewService, IngredientReviewService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-builder.Services.AddScoped<ICartItemService, CartItemService>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IPromotionDetailService, PromotionDetailService>();

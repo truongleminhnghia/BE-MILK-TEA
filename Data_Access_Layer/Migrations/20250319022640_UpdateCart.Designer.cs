@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250315125323_UpdateDateNullable")]
-    partial class UpdateDateNullable
+    [Migration("20250319022640_UpdateCart")]
+    partial class UpdateCart
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -129,9 +129,12 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
-                    b.Property<Guid>("IngredientProductId")
+                    b.Property<Guid>("IngredientId")
                         .HasColumnType("char(36)")
-                        .HasColumnName("ingredient_product_id");
+                        .HasColumnName("ingredient_id");
+
+                    b.Property<int>("ProductType")
+                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
@@ -143,10 +146,9 @@ namespace Data_Access_Layer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CartId")
-                        .IsUnique();
+                    b.HasIndex("CartId");
 
-                    b.HasIndex("IngredientProductId");
+                    b.HasIndex("IngredientId");
 
                     b.ToTable("cart_item");
                 });
@@ -875,15 +877,15 @@ namespace Data_Access_Layer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Data_Access_Layer.Entities.IngredientProduct", "IngredientProduct")
+                    b.HasOne("Data_Access_Layer.Entities.Ingredient", "Ingredient")
                         .WithMany("CartItems")
-                        .HasForeignKey("IngredientProductId")
+                        .HasForeignKey("IngredientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cart");
 
-                    b.Navigation("IngredientProduct");
+                    b.Navigation("Ingredient");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Customer", b =>
@@ -1118,6 +1120,8 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Ingredient", b =>
                 {
+                    b.Navigation("CartItems");
+
                     b.Navigation("Images");
 
                     b.Navigation("IngredientProducts");
@@ -1133,8 +1137,6 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.IngredientProduct", b =>
                 {
-                    b.Navigation("CartItems");
-
                     b.Navigation("OrderDetails");
                 });
 
