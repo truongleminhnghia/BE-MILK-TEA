@@ -140,9 +140,18 @@ namespace Business_Logic_Layer.Services.Carts
             return await _cartItemRepository.DeleteCartItem(cartItem);
         }
 
-        public Task<IEnumerable<CartItemResponse>> GetByCart(Guid cartId)
+        public async Task<IEnumerable<CartItemResponse>> GetByCart(Guid cartId)
         {
-            throw new NotImplementedException();
+            if (cartId == null)
+            {
+                throw new Exception("card id khoogn được rỗng");
+            }
+            var cartItems = await _cartItemRepository.GetByCart(cartId);
+            if (cartItems == null)
+            {
+                throw new Exception("rỗng");
+            }
+            return _mapper.Map<IEnumerable<CartItemResponse>>(cartItems);
         }
 
         public async Task<CartItemResponse> GetById(Guid id)
