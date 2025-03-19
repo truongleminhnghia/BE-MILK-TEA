@@ -12,7 +12,7 @@ namespace Business_Logic_Layer.Models.Responses
     {
         public Guid Id { get; set; }
         public AccountResponse? AccountResponse { get; set; }
-        public CartItemResponse? CarItemResponse { get; set; }
+        public List<CartItemResponse>? CartItemResponse { get; set; }
         public int TotalCartItem { get; set; }
 
     }

@@ -19,6 +19,11 @@ namespace Data_Access_Layer.Repositories
             bool isDescending, PromotionType? promotionType,
             DateTime? startDate, DateTime? endDate,
             int page, int pageSize);
+
+        Task<(List<Promotion>, int)> GetAllPromotions(
+        bool isActive, string? search, string? sortBy, bool isDescending,
+        PromotionType? promotionType, string? promotionCode, string? promotionName,
+        DateTime? startDate, DateTime? endDate, int page, int pageSize);
         Task<Promotion?> GetByIdAsync(Guid id);
         Task<Promotion> CreateAsync(Promotion promotion);
         Task<Promotion?> UpdateAsync(Guid id, Promotion promotion);
@@ -198,6 +203,68 @@ namespace Data_Access_Layer.Repositories
             {
                 throw new Exception("Lỗi khi tạo Order Promotion.", ex);
             }
+        }
+
+        public async Task<(List<Promotion>, int)> GetAllPromotions(
+        bool isActive, string? search, string? sortBy, bool isDescending,
+        PromotionType? promotionType, string? promotionCode, string? promotionName,
+        DateTime? startDate, DateTime? endDate, int page, int pageSize)
+        {
+            var query = _context.Promotions.Include(p => p.PromotionDetail).AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.PromotionDetail.PromotionName.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(promotionCode))
+            {
+                query = query.Where(p => p.PromotionCode == promotionCode);
+            }
+
+            if (!string.IsNullOrEmpty(promotionName))
+            {
+                query = query.Where(p => p.PromotionDetail.PromotionName.Contains(promotionName));
+            }
+
+            if (promotionType.HasValue)
+            {
+                query = query.Where(p => p.PromotionType == promotionType.Value);
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(p => p.StartDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(p => p.EndDate <= endDate.Value);
+            }
+
+            // Sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                if (isDescending)
+                {
+                    query = query.OrderByDescending(p => EF.Property<object>(p, sortBy));
+                }
+                else
+                {
+                    query = query.OrderBy(p => EF.Property<object>(p, sortBy));
+                }
+            }
+
+            // Total count before pagination
+            var total = await query.CountAsync();
+
+            // Apply pagination
+            var promotions = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (promotions, total);
         }
     }
 }

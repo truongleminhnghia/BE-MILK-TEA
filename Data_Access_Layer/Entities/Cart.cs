@@ -24,6 +24,7 @@ namespace Data_Access_Layer.Entities
 
         public ICollection<CartItem>? CartItems { get; set; }
 
+
         // relationship
         // 1-1 Account
         // 1-N CartItem

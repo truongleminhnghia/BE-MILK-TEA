@@ -3,9 +3,13 @@ using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
+using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Crmf;
 
 
 namespace WebAPI.Controllers
@@ -15,18 +19,22 @@ namespace WebAPI.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
+        private readonly ICartRepository _cartRepository;
         private readonly IMapper _mapper;
+        private readonly ApplicationDbContext _context;
 
-        public CartController(ICartService cartService, IMapper mapper)
+        public CartController(ICartService cartService, IMapper mapper, ApplicationDbContext context, ICartRepository cartRepository)
         {
+            _cartRepository = cartRepository;
             _cartService = cartService;
             _mapper = mapper;
+            _context = context;
         }
-        //Get by id
+        //get cart
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var carts = await _cartService.GetByAccountAsync(id);
+            var carts = await _cartService.GetByIdAsync(id);
             if (carts == null)
             {
                 return Ok(new ApiResponse(
@@ -44,7 +52,7 @@ namespace WebAPI.Controllers
                 ));
         }
 
-        ////Create
+        //Create
         [HttpPost]
         public async Task<IActionResult> AddCart([FromBody] CartRequest cart)
         {
@@ -56,28 +64,24 @@ namespace WebAPI.Controllers
             var createCart = await _cartService.CreateAsync(cart);
             return Ok(createCart);
         }
+       
 
-        //UPDATE
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> UpdateCart(
-        // Guid id,
-        //     [FromBody] CartRequest cartRequest
-        // )
-        // {
-        //     if (cartRequest == null)
-        //     {
-        //         return BadRequest(new { message = "Invalid cart data" });
-        //     }
+        //clear cart
+        [HttpDelete("clear")]
+        public async Task<IActionResult> ClearCart([FromQuery] Guid accountId)
+        {
+            if (accountId == Guid.Empty)
+            {
+                return BadRequest(new { message = "Account ID không hợp lệ!" });
+            }
 
-        //     var cart = _mapper.Map<Cart>(cartRequest);
-        //     var updatedCart = await _cartService.UpdateAsync(id, cart);
+            var success = await _cartService.ClearCartAsync(accountId);
+            if (!success)
+            {
+                return NotFound(new { message = "Giỏ hàng đã trống hoặc không tồn tại!" });
+            }
 
-        //     if (updatedCart == null)
-        //     {
-        //         return NotFound(new { message = "Cart not found" });
-        //     }
-
-        //     return Ok(updatedCart);
-        // }
+            return Ok(new { message = "Giỏ hàng đã được xóa toàn bộ item thành công!" });
+        }
     }
 }
