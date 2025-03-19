@@ -37,8 +37,6 @@ namespace Business_Logic_Layer.Services
         private readonly IIngredientProductService _ingredientProductService;
         private readonly IIngredientQuantityService _ingredientQuantityService;
         //private readonly IIngredientService _ingredientService;
-        private readonly CartRepository _cartRepository;
-        private readonly CartItemService _cartItemService;
         private readonly IMapper _mapper;
         private readonly Source _source;
 

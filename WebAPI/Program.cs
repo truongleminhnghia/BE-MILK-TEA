@@ -18,11 +18,11 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-// using Business_Logic_Layer.Utils;
 using Microsoft.OpenApi.Models;
 using Business_Logic_Layer.Services.PromotionService;
 using Business_Logic_Layer.Services.PromotionDetailService;
 using Business_Logic_Layer.Services.DashboardService;
+using Business_Logic_Layer.Services.Carts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,8 +35,6 @@ builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection(
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-
-    // Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -46,7 +44,6 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -63,10 +60,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 Env.Load();
-
-// var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
 var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
 var _port = Environment.GetEnvironmentVariable("PORT_LOCAL");
@@ -75,8 +69,8 @@ var _password = Environment.GetEnvironmentVariable("PASSWORD_LOCAL");
 var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
-//var connectionString =
-//  $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+var connectionString =
+ $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
 var connectionString = $"Server=yamabiko.proxy.rlwy.net;Port=46054;User Id=root;Password=LGcWZkUqzkkXPqlpOKnxUvykcQcVcIib;Database=DB_MILK_TEA;SslMode=Required;";
 
@@ -91,10 +85,6 @@ if (string.IsNullOrEmpty(connectionString))
     throw new Exception("DATABASE_CONNECTION is not set!");
 }
 Console.WriteLine($"DATABASE_CONNECTION: {connectionString}");
-
-// Cấu hình DbContext với MySQL
-
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseMySql(
@@ -168,9 +158,10 @@ builder.Services.AddAutoMapper(
     typeof(IngredientRecipeMapper),
     typeof(OrderMapper),
     typeof(OrderDetailMapper),
-    typeof(CartItemMapper),
     typeof(PromotionMapper),
-    typeof(RecipeMapper)
+    typeof(RecipeMapper),
+    typeof(CartMapper),
+    typeof(CartItemMapper)
 );
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<Func<ICategoryService>>(provider =>
@@ -201,7 +192,6 @@ builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
-
 builder.Services.AddScoped<IIngredientQuantityService, IngredientQuantityService>();
 builder.Services.AddScoped<IIngredientQuantityRepository, IngredientQuantityRepository>();
 builder.Services.AddScoped<IPromotionDetailRepository, PromotionDetailRepository>();
@@ -209,13 +199,6 @@ builder.Services.AddScoped<IPromotionDetailService, PromotionDetailService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
-
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<ICartItemService, CartItemService>();
-
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
@@ -228,36 +211,24 @@ builder.Services.AddScoped<IIngredientReviewService, IngredientReviewService>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IIngredientRecipeRepository, IngredientRecipeRepository>();
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-builder.Services.AddScoped<ICartItemService, CartItemService>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IPromotionDetailService, PromotionDetailService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
 builder.Services.AddScoped<IPromotionDetailRepository, PromotionDetailRepository>();
-
-
-
-
-
-
-// Register ImageRepository and ImageService
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<ICartItemService, CartItemService>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();
-
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<Source>();
-
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
-
-// config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -270,20 +241,15 @@ builder.Services.AddCors(options =>
                   .AllowCredentials();
         });
 });
-
 builder.Services.AddHttpClient<AuthenService>();
-
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseMiddleware<JwtMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseHttpsRedirection();
-
 //cấu hình tự động bỏ qua xác thực đối với một số endpoint / API cụ thể ngay từ Program.cs nếu lười dùng [AllowAnonymous] cho từng API
 app.Use(
     async (context, next) =>
@@ -296,21 +262,17 @@ app.Use(
             "/api/v1/auths/login",
             "/api/v1/auths/forgot-password",
         };
-
         // Nếu request thuộc API công khai, bỏ qua xác thực
         if (publicEndpoints.Any(endpoint => path.StartsWith(endpoint)))
         {
             await next();
             return;
         }
-
         await next();
     }
 );
-
 app.MapControllers();
 app.UseCors(MyAllowSpecificOrigins);
-
 var webSocketOptions = new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromMinutes(
