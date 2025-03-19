@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data_Access_Layer.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateDateNullable : Migration
+    public partial class UpdateCart : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -348,6 +348,36 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "cart_item",
+                columns: table => new
+                {
+                    cart_item_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    quantity = table.Column<int>(type: "int", nullable: false),
+                    ProductType = table.Column<int>(type: "int", nullable: false),
+                    cart_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_cart_item", x => x.cart_item_id);
+                    table.ForeignKey(
+                        name: "FK_cart_item_cart_cart_id",
+                        column: x => x.cart_id,
+                        principalTable: "cart",
+                        principalColumn: "cart_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_cart_item_ingredient_ingredient_id",
+                        column: x => x.ingredient_id,
+                        principalTable: "ingredient",
+                        principalColumn: "ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "image",
                 columns: table => new
                 {
@@ -495,35 +525,6 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "cart_item",
-                columns: table => new
-                {
-                    cart_item_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    quantity = table.Column<int>(type: "int", nullable: false),
-                    cart_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ingredient_product_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_cart_item", x => x.cart_item_id);
-                    table.ForeignKey(
-                        name: "FK_cart_item_cart_cart_id",
-                        column: x => x.cart_id,
-                        principalTable: "cart",
-                        principalColumn: "cart_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_cart_item_ingredient_product_ingredient_product_id",
-                        column: x => x.ingredient_product_id,
-                        principalTable: "ingredient_product",
-                        principalColumn: "ingredient_product_id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "order_detail",
                 columns: table => new
                 {
@@ -566,13 +567,12 @@ namespace Data_Access_Layer.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_cart_item_cart_id",
                 table: "cart_item",
-                column: "cart_id",
-                unique: true);
+                column: "cart_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_cart_item_ingredient_product_id",
+                name: "IX_cart_item_ingredient_id",
                 table: "cart_item",
-                column: "ingredient_product_id");
+                column: "ingredient_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_customer_account_id",

@@ -66,9 +66,6 @@ namespace Data_Access_Layer.Data
             modelBuilder.Entity<Cart>()
                 .HasIndex(a => a.AccountId)
                 .IsUnique();
-            modelBuilder.Entity<CartItem>()
-                .HasIndex(ci => ci.CartId)
-                .IsUnique();
             modelBuilder.Entity<Category>()
                 .Property(a => a.CategoryStatus)
                 .HasConversion<string>();
