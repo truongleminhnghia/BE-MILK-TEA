@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250319022640_UpdateCart")]
-    partial class UpdateCart
+    [Migration("20250320003446_AddRecipeLevel")]
+    partial class AddRecipeLevel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -816,6 +816,10 @@ namespace Data_Access_Layer.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("image_url");
+
+                    b.Property<int>("RecipeLevel")
+                        .HasColumnType("int")
+                        .HasColumnName("recipe_level");
 
                     b.Property<int>("RecipeStatus")
                         .HasColumnType("int")

@@ -88,20 +88,21 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAllRecipes(
-            string? search,
-            string? sortBy,
-            RecipeStatusEnum recipeStatusEnum,
-            bool isDescending = false,
-            Guid? categoryId = null,
-            DateTime? startDate = null,
-            DateTime? endDate = null,
-            int page = 1,
-            int pageSize = 10)
+            [FromQuery] string? search,
+            [FromQuery] string? sortBy,
+            [FromQuery] RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] Guid? categoryId = null,
+            [FromQuery] RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
                 var recipes = await _recipeService.GetAllRecipesAsync(
-                    search, sortBy, isDescending, recipeStatusEnum, categoryId, startDate, endDate, page, pageSize);
+             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize);
 
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
@@ -116,7 +117,28 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpPut("status/{id}")]
+        public async Task<IActionResult> UpdateRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
+        {
+            try
+            {
+                var isUpdated = await _recipeService.UpdateRecipeStatusAsync(id, requestStatus);
+                if (isUpdated == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
 
+
+                return Ok(new ApiResponse(
+                                HttpStatusCode.OK.GetHashCode(),
+                                true,
+                                "Cập nhật công thức thành công!",
+                                isUpdated
+                            ));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
+        }
     }
 
 }

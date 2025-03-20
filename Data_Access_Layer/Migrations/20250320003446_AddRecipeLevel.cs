@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data_Access_Layer.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateCart : Migration
+    public partial class AddRecipeLevel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -253,6 +253,7 @@ namespace Data_Access_Layer.Migrations
                     image_url = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     category_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     recipe_status = table.Column<int>(type: "int", nullable: false),
+                    recipe_level = table.Column<int>(type: "int", nullable: false),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
