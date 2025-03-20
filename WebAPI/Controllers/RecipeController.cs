@@ -88,16 +88,16 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAllRecipes(
-            string? search,
-            string? sortBy,
-            RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
-            bool isDescending = false,
-            Guid? categoryId = null,
-            RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
-            DateTime? startDate = null,
-            DateTime? endDate = null,
-            int page = 1,
-            int pageSize = 10)
+            [FromQuery] string? search,
+            [FromQuery] string? sortBy,
+            [FromQuery] RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] Guid? categoryId = null,
+            [FromQuery] RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
