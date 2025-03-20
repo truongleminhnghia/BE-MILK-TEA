@@ -90,9 +90,10 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetAllRecipes(
             string? search,
             string? sortBy,
-            RecipeStatusEnum recipeStatusEnum,
+            RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
             bool isDescending = false,
             Guid? categoryId = null,
+            RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
             DateTime? startDate = null,
             DateTime? endDate = null,
             int page = 1,
@@ -101,7 +102,7 @@ namespace WebAPI.Controllers
             try
             {
                 var recipes = await _recipeService.GetAllRecipesAsync(
-                    search, sortBy, isDescending, recipeStatusEnum, categoryId, startDate, endDate, page, pageSize);
+             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize);
 
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
@@ -116,7 +117,28 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpPut("status/{id}")]
+        public async Task<IActionResult> UpdateRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
+        {
+            try
+            {
+                var isUpdated = await _recipeService.UpdateRecipeStatusAsync(id, requestStatus);
+                if (isUpdated == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
 
+
+                return Ok(new ApiResponse(
+                                HttpStatusCode.OK.GetHashCode(),
+                                true,
+                                "Cập nhật công thức thành công!",
+                                isUpdated
+                            ));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
+        }
     }
 
 }

@@ -117,7 +117,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<(List<Recipe>, int)> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
-    RecipeStatusEnum? recipeStatus, Guid? categoryId,
+    RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
     DateTime? startDate, DateTime? endDate,
     int page, int pageSize)
         {
@@ -151,6 +151,11 @@ namespace Data_Access_Layer.Repositories
             if (endDate.HasValue)
             {
                 query = query.Where(r => r.CreateAt <= endDate.Value);
+            }
+
+            if (recipeLevel.HasValue)
+            {
+                query = query.Where(r => r.RecipeLevel == recipeLevel.Value);
             }
 
             // Sorting
