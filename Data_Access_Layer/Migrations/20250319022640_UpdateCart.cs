@@ -356,9 +356,6 @@ namespace Data_Access_Layer.Migrations
                      ProductType = table.Column<int>(type: "int", nullable: false),
                      cart_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                      ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                     price = table.Column<double>(type: "double", nullable: false),  // Bổ sung cột giá sản phẩm
-                     total_price = table.Column<double>(type: "double", nullable: false),  // Bổ sung tổng tiền
-                     is_cart = table.Column<bool>(type: "bit", nullable: false),  // Bổ sung cột trạng thái
                      create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                      update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                  },
