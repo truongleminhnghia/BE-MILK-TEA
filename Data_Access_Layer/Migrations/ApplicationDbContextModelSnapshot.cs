@@ -137,6 +137,21 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("int")
                         .HasColumnName("quantity");
 
+                    b.Property<double>("Price")  // Bổ sung cột giá sản phẩm
+                        .IsRequired()
+                        .HasColumnType("double")
+                        .HasColumnName("price");
+
+                    b.Property<double>("TotalPrice")  // Bổ sung tổng tiền
+                        .IsRequired()
+                        .HasColumnType("double")
+                        .HasColumnName("total_price");
+
+                    b.Property<bool>("IsCart")  // Bổ sung cột trạng thái có trong giỏ hàng hay không
+                        .IsRequired()
+                        .HasColumnType("bit")
+                        .HasColumnName("is_cart");
+
                     b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");

@@ -33,6 +33,21 @@ namespace Data_Access_Layer.Entities
         [ForeignKey("IngredientId")]
         public Guid IngredientId { get; set; }
 
+        [Column("price")]
+        [Required]
+        //[ForeignKey("Price")]
+        public double Price { get; set; }
+
+        [Column("total_price")]
+        [Required]
+        //[ForeignKey("total_price")]
+        public double TotalPrice { get; set; }
+
+        [Column("isCart")]
+        [Required]
+        //[ForeignKey("isCart")]
+        public bool IsCart { get; set; }
+
         // relationship
         // N-1 Cart
         // 1-1 Product

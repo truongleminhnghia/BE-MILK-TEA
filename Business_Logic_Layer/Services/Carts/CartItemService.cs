@@ -145,7 +145,7 @@ namespace Business_Logic_Layer.Services.Carts
         {
             if (cartId == null)
             {
-                throw new Exception("card id khoogn được rỗng");
+                throw new Exception("card id khong được rỗng");
             }
             var cartItems = await _cartItemRepository.GetByCart(cartId);
             if (cartItems == null)

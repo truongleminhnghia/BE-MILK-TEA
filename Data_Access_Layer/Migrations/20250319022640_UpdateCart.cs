@@ -348,34 +348,37 @@ namespace Data_Access_Layer.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "cart_item",
-                columns: table => new
-                {
-                    cart_item_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    quantity = table.Column<int>(type: "int", nullable: false),
-                    ProductType = table.Column<int>(type: "int", nullable: false),
-                    cart_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_cart_item", x => x.cart_item_id);
-                    table.ForeignKey(
-                        name: "FK_cart_item_cart_cart_id",
-                        column: x => x.cart_id,
-                        principalTable: "cart",
-                        principalColumn: "cart_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_cart_item_ingredient_ingredient_id",
-                        column: x => x.ingredient_id,
-                        principalTable: "ingredient",
-                        principalColumn: "ingredient_id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                 name: "cart_item",
+                 columns: table => new
+                 {
+                     cart_item_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                     quantity = table.Column<int>(type: "int", nullable: false),
+                     ProductType = table.Column<int>(type: "int", nullable: false),
+                     cart_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                     ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                     price = table.Column<double>(type: "double", nullable: false),  // Bổ sung cột giá sản phẩm
+                     total_price = table.Column<double>(type: "double", nullable: false),  // Bổ sung tổng tiền
+                     is_cart = table.Column<bool>(type: "bit", nullable: false),  // Bổ sung cột trạng thái
+                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                     update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                 },
+                 constraints: table =>
+                 {
+                     table.PrimaryKey("PK_cart_item", x => x.cart_item_id);
+                     table.ForeignKey(
+                         name: "FK_cart_item_cart_cart_id",
+                         column: x => x.cart_id,
+                         principalTable: "cart",
+                         principalColumn: "cart_id",
+                         onDelete: ReferentialAction.Cascade);
+                     table.ForeignKey(
+                         name: "FK_cart_item_ingredient_ingredient_id",
+                         column: x => x.ingredient_id,
+                         principalTable: "ingredient",
+                         principalColumn: "ingredient_id",
+                         onDelete: ReferentialAction.Cascade);
+                 })
+                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "image",
