@@ -306,7 +306,7 @@ namespace Business_Logic_Layer.Services
                     CreateAt = (DateTime)ir.Ingredient.CreateAt,
                     UpdateAt = (DateTime)ir.Ingredient.UpdateAt,
                     IngredientType = ir.Ingredient.IngredientType.ToString(),
-                    Images = ir.Ingredient.Images?.Select(img => new ImageRespone
+                    Images = ir.Ingredient.Images?.Select(img => new ImageResponse
                     {
                         Id = img.Id,
                         ImageUrl = img.ImageUrl,

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Business_Logic_Layer.Models
 {
-    public class ImageRespone
+    public class ImageResponse
     {
         //[JsonIgnore]
         public Guid Id { get; set; }

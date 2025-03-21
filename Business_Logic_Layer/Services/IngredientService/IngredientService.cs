@@ -97,7 +97,7 @@ namespace Business_Logic_Layer.Services.IngredientService
                     throw new Exception("Tạo nguyên liệu mới không thành công");
                 }
 
-                List<ImageRespone> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
+                List<ImageResponse> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
 
                 // List<IngredientQuantityResponse> ingredientQuantities = await _ingredientQuantityService.CreateQuantitiesAsync(ingredientResponse.Id, request.IngredientQuantities);
 
