@@ -17,10 +17,12 @@ namespace Data_Access_Layer.Entities
 
         [Column("order_id")]
         [ForeignKey("OrderId")]
+        [Required]
         public Guid OrderId { get; set; }
 
         [Column("promotion_id")]
         [ForeignKey("PromotionId")]
+        [Required]
         public Guid PromotionId { get; set; }
 
         public Promotion? Promotion { get; set; }

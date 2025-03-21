@@ -36,5 +36,6 @@ namespace Data_Access_Layer.Entities
         public virtual Order? Orders { get; set; }
 
         public IngredientProduct? IngredientProducts { get; set; }
+
     }
 }

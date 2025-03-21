@@ -23,12 +23,10 @@ namespace Data_Access_Layer.Entities
         public Guid IngredientId { get; set; }
 
         [Column("quantity")]
-        [Range(1, int.MinValue, ErrorMessage = "Quantity must be greater than 0")]
-        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public int Quantity { get; set; }
 
         [Column("product_type", TypeName = "nvarchar(200)")]
-        [Required]
         [EnumDataType(typeof(ProductType))]
         public ProductType ProductType { get; set; }
 

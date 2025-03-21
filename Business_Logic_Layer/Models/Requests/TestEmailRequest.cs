@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Business_Logic_Layer.Models.Requests
 {
-    public class CartRequest
+    public class TestEmailRequest
     {
-        
+        public string Email { get; set; }
+        public int AmountPaid { get; set; }
     }
 }

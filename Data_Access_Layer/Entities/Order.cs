@@ -79,6 +79,5 @@ namespace Data_Access_Layer.Entities
         public ICollection<Payment>? Payments { get; set; }
         public ICollection<OrderPromotion>? OrderPromotions { get; set; }
         public ICollection<OrderDetail>? OrderDetails { get; set; }
-
     }
 }

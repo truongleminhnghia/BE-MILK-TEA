@@ -12,7 +12,6 @@ namespace Data_Access_Layer.Repositories
 {
     public class AccountRepository : IAccountRepository
     {
-
         private readonly ApplicationDbContext _context;
 
         public AccountRepository(ApplicationDbContext context)
@@ -39,7 +38,8 @@ namespace Data_Access_Layer.Repositories
             try
             {
                 response = await _context.Accounts.FirstOrDefaultAsync(a => a.Email == _email);
-             } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -48,8 +48,8 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Account?> GetById(Guid _id)
         {
-            return await _context.Accounts
-                .Include(a => a.Employee)
+            return await _context
+                .Accounts.Include(a => a.Employee)
                 .Include(a => a.Customer)
                 .FirstOrDefaultAsync(a => a.Id == _id);
         }
@@ -65,19 +65,24 @@ namespace Data_Access_Layer.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Account>> GetAllAccounts (
-    string? search, string? sortBy, bool isDescending,
-    AccountStatus? accountStatus, RoleName? role, int page, int pageSize)
+        public async Task<(IEnumerable<Account>, int TotalCount)> GetAllAccountsAsync(
+    string? search, AccountStatus? accountStatus, RoleName? roleName,
+    string? sortBy, bool isDescending, int page, int pageSize)
         {
             var query = _context.Accounts
-                .Include(a => a.Employee)
-                .Include(a => a.Customer)
-                .AsQueryable();
+                                .Include(a => a.Employee)
+                                .Include(a => a.Customer)
+                                .AsQueryable();
 
-            // **Tìm kiếm theo Email hoặc Username**
+            // **Tìm kiếm theo email, họ tên, số điện thoại**
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(a => a.Email.Contains(search) || a.FirstName.Contains(search) || a.LastName.Contains(search));
+                query = query.Where(a =>
+                    a.Email.Contains(search) ||
+                    a.FirstName.Contains(search) ||
+                    a.LastName.Contains(search) ||
+                    a.Phone.Contains(search)
+                );
             }
 
             // **Lọc theo trạng thái tài khoản**
@@ -86,24 +91,44 @@ namespace Data_Access_Layer.Repositories
                 query = query.Where(a => a.AccountStatus == accountStatus.Value);
             }
 
-            if (role != null)
+            // **Lọc theo vai trò**
+            if (roleName.HasValue)
             {
-                query = query.Where(a => a.RoleName == role.Value);
+                query = query.Where(a => a.RoleName == roleName.Value);
             }
 
-            // **Sắp xếp**
+            // **Sắp xếp dữ liệu**
             if (!string.IsNullOrEmpty(sortBy))
             {
                 query = isDescending
                     ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
                     : query.OrderBy(e => EF.Property<object>(e, sortBy));
             }
+            else
+            {
+                query = query.OrderByDescending(a => a.CreateAt);
+            }
+
+            int total = await query.CountAsync();
 
             // **Phân trang**
-            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+            var accounts = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
-            return await query.ToListAsync();
+            return (accounts, total);
         }
 
+
+
+
+        public async Task<Account> GetAccountByOrderIdAsync(Guid orderId)
+        {
+            return await _context
+                .Orders.Where(o => o.Id == orderId)
+                .Select(o => o.Account)
+                .FirstOrDefaultAsync();
+        }
     }
 }

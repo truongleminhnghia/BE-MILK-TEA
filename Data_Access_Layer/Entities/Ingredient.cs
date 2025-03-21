@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Data_Access_Layer.Enum;
 
@@ -41,28 +42,30 @@ namespace Data_Access_Layer.Entities
         public DateTime ExpiredDate { get; set; }
 
         [Column("ingredient_status")]
-        [Required]
         public IngredientStatus IngredientStatus { get; set; }
 
         [Column("weight_per_bag")]
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public float WeightPerBag { get; set; } // trong lượng trong mỗi bịch => một bịch 500g 0.5kg......
 
         [Column("quantity_per_carton")]
+        [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public int QuantityPerCarton { get; set; } // số lượng trong mỗi thùng ==> thùng 12 bịch
 
         [Column("ingredient_type")]
+        [EnumDataType(typeof(IngredientType))]
         [Required]
         public IngredientType IngredientType  { get; set; } // Thêm Enum mới
 
         [Column("unit", TypeName = "nvarchar(50)")]
-        public string Unit { get; set; } = string.Empty; // đơn vị là string, viết kilogram hoặc gram
+        [EnumDataType(typeof(UnitOfIngredientEnum))]
+        public UnitOfIngredientEnum Unit { get; set; } // đơn vị là string, viết kilogram hoặc gram
 
         [Column("price_origin")]
         [Required]
         public double PriceOrigin { get; set; } // giá ban đầu, không khuyến mãi
 
         [Column("price_promotion")]
-        [Required]
         public double PricePromotion { get; set; } // giá khuyến mãi
 
         [Column("category_id")]
@@ -71,12 +74,12 @@ namespace Data_Access_Layer.Entities
         public Guid CategoryId { get; set; }
 
         [Column("is_sale")]
-        [Required]
         public bool IsSale { get; set; }
 
         [Column("rate")]
-        public float Rate { get; set; } // tính TB 4 + 5 /2
-         // bổ sung bình luận
+        public float Rate { get; set; }
+
+        public ICollection<CartItem>? CartItems { get; set; }
 
         public ICollection<Image>? Images { get; set; }
         public ICollection<IngredientReview>? IngredientReviews { get; set; }
@@ -88,6 +91,3 @@ namespace Data_Access_Layer.Entities
     }
     
 }
-
-// isStaff = true ==> crud
-// customer: xemmmm

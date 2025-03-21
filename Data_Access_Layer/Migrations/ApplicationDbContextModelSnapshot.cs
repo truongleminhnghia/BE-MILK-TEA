@@ -34,7 +34,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("account_status");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
@@ -72,7 +72,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("role_name");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -95,11 +95,11 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("account_id");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -122,28 +122,30 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("cart_id");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
-                    b.Property<Guid>("IngredientProductId")
+                    b.Property<Guid>("IngredientId")
                         .HasColumnType("char(36)")
-                        .HasColumnName("ingredient_product_id");
+                        .HasColumnName("ingredient_id");
+
+                    b.Property<int>("ProductType")
+                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("quantity");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CartId")
-                        .IsUnique();
+                    b.HasIndex("CartId");
 
-                    b.HasIndex("IngredientProductId");
+                    b.HasIndex("IngredientId");
 
                     b.ToTable("cart_item");
                 });
@@ -170,11 +172,11 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("category_type");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -203,7 +205,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("address");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
@@ -216,7 +218,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("tax_code");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -239,7 +241,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("account_id");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
@@ -248,7 +250,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("ref_code");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -294,7 +296,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("category_id");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
@@ -362,7 +364,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("unit");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -439,7 +441,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("ingredient_quantity_id");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
@@ -456,7 +458,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("int")
                         .HasColumnName("quantity");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -715,7 +717,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("promotion_id");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
@@ -741,7 +743,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("start_date");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -804,13 +806,17 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("nvarchar(2000)")
                         .HasColumnName("content");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_at");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("image_url");
+
+                    b.Property<int>("RecipeLevel")
+                        .HasColumnType("int")
+                        .HasColumnName("recipe_level");
 
                     b.Property<int>("RecipeStatus")
                         .HasColumnType("int")
@@ -821,7 +827,7 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("nvarchar(300)")
                         .HasColumnName("recipe_title");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_at");
 
@@ -872,15 +878,15 @@ namespace Data_Access_Layer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Data_Access_Layer.Entities.IngredientProduct", "IngredientProduct")
+                    b.HasOne("Data_Access_Layer.Entities.Ingredient", "Ingredient")
                         .WithMany("CartItems")
-                        .HasForeignKey("IngredientProductId")
+                        .HasForeignKey("IngredientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cart");
 
-                    b.Navigation("IngredientProduct");
+                    b.Navigation("Ingredient");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Customer", b =>
@@ -1115,6 +1121,8 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Ingredient", b =>
                 {
+                    b.Navigation("CartItems");
+
                     b.Navigation("Images");
 
                     b.Navigation("IngredientProducts");
@@ -1130,8 +1138,6 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.IngredientProduct", b =>
                 {
-                    b.Navigation("CartItems");
-
                     b.Navigation("OrderDetails");
                 });
 

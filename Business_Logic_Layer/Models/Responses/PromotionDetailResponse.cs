@@ -18,8 +18,8 @@ namespace Business_Logic_Layer.Models.Responses
         [Range(0, 100, ErrorMessage = "DiscountValue phải nằm trong khoảng 0 - 100")]
         public float? DiscountValue { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "MiniValue phải là số dương")]
-        public double? MiniValue { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "MinValue phải là số dương")]
+        public double? MinValue { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "MaxValue phải là số dương")]
         public double? MaxValue { get; set; }

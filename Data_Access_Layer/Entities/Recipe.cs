@@ -33,9 +33,12 @@ namespace Data_Access_Layer.Entities
         public Guid CategoryId { get; set; }
 
         [Column("recipe_status")]
-        [Required]
         [EnumDataType(typeof(RecipeStatusEnum))]
         public RecipeStatusEnum RecipeStatus { get; set; }
+
+        [Column("recipe_level")]
+        [EnumDataType(typeof(RecipeLevelEnum))]
+        public RecipeLevelEnum RecipeLevel { get; set; }
 
         public Category? Category { get; set; }
 

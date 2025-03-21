@@ -2,6 +2,7 @@
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -9,7 +10,7 @@ using System.Net;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/recipe")]
+    [Route("api/v1/recipes")]
     //[Authorize(Roles = "ROLE_STAFF" )]
 
     public class RecipeController : ControllerBase
@@ -67,14 +68,16 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var updatedRecipe = await _recipeService.UpdateRecipe(id, request);
-                if (updatedRecipe == null) return NotFound(new { message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
+                var isUpdated = await _recipeService.UpdateRecipe(id, request);
+                if (isUpdated == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
+
 
                 return Ok(new ApiResponse(
                                 HttpStatusCode.OK.GetHashCode(),
                                 true,
-                "Lấy công thức thành công",
-                                updatedRecipe
+                                "Cập nhật công thức thành công!",
+                                isUpdated
                             ));
             }
             catch (Exception ex)
@@ -85,20 +88,28 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAllRecipes(
-    string? search, string? sortBy, bool isDescending = false,
-    Guid? categoryId = null, int page = 1, int pageSize = 10)
+            [FromQuery] string? search,
+            [FromQuery] string? sortBy,
+            [FromQuery] RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] Guid? categoryId = null,
+            [FromQuery] RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-                var recipes = await _recipeService.GetAllRecipes(
-                search, sortBy, isDescending, categoryId, page, pageSize);
+                var recipes = await _recipeService.GetAllRecipesAsync(
+             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize);
 
                 return Ok(new ApiResponse(
-                                HttpStatusCode.OK.GetHashCode(),
-                                true,
-                "Lấy danh sách công thức thành công",
-                                recipes
-                            ));
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Lấy danh sách công thức thành công",
+                    recipes
+                ));
             }
             catch (Exception ex)
             {
@@ -106,7 +117,28 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpPut("status/{id}")]
+        public async Task<IActionResult> UpdateRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
+        {
+            try
+            {
+                var isUpdated = await _recipeService.UpdateRecipeStatusAsync(id, requestStatus);
+                if (isUpdated == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
 
+
+                return Ok(new ApiResponse(
+                                HttpStatusCode.OK.GetHashCode(),
+                                true,
+                                "Cập nhật công thức thành công!",
+                                isUpdated
+                            ));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
+        }
     }
 
 }

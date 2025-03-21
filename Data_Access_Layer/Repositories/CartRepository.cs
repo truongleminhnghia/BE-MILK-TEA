@@ -1,51 +1,51 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Data_Access_Layer.Repositories
 {
-    public interface ICartRepository
-    {
-        Task<Cart?> GetByIdAsync(Guid id);
-        Task<Cart> CreateAsync(Cart cart);
-        Task<Cart?> UpdateAsync(Guid id, Cart cart);
-    }
     public class CartRepository : ICartRepository
     {
         private readonly ApplicationDbContext _context;
-
-        public async Task<Cart> CreateAsync(Cart cart)
+        public CartRepository(ApplicationDbContext context)
         {
-            cart.Id = Guid.NewGuid();
-            cart.CreateAt = DateTime.Now;
+            _context = context;
+        }
 
+        public async Task<Cart> FindByAccount(Guid id)
+        {
+            return await _context.Carts
+       .Include(c => c.Account)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient.Images)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient.IngredientQuantities)
+       .FirstOrDefaultAsync(c => c.AccountId == id);
+        }
+
+        public async Task<Cart> FindById(Guid id)
+        {
+            return await _context.Carts
+       .Include(c => c.Account)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient.Images)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient.IngredientQuantities).FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<Cart> Save(Cart cart)
+        {
             _context.Carts.Add(cart);
             await _context.SaveChangesAsync();
             return cart;
-        }
-
-        public async Task<Cart?> GetByIdAsync(Guid id)
-        {
-            return await _context.Carts.FirstOrDefaultAsync(o => o.Id == id) ?? null;
-        }
-
-        public async Task<Cart?> UpdateAsync(Guid id, Cart cart)
-        {
-            var existingCart = await _context.Carts.FindAsync(id);
-            if (existingCart == null)
-            {
-                return null;
-            }
-            existingCart.UpdateAt = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-            return existingCart;
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Data_Access_Layer.Repositories
@@ -28,10 +30,19 @@ namespace Data_Access_Layer.Repositories
         public async Task<Recipe?> GetRecipeById(Guid recipeId)
         {
             return await _context.Recipes
+                .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
-                .ThenInclude(ir => ir.Ingredient)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Category)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Images)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.IngredientQuantities)
                 .FirstOrDefaultAsync(r => r.Id == recipeId);
         }
+
 
         public async Task<Recipe?> UpdateRecipe(Recipe recipe)
         {
@@ -51,18 +62,35 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<IEnumerable<Recipe>> GetAllRecipes(
     string? search, string? sortBy, bool isDescending,
-    Guid? categoryId, int page, int pageSize)
+    Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus)
         {
             var query = _context.Recipes
                 .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
                     .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Category)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Images)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.IngredientQuantities)
                 .AsQueryable();
+
+            // **Lọc theo trạng thái**
+            if (recipeStatus.HasValue)
+            {
+                query = query.Where(r => r.RecipeStatus == recipeStatus.Value);
+            }
 
             // **Tìm kiếm theo tiêu đề hoặc nội dung**
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(r => r.RecipeTitle.Contains(search) || r.Content.Contains(search));
+                string trimmedSearch = Regex.Replace(search.Trim(), @"\s+", " "); // Bỏ khoảng trắng thừa
+                query = query.Where(r =>
+                    r.RecipeTitle.Contains(trimmedSearch) ||
+                    (r.Content != null && r.Content.Contains(trimmedSearch))
+                );
             }
 
             // **Lọc theo danh mục**
@@ -71,8 +99,9 @@ namespace Data_Access_Layer.Repositories
                 query = query.Where(r => r.CategoryId == categoryId.Value);
             }
 
-            // **Sắp xếp**
-            if (!string.IsNullOrEmpty(sortBy))
+            // **Sắp xếp dữ liệu**
+            var validSortColumns = new HashSet<string> { "RecipeTitle", "CategoryId", "RecipeStatus" };
+            if (!string.IsNullOrEmpty(sortBy) && validSortColumns.Contains(sortBy))
             {
                 query = isDescending
                     ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
@@ -83,6 +112,81 @@ namespace Data_Access_Layer.Repositories
             query = query.Skip((page - 1) * pageSize).Take(pageSize);
 
             return await query.ToListAsync();
+        }
+
+
+        public async Task<(List<Recipe>, int)> GetAllRecipesAsync(
+    string? search, string? sortBy, bool isDescending,
+    RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
+    DateTime? startDate, DateTime? endDate,
+    int page, int pageSize)
+        {
+            var query = _context.Recipes
+                .Include(r => r.Category)
+                .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                .AsQueryable();
+
+            // Apply Filters if not null
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(r => r.RecipeTitle.Contains(search) || r.Content.Contains(search));
+            }
+
+            if (recipeStatus.HasValue)
+            {
+                query = query.Where(r => r.RecipeStatus == recipeStatus.Value);
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(r => r.CategoryId == categoryId.Value);
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(r => r.CreateAt >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(r => r.CreateAt <= endDate.Value);
+            }
+
+            if (recipeLevel.HasValue)
+            {
+                query = query.Where(r => r.RecipeLevel == recipeLevel.Value);
+            }
+
+            // Sorting
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                query = isDescending
+                    ? query.OrderByDescending(r => EF.Property<object>(r, sortBy))
+                    : query.OrderBy(r => EF.Property<object>(r, sortBy));
+            }
+            else
+            {
+                query = query.OrderByDescending(r => r.CreateAt); // Default sort by latest created
+            }
+
+            // Get Total Count Before Pagination
+            int total = await query.CountAsync();
+
+            // Apply Pagination
+            var recipes = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (recipes, total);
+        }
+
+
+        public async Task<Recipe?> GetByTitleAsync(string title)
+        {
+            return await _context.Recipes
+                .FirstOrDefaultAsync(r => r.RecipeTitle.Trim().ToLower() == title.Trim().ToLower());
         }
 
 

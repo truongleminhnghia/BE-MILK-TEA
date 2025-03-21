@@ -62,9 +62,21 @@ namespace Business_Logic_Layer.Services.IngredientService
                 {
                     throw new Exception("Danh mục không tồn tại");
                 }
+                if (categoryExists.CategoryType != CategoryType.CATEGORY_PRODUCT)
+                {
+                    throw new Exception("Danh mục không phải là danh mục nguyên liệu");
+                }
                 if (request.ImageRequest == null || !request.ImageRequest.Any())
                 {
                     throw new Exception("Danh sách ảnh trống");
+                }
+                if (request.Unit == UnitOfIngredientEnum.KG && request.WeightPerBag < 0)
+                {
+                    throw new Exception("Khối lượng trong mỗi túi tính theo kilogram phải lớn hơn 0");
+                }
+                else if (request.Unit == UnitOfIngredientEnum.GRAM && request.WeightPerBag < 1)
+                {
+                    throw new Exception("Khối lượng trong mỗi túi tính theo gram phải lớn hơn 1");
                 }
                 var ingredient = _mapper.Map<Ingredient>(request);
                 ingredient.IngredientCode = "P" + _source.GenerateRandom8Digits();
@@ -84,8 +96,11 @@ namespace Business_Logic_Layer.Services.IngredientService
                 {
                     throw new Exception("Tạo nguyên liệu mới không thành công");
                 }
-                List<ImageRespone> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
-                List<IngredientQuantityResponse> ingredientQuantities = await _ingredientQuantityService.CreateQuantitiesAsync(ingredientResponse.Id, request.IngredientQuantities);
+
+                List<ImageResponse> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
+
+                // List<IngredientQuantityResponse> ingredientQuantities = await _ingredientQuantityService.CreateQuantitiesAsync(ingredientResponse.Id, request.IngredientQuantities);
+
                 ingredient.Images = _mapper.Map<List<Image>>(imageRespones);
                 ingredientResponse.Category = _mapper.Map<CategoryResponse>(categoryExists);
                 ingredientResponse.Images = imageRespones;

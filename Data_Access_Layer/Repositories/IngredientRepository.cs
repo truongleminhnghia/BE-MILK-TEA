@@ -82,18 +82,19 @@ namespace Data_Access_Layer.Repositories
         // }
 
         public IQueryable<Ingredient> GetAll(
-        string? search,
-        string? categorySearch,
-        Guid? categoryId,
-        DateTime? startDate,
-        DateTime? endDate,
-        IngredientStatus? status,
-        decimal? minPrice,
-        decimal? maxPrice,
-        bool? isSale)
+            string? search,
+            string? categorySearch,
+            Guid? categoryId,
+            DateTime? startDate,
+            DateTime? endDate,
+            IngredientStatus? status,
+            decimal? minPrice,
+            decimal? maxPrice,
+            bool? isSale
+        )
         {
-            var query = _context.Ingredients
-                .Include(i => i.Category)
+            var query = _context
+                .Ingredients.Include(i => i.Category)
                 .Include(i => i.Images)
                 .Include(i => i.IngredientQuantities)
                 .AsQueryable();
@@ -143,14 +144,13 @@ namespace Data_Access_Layer.Repositories
             return query;
         }
 
-
         public async Task<Ingredient> GetById(Guid id)
         {
-            return await _context.Ingredients
-            .Include(i => i.Images)
-            .Include(i => i.Category)
-            .Include(i => i.IngredientQuantities)
-            .FirstAsync(a => a.Id.Equals(id));
+            return await _context
+                .Ingredients.Include(i => i.Images)
+                .Include(i => i.Category)
+                .Include(i => i.IngredientQuantities)
+                .FirstAsync(a => a.Id.Equals(id));
         }
 
         public async Task<Ingredient> CreateAsync(Ingredient ingredient)
@@ -172,8 +172,6 @@ namespace Data_Access_Layer.Repositories
             await _context.SaveChangesAsync();
             return existingIngredient;
         }
-
-
 
         public async Task<bool> CheckCode(string code)
         {

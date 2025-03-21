@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data_Access_Layer.Enum;
 
 namespace Business_Logic_Layer.Models.Requests
 {
@@ -17,13 +18,15 @@ namespace Business_Logic_Layer.Models.Requests
 
         public Guid CategoryId { get; set; }
 
+        public RecipeLevelEnum recipeLevel { get; set; }
+
         public List<RecipeIngredientRequest> Ingredients { get; set; } = new();
     }
 
     public class RecipeIngredientRequest
     {
         public Guid IngredientId { get; set; }
-
+        [Range(0.1, double.MaxValue, ErrorMessage = "Khối lượng của nguyên liệu phải lớn hơn 0")]
         public float WeightOfIngredient { get; set; }
     }
 

@@ -7,14 +7,11 @@ using Data_Access_Layer.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using System.Net.WebSockets;
-using System.Text;
-using System.Text.Json;
 
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/ingredientproducts")]
+    [Route("api/v1/ingredient-products")]
     public class IngredientProductController : ControllerBase
     {
         private readonly IIngredientProductService _ingredientProductService;
@@ -24,124 +21,133 @@ namespace WebAPI.Controllers
             _ingredientProductService = ingredientProductService;
             _mapper = mapper;
         }
-
-
         //CREATE
         [HttpPost]
-        public async Task<IActionResult> AddIngredientProduct([FromBody] IngredientProductRequest ingredientReq)
+        public async Task<IActionResult> AddIngredientProduct([FromBody] IngredientProductRequest ingredientReq, [FromQuery] bool isCart)
         {
-
-            if (ingredientReq == null)
-            {
-                return BadRequest(new ApiResponse(
-                    HttpStatusCode.BadRequest.GetHashCode(),
-                    false,
-                    "Dữ liệu không hợp lệ"));
-            }
-
             try
             {
-                var createdIngredientProduct = await _ingredientProductService.CreateAsync(ingredientReq);
-
+                var ingredientProduct = await _ingredientProductService.CreateAsync(ingredientReq, isCart);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
                     "Thêm nguyên liệu vào sản phẩm thành công",
-                    createdIngredientProduct  // Trả về dữ liệu sau khi tạo
-                ));
+                    ingredientProduct));
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception e)
             {
-                return NotFound(new ApiResponse(
-                    HttpStatusCode.NotFound.GetHashCode(),
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
                     false,
-                    ex.Message
-                ));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError.GetHashCode(),
-                    false,
-                    "Lỗi server: " + ex.Message
-                ));
+                    e.Message));
             }
         }
 
-        // GET 
-        [HttpGet("{ingredientProductId}")]
-        public async Task<IActionResult> GetIngredientProductById(Guid ingredientProductId)
+        [HttpGet]
+        public async Task<IActionResult> GetProductById(Guid id)
         {
             try
             {
-                var ingredientProduct = await _ingredientProductService.GetIngredientProductbyId(ingredientProductId);
+                var ingredientProduct = await _ingredientProductService.GetIngredientProductbyId(id);
                 if (ingredientProduct == null)
                 {
                     return NotFound(new ApiResponse(
                         HttpStatusCode.NotFound.GetHashCode(),
                         false,
-                        "Không tìm thấy Ingredient Product"
-                    ));
+                        "Không tìm thấy sản phẩm"));
                 }
-
+                var ingredientProductResponse = _mapper.Map<IngredientProductResponse>(ingredientProduct);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
-                    "Lấy thông tin thành công",
-                    ingredientProduct
-                ));
+                    "Thành công",
+                    ingredientProductResponse));
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError.GetHashCode(),
-                    false,
-                    "Lỗi server: " + ex.Message
-                ));
-            }
-        }
-        // UPDATE 
-        [HttpPut("{ingredientProductId}")]
-        // [Authorize(Roles = "ROLE_STAFF")]
-        public async Task<IActionResult> UpdateIngredientProduct(
-            Guid ingredientProductId,
-            [FromBody] IngredientProductRequest ingredientProductRequest)
-        {
-            if (ingredientProductRequest == null)
+            catch (Exception e)
             {
                 return BadRequest(new ApiResponse(
                     HttpStatusCode.BadRequest.GetHashCode(),
                     false,
-                    "Dữ liệu không hợp lệ"
-                ));
+                    e.Message));
             }
+        }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] IngredientProductRequest request, [FromQuery] bool isCart)
+        {
             try
             {
-                var updatedIngredientProduct = await _ingredientProductService.UpdateAsync(ingredientProductId, ingredientProductRequest);
-
+                if (request == null)
+                {
+                    return BadRequest(new ApiResponse(
+                        HttpStatusCode.BadRequest.GetHashCode(),
+                        false,
+                        "Dữ liệu không hợp lệ"));
+                }
+                var ingredientProductUpdate = _mapper.Map<IngredientProduct>(request);
+                await _ingredientProductService.UpdateAsync(id, request, isCart);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
-                    "Cập nhật thành công",
-                    updatedIngredientProduct  // Trả về dữ liệu sau khi cập nhật
-                ));
+                    "Cập nhật sản phẩm thành công"));
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception e)
             {
-                return NotFound(new ApiResponse(
-                    HttpStatusCode.NotFound.GetHashCode(),
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
                     false,
-                    ex.Message
-                ));
+                    e.Message));
             }
-            catch (Exception ex)
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(Guid id)
+        {
+            try
             {
-                return StatusCode(500, new ApiResponse(
-                    HttpStatusCode.InternalServerError.GetHashCode(),
+                var result = await _ingredientProductService.DeleteAsync(id);
+                if (!result)
+                {
+                    return NotFound(new ApiResponse(
+                        HttpStatusCode.NotFound.GetHashCode(),
+                        false,
+                        "Không tìm thấy sản phẩm"));
+                }
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Xóa sản phẩm thành công"));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
                     false,
-                    "Lỗi server: " + ex.Message
-                ));
+                    e.Message));
+            }
+        }
+
+        [HttpGet("by-ingredient/{ingredientId}")]
+        public async Task<IActionResult> GetByIngredientId(Guid ingredientId)
+        {
+            try
+            {
+                var ingredientProducts = await _ingredientProductService.GetByIngredientIdAsync(ingredientId);
+                if (ingredientProducts == null || !ingredientProducts.Any())
+                {
+                    return NotFound("Không tìm thấy Ingredient Id.");
+                }
+                return Ok(new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Lấy danh sách sản phẩm thành công"));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    false,
+                    "Đã có lỗi khi lấy danh sách: " + e.Message));
             }
         }
     }
