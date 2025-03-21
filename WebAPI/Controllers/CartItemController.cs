@@ -82,7 +82,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCartItem([FromRoute] Guid id, [FromBody] CartItemRequest request)
+        public async Task<IActionResult> UpdateCartItem([FromRoute] Guid id, [FromBody] UpdateCartItemRequest request)
         {
             try
             {

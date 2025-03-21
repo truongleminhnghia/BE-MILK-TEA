@@ -12,7 +12,7 @@ namespace Business_Logic_Layer.Services.Carts
         Task<CartItemResponse> CreateCartItem(CartItemRequest cartItemRequest);
         Task<CartItemResponse> GetById(Guid id);
         Task<IEnumerable<CartItemResponse>> GetByCart(Guid cartId);
-        Task<bool> UpdateCartItem(Guid id, CartItemRequest request);
+        Task<bool> UpdateCartItem(Guid id, UpdateCartItemRequest request);
         Task<bool> Delete(Guid id);
     }
 }
