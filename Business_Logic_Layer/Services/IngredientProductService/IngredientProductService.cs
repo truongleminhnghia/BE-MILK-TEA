@@ -75,19 +75,19 @@ namespace Business_Logic_Layer.Services.IngredientProductService
                 }
                 else
                 {
-                    if (ingredient.PricePromotion > 0.0 && request.ProductType.Equals(ProductType.Thung))
+                    if (ingredient.PricePromotion > 0.0 && request.ProductType.Equals(ProductType.BIN))
                     {
                         newProduct.TotalPrice = ingredient.PricePromotion * request.Quantity * ingredient.QuantityPerCarton;
                     }
-                    else if (ingredient.PricePromotion > 0.0 && request.ProductType.Equals(ProductType.Bich))
+                    else if (ingredient.PricePromotion > 0.0 && request.ProductType.Equals(ProductType.BAG))
                     {
                         newProduct.TotalPrice = ingredient.PricePromotion * request.Quantity;
                     }
-                    else if (ingredient.PricePromotion <= 0.0 && request.ProductType.Equals(ProductType.Bich))
+                    else if (ingredient.PricePromotion <= 0.0 && request.ProductType.Equals(ProductType.BAG))
                     {
                         newProduct.TotalPrice = ingredient.PriceOrigin * request.Quantity;
                     }
-                    else if (ingredient.PricePromotion <= 0.0 && request.ProductType.Equals(ProductType.Thung))
+                    else if (ingredient.PricePromotion <= 0.0 && request.ProductType.Equals(ProductType.BIN))
                     {
                         newProduct.TotalPrice = ingredient.PriceOrigin * request.Quantity * ingredient.QuantityPerCarton;
                     }

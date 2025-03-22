@@ -827,6 +827,11 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("image_url");
 
+                    b.Property<string>("RecipeLevel")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("recipe_level");
+
                     b.Property<int>("RecipeStatus")
                         .HasColumnType("int")
                         .HasColumnName("recipe_status");

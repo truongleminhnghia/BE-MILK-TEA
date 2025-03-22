@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250322083751_InitCreate")]
+    [Migration("20250322145152_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
@@ -829,6 +829,11 @@ namespace Data_Access_Layer.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("image_url");
+
+                    b.Property<string>("RecipeLevel")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("recipe_level");
 
                     b.Property<int>("RecipeStatus")
                         .HasColumnType("int")
