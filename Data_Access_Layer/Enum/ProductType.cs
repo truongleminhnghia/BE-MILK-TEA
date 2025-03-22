@@ -2,7 +2,8 @@
 {
     public enum ProductType
     {
-        Bich,  // Bịch
-        Thung // Thùng
+        BIN, // thùng
+        BAG, // bịch
+        BÕ, // hộp
     }
 }

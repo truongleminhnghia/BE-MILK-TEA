@@ -21,6 +21,18 @@ namespace Business_Logic_Layer.Middleware
 
         public async Task Invoke(HttpContext context)
         {
+            var path = context.Request.Path.Value?.ToLower();
+            var excludedPaths = new[]
+                {
+                    "/api/v1/auths/login",
+                    "/api/v1/auths/register"
+                   };
+            if (excludedPaths.Any(p => path.StartsWith(p)))
+            {
+                await _next(context); // Bỏ qua kiểm tra JWT
+                return;
+            }
+
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             if (token != null)
             {

@@ -31,14 +31,14 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> Register([FromBody] CreateAccountRequest _request) // Cho phép null
         {
             try
-             {
+            {
                 var account = await _authenService.Register(_request, false);
 
-                return Ok(new ApiResponse (HttpStatusCode.OK.GetHashCode(), true, "Đăng ký thành công", account));
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Đăng ký thành công", account));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse( HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
             }
         }
 
@@ -50,6 +50,10 @@ namespace WebAPI.Controllers
                 if (typeLogin.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
                     var loginSuccess = await _authenService.LoginLocal(request, typeLogin);
+                    if (loginSuccess == null)
+                    {
+                        return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại", null));
+                    }
                     return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Đăng nhập thành công", loginSuccess));
                 }
                 else if (typeLogin.Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
@@ -62,11 +66,11 @@ namespace WebAPI.Controllers
                         urlLogin
                         ));
                 }
-                return BadRequest(new ApiResponse (HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại" ));
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Đăng nhập thất bại"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse (HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+                return StatusCode(500, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
             }
         }
 

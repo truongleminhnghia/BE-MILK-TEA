@@ -10,5 +10,7 @@ namespace Data_Access_Layer.Enum
     {
         KG,
         GRAM,
+        ML,
+        L
     }
 }
