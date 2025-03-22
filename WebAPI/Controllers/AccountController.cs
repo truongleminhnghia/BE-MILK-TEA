@@ -47,7 +47,14 @@ namespace WebAPI.Controllers
             {
                 var accounts = await _accountService.GetAllAccountsAsync(
                             search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
-
+                if(accounts == null) {
+                    return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    true,
+                    "Danh sách rỗng",
+                    accounts
+                ));
+                }
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
@@ -57,7 +64,7 @@ namespace WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
             }
         }
 
