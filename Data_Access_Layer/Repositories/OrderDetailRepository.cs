@@ -90,7 +90,7 @@ namespace Data_Access_Layer.Repositories
                 throw new Exception("Ingredient not found.");
             }
             existingOrderDetail.Quantity = orderDetail.Quantity;
-            existingOrderDetail.Price = orderDetail.Quantity * cartItem.Price;
+            // existingOrderDetail.Price = orderDetail.Quantity * cartItem.Price;
             await _context.SaveChangesAsync();
             return existingOrderDetail;
         }
