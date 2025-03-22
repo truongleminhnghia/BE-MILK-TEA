@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250319022640_UpdateCart")]
-    partial class UpdateCart
+    [Migration("20250322082008_updateDatabase")]
+    partial class updateDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -133,12 +133,24 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("ingredient_id");
 
+                    b.Property<bool>("IsCart")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("isCart");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("double")
+                        .HasColumnName("price");
+
                     b.Property<int>("ProductType")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("quantity");
+
+                    b.Property<double>("TotalPrice")
+                        .HasColumnType("double")
+                        .HasColumnName("total_price");
 
                     b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
@@ -615,9 +627,12 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("order_detail_id");
 
-                    b.Property<Guid>("IngredientProductId")
+                    b.Property<Guid>("CartItemId")
                         .HasColumnType("char(36)")
-                        .HasColumnName("ingredient_product_id");
+                        .HasColumnName("cart_item_id");
+
+                    b.Property<Guid?>("IngredientProductId")
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("char(36)")
@@ -632,6 +647,8 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("quantity");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CartItemId");
 
                     b.HasIndex("IngredientProductId");
 
@@ -1024,11 +1041,15 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Entities.IngredientProduct", "IngredientProducts")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("IngredientProductId")
+                    b.HasOne("Data_Access_Layer.Entities.CartItem", "CartItems")
+                        .WithMany()
+                        .HasForeignKey("CartItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Data_Access_Layer.Entities.IngredientProduct", null)
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("IngredientProductId");
 
                     b.HasOne("Data_Access_Layer.Entities.Order", "Orders")
                         .WithMany("OrderDetails")
@@ -1036,7 +1057,7 @@ namespace Data_Access_Layer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("IngredientProducts");
+                    b.Navigation("CartItems");
 
                     b.Navigation("Orders");
                 });
