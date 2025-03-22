@@ -17,10 +17,12 @@ namespace WebAPI.Controllers
     public class OrderDetailController : ControllerBase
     {
         private readonly IOrderDetailService _orderDetailService;
+        private readonly IOrderService _orderService;
         private readonly IMapper _mapper;
 
-        public OrderDetailController(IOrderDetailService orderDetailService, IMapper mapper)
+        public OrderDetailController(IOrderDetailService orderDetailService, IMapper mapper, IOrderService orderService)
         {
+            _orderService = orderService;
             _orderDetailService = orderDetailService;
             _mapper = mapper;
         }
@@ -87,11 +89,17 @@ namespace WebAPI.Controllers
         }
         ////Create
         [HttpPost]
-        public async Task<IActionResult> AddOrderDetail([FromBody] OrderDetailRequest orderDetails)
+        public async Task<IActionResult> AddOrderDetail([FromBody] CreateOrderDetailRequest orderDetails)
         {
+            var order = await _orderService.GetByIdAsync(orderDetails.OrderId);
+         
             if (orderDetails == null)
             {
                 return BadRequest(new { message = "Invalid order detail data" });
+            }
+            if (order == null)
+            {
+                return BadRequest(new { message = "Không tồn tại order với id này" });
             }
             var orderDetailEntity = _mapper.Map<OrderDetail>(orderDetails);
 
@@ -103,7 +111,7 @@ namespace WebAPI.Controllers
 
         public async Task<IActionResult> UpdateOrderDetail(
             Guid id,
-            [FromBody] OrderDetailRequest orderDetailRequest
+            [FromBody] CreateOrderDetailRequest orderDetailRequest
         )
         {
             if (orderDetailRequest == null)
