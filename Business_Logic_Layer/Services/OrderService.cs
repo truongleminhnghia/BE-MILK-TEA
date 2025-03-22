@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
+using Business_Logic_Layer.Services.Carts;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
 using Business_Logic_Layer.Utils;
@@ -34,15 +35,13 @@ namespace Business_Logic_Layer.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderDetailService _orderDetailService;
         private readonly IIngredientService _ingredientService;
-        private readonly IIngredientProductService _ingredientProductService;
+        //private readonly IIngredientProductService _ingredientProductService;
         private readonly IIngredientQuantityService _ingredientQuantityService;
-        //private readonly IIngredientService _ingredientService;
-        private readonly CartRepository _cartRepository;
-        private readonly CartItemService _cartItemService;
+        private readonly ICartItemService _cartItemService;
         private readonly IMapper _mapper;
         private readonly Source _source;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source, IIngredientQuantityService ingredientQuantityService, IIngredientProductService ingredientProductService, IIngredientService ingredientService )
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source, IIngredientQuantityService ingredientQuantityService, ICartItemService cartItemService , IIngredientService ingredientService )
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
@@ -50,7 +49,8 @@ namespace Business_Logic_Layer.Services
             _source = source;
             _ingredientService = ingredientService;
             _ingredientQuantityService = ingredientQuantityService;
-            _ingredientProductService = ingredientProductService;
+            _cartItemService = cartItemService;
+            //_ingredientProductService = ingredientProductService;
         }
         public async Task<OrderResponse> CreateAsync(OrderRequest orderRequest)
         {
@@ -69,23 +69,24 @@ namespace Business_Logic_Layer.Services
                 {
                     //xử lý quantity
                     var orderDetails = new OrderDetail();
-                    var ingredientProduct = await _ingredientProductService.GetIngredientProductbyId(orderDetail.IngredientProductId);
+                    var cartItem = await _cartItemService.GetById(orderDetail.CartItemId);
+                    var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
                     if (ingredientProduct == null)
                     {
-                        throw new Exception($"Không tìm thấy ingredientProduct với ID {orderDetail.IngredientProductId}");
+                        throw new Exception($"Không tìm thấy ingredientProduct với ID {cartItem.IngredientId}");
                     }
 
-                    var ingredientQuantityProduct = await _ingredientQuantityService.GetByIdAndProductType(ingredientProduct.IngredientId,ingredientProduct.ProductType);
+                    var ingredientQuantityProduct = await _ingredientQuantityService.GetByIdAndProductType(ingredientProduct.Id, cartItem.ProductType);
 
                     if (ingredientQuantityProduct == null)
                     {
-                        throw new Exception($"Không tìm thấy nguyên liệu với ID {ingredientProduct.IngredientId}");
+                        throw new Exception($"Không tìm thấy nguyên liệu với ID {ingredientProduct.Id}");
                     }
 
                     if (ingredientQuantityProduct.Quantity < orderDetail.Quantity)
                     {
-                        throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({ingredientProduct.Quantity})");
+                        throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({ingredientQuantityProduct.Quantity})");
                     }
                     //Trừ số lượng đang có trong database = số lượng đặt
                     ingredientQuantityProduct.Quantity -= orderDetail.Quantity;
@@ -95,15 +96,15 @@ namespace Business_Logic_Layer.Services
                     await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, ingredientQuantityRequest);
 
                     //tạo orderdetail
-                    var chosenIngredient = await _ingredientService.GetById(ingredientProduct.IngredientId);
+                    //var chosenIngredient = await _ingredientService.GetById(ingredientProduct.IngredientId);
                     orderDetails.OrderId = createdOrder.Id;
-                    orderDetails.IngredientProductId = orderDetail.IngredientProductId;
+                    orderDetails.CartItemId = orderDetail.CartItemId;
                     orderDetails.Quantity = orderDetail.Quantity;
 
 
                     //orderDetails.Price = orderDetail.Price;
 
-                    orderDetails.Price = chosenIngredient.PriceOrigin;
+                    orderDetails.Price = ingredientProduct.PriceOrigin;
                     var createOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
                     orderDetailList.Add(createOrderDetail);
                     createdOrder.Quantity += createOrderDetail.Quantity;
@@ -180,25 +181,25 @@ namespace Business_Logic_Layer.Services
                     var orderDetails = query.Select(q => new OrderDetail
                     {
                         Id = q.Id,
-                        IngredientProductId = q.IngredientProductId,
+                        CartItemId = q.CartItemId,
                         Quantity = q.Quantity,
          
                     }).ToList();
                     foreach (OrderDetail orderDetail in orderDetails)
                     {
-                        var orderDetailId = orderDetail.IngredientProductId;
-                        var ingredientProducts = await _ingredientProductService.GetIngredientProductbyId(orderDetailId);
-
-                        if (ingredientProducts == null)
+                        var cartItemId = orderDetail.CartItemId;
+                        var cartItem = await _cartItemService.GetById(cartItemId);
+                        var ingredient = await _ingredientService.GetById(cartItem.IngredientId);
+                        if (cartItem == null)
                         {
-                            throw new Exception($"Không tìm thấy ingredientProduct với ID {orderDetail.IngredientProductId}");
+                            throw new Exception($"Không tìm thấy cartItem với ID {cartItemId}");
                         }
 
-                        var ingredientQuantityProduct = await _ingredientQuantityService.GetByIdAndProductType(ingredientProducts.IngredientId, ingredientProducts.ProductType);
+                        var ingredientQuantityProduct = await _ingredientQuantityService.GetByIdAndProductType(ingredient.Id, cartItem.ProductType);
 
                         if (ingredientQuantityProduct == null)
                         {
-                            throw new Exception($"Không tìm thấy nguyên liệu với ID {ingredientProducts.IngredientId}");
+                            throw new Exception($"Không tìm thấy nguyên liệu với ID {ingredient.Id}");
                         }
                         ingredientQuantityProduct.Quantity += orderDetail.Quantity;
                         var a = _mapper.Map<IngredientQuantityRequest>(ingredientQuantityProduct);

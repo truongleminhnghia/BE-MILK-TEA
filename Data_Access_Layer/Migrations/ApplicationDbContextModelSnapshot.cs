@@ -122,19 +122,42 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("cart_id");
 
-                    b.Property<Guid>("IngredientProductId")
+                    b.Property<DateTime?>("CreateAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("create_at");
+
+                    b.Property<Guid>("IngredientId")
                         .HasColumnType("char(36)")
-                        .HasColumnName("ingredient_product_id");
+                        .HasColumnName("ingredient_id");
+
+                    b.Property<bool>("IsCart")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("isCart");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("double")
+                        .HasColumnName("price");
+
+                    b.Property<int>("ProductType")
+                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("quantity");
 
+                    b.Property<double>("TotalPrice")
+                        .HasColumnType("double")
+                        .HasColumnName("total_price");
+
+                    b.Property<DateTime?>("UpdateAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("update_at");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CartId");
 
-                    b.HasIndex("IngredientProductId");
+                    b.HasIndex("IngredientId");
 
                     b.ToTable("cart_item");
                 });
@@ -601,9 +624,12 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("order_detail_id");
 
-                    b.Property<Guid>("IngredientProductId")
+                    b.Property<Guid>("CartItemId")
                         .HasColumnType("char(36)")
-                        .HasColumnName("ingredient_product_id");
+                        .HasColumnName("cart_item_id");
+
+                    b.Property<Guid?>("IngredientProductId")
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("char(36)")
@@ -618,6 +644,8 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("quantity");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CartItemId");
 
                     b.HasIndex("IngredientProductId");
 
@@ -863,15 +891,15 @@ namespace Data_Access_Layer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Data_Access_Layer.Entities.IngredientProduct", "IngredientProduct")
+                    b.HasOne("Data_Access_Layer.Entities.Ingredient", "Ingredient")
                         .WithMany("CartItems")
-                        .HasForeignKey("IngredientProductId")
+                        .HasForeignKey("IngredientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cart");
 
-                    b.Navigation("IngredientProduct");
+                    b.Navigation("Ingredient");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Customer", b =>
@@ -1010,11 +1038,15 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Entities.IngredientProduct", "IngredientProducts")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("IngredientProductId")
+                    b.HasOne("Data_Access_Layer.Entities.CartItem", "CartItems")
+                        .WithMany()
+                        .HasForeignKey("CartItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Data_Access_Layer.Entities.IngredientProduct", null)
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("IngredientProductId");
 
                     b.HasOne("Data_Access_Layer.Entities.Order", "Orders")
                         .WithMany("OrderDetails")
@@ -1022,7 +1054,7 @@ namespace Data_Access_Layer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("IngredientProducts");
+                    b.Navigation("CartItems");
 
                     b.Navigation("Orders");
                 });
@@ -1106,6 +1138,8 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Ingredient", b =>
                 {
+                    b.Navigation("CartItems");
+
                     b.Navigation("Images");
 
                     b.Navigation("IngredientProducts");
@@ -1121,8 +1155,6 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.IngredientProduct", b =>
                 {
-                    b.Navigation("CartItems");
-
                     b.Navigation("OrderDetails");
                 });
 

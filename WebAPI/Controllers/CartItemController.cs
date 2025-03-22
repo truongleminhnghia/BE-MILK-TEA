@@ -1,7 +1,9 @@
 
-﻿using AutoMapper;
+using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
+using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
+using Business_Logic_Layer.Services.Carts;
 using Data_Access_Layer.Entities;
 
 using Microsoft.AspNetCore.Mvc;
@@ -14,123 +16,87 @@ namespace WebAPI.Controllers
     public class CartItemController : ControllerBase
     {
         private readonly ICartItemService _cartItemService;
-
-        private readonly ICartService _cartService;
-        private readonly IMapper _mapper;
-        public CartItemController(ICartService cartService, IMapper mapper, ICartItemService cartItemService)
+        public CartItemController(ICartItemService cartItemService)
         {
-            _cartService = cartService;
-            _mapper = mapper;
             _cartItemService = cartItemService;
         }
 
-        //add item to cart
-        [HttpPost("add")]
-        public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
+        [HttpPost]
+        public async Task<IActionResult> CreateCartItem([FromBody] CartItemRequest request)
         {
-            if (request == null || request.AccountId == Guid.Empty || request.IngredientProductId == Guid.Empty || request.Quantity <= 0)
-            {
-                return BadRequest(new { message = "Dữ liệu không hợp lệ!" });
-            }
-
             try
             {
-                // Gọi phương thức lưu dữ liệu mà không cần gán kết quả
-                await _cartService.AddToCartAsync(request.AccountId, request.IngredientProductId, request.Quantity);
-
-                return Ok(new
-                {
-                    success = true,
-                    code = 200,
-                    message = "Thành công cho item vào cart!",
-                    data = new
-                    {
-                        accountId = request.AccountId,
-                        ingredientProductId = request.IngredientProductId,
-                        quantity = request.Quantity
-                    }
-                });
+                var result = await _cartItemService.CreateCartItem(request);
+                return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Thêm sản phẩm vào giỏ hàng thành công", result));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi add to cart", error = ex.Message });
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, false, ex.Message));
             }
         }
 
-        //get cart item detail
-        [HttpGet("{cartItemId}")]
-        public async Task<IActionResult> GetCartItemById(Guid cartItemId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCartItem([FromRoute] Guid id)
         {
-            if (cartItemId == Guid.Empty)
-            {
-                return BadRequest(new { message = "Cart Item ID không hợp lệ!" });
-            }
-
-            var cartItem = await _cartItemService.GetByIdAsync(cartItemId);
-
-            if (cartItem == null)
-            {
-                return NotFound(new { message = "Không tìm thấy mục trong giỏ hàng!" });
-            }
-
-            return Ok(new
-            {
-                success = true,
-                code = 200,
-                message = "Lấy dữ liệu thành công!",
-                data = cartItem
-            });
-        }
-
-        //update quantity of cart item
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateCartItem([FromBody] UpdateCartItemRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var success = await _cartService.UpdateCartItemQuantityAsync(request.AccountId, request.IngredientProductId, request.Quantity);
-            if (!success)
-            {
-                return NotFound(new { message = "Sản phẩm không tồn tại trong giỏ hàng!" });
-            }
-
-            return Ok(new
-            {
-                success = true,
-                code = 200,
-                message = "Cap nhat thành công!"
-            });
-        }
-
-        //remove item from cart
-        [HttpDelete("remove")]
-        public async Task<IActionResult> RemoveFromCart([FromBody] RemoveCartItemRequest request)
-        {
-            if (request == null || request.AccountId == Guid.Empty || request.IngredientProductId == Guid.Empty)
-            {
-                return BadRequest(new { message = "Dữ liệu không hợp lệ!" });
-            }
-
             try
             {
-                var result = await _cartService.RemoveItemAsync(request.AccountId, request.IngredientProductId);
-
-                if (result)
+                var success = await _cartItemService.Delete(id);
+                if (!success)
                 {
-                    return Ok(new { message = "Xóa sản phẩm thành công!" });
+                    return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, false, "Không tìm thấy sản phẩm trong giỏ hàng"));
                 }
-
-                return BadRequest(new { message = "Không thể xóa sản phẩm khỏi giỏ hàng!" });
+                return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Xóa sản phẩm khỏi giỏ hàng thành công"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi hệ thống!", error = ex.Message });
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, false, ex.Message));
             }
         }
-    
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCartItemById([FromRoute] Guid id)
+        {
+            try
+            {
+                var result = await _cartItemService.GetById(id);
+                return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Lấy thông tin sản phẩm thành công", result));
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, false, ex.Message));
+            }
+        }
+
+        [HttpGet("cart/{cartId}")]
+        public async Task<IActionResult> GetCartItemsByCartId([FromRoute] Guid cartId)
+        {
+            try
+            {
+                var result = await _cartItemService.GetByCart(cartId);
+                return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Lấy danh sách sản phẩm trong giỏ hàng thành công", result));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, false, ex.Message));
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCartItem([FromRoute] Guid id, [FromBody] UpdateCartItemRequest request)
+        {
+            try
+            {
+                var success = await _cartItemService.UpdateCartItem(id, request);
+                if (!success)
+                {
+                    return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, false, "Cập nhật thất bại, không tìm thấy sản phẩm trong giỏ hàng"));
+                }
+                return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Cập nhật sản phẩm trong giỏ hàng thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, false, ex.Message));
+            }
+        }
     }
 }

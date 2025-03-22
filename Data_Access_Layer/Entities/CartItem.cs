@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using Data_Access_Layer.Enum;
 
 namespace Data_Access_Layer.Entities
 {
@@ -20,16 +21,28 @@ namespace Data_Access_Layer.Entities
         [Required]
         public int Quantity { get; set; }
 
+        public ProductType ProductType { get; set; }
+
         [Column("cart_id")]
         [Required]
         [ForeignKey("CartId")]
         public Guid CartId { get; set; }
 
-        [Column("ingredient_product_id")]
+        [ForeignKey("IngredientId")]
         [Required]
-        [ForeignKey("IngredientProductId")]
-        public Guid IngredientProductId { get; set; }
+        public Guid IngredientId { get; set; }
+
+        [Column("price")]
+        public double? Price { get; set; }
+
+        [Column("total_price")]
+        public double? TotalPrice { get; set; }
+
+        [Column("isCart")]
+        [Required]
+        public bool IsCart { get; set; }
+
         public Cart? Cart { get; set; }
-        public IngredientProduct? IngredientProduct { get; set; }
+        public Ingredient? Ingredient { get; set; }
     }
 }

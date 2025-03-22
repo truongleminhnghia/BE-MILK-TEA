@@ -13,9 +13,11 @@ namespace Data_Access_Layer.Repositories
     public class OrderDetailRepository : IOrderDetailRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICartItemRepository _cartItemRepository;
 
-        public OrderDetailRepository(ApplicationDbContext context)
+        public OrderDetailRepository(ApplicationDbContext context, ICartItemRepository cartItemRepository)
         {
+            _cartItemRepository = cartItemRepository;
             _context = context;
         }
         public async Task<List<OrderDetail>> GetAllOrdersDetailAsync(Guid orderId, string? search, string? sortBy, bool isDescending, int page, int pageSize)
@@ -28,7 +30,7 @@ namespace Data_Access_Layer.Repositories
 
                 if (!string.IsNullOrEmpty(search))
                 {
-                    query = query.Where(od => od.IngredientProductId.ToString().Contains(search));
+                    query = query.Where(od => od.CartItemId.ToString().Contains(search));
                 }
 
                 if (!string.IsNullOrEmpty(sortBy))
@@ -69,7 +71,10 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<OrderDetail?> GetByIdAsync(Guid id)
         {
-            return await _context.OrderDetails.FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.OrderDetails
+             .Include(od => od.CartItems)
+             .Include(od => od.Orders)
+             .FirstOrDefaultAsync(od => od.Id == id);
         }
        public async Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail)
         {
@@ -78,13 +83,14 @@ namespace Data_Access_Layer.Repositories
             {
                 return null;
             }
-            var ingredient = await _context.IngredientProducts.FirstOrDefaultAsync(i => i.Id == orderDetail.IngredientProductId);
+            var cartItem = await _cartItemRepository.GetById(orderDetail.Id);
+            var ingredient = await _context.Ingredients.FirstOrDefaultAsync(i => i.Id == cartItem.IngredientId);
             if (ingredient == null)
             {
                 throw new Exception("Ingredient not found.");
             }
             existingOrderDetail.Quantity = orderDetail.Quantity;
-            existingOrderDetail.Price = orderDetail.Quantity * ingredient.TotalPrice;
+            existingOrderDetail.Price = orderDetail.Quantity * cartItem.Price;
             await _context.SaveChangesAsync();
             return existingOrderDetail;
         }
