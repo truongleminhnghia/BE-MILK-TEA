@@ -14,7 +14,7 @@ namespace Data_Access_Layer.Repositories
             Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus);
         Task<(List<Recipe>, int)> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
-    RecipeStatusEnum? recipeStatus, Guid? categoryId,
+    RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
     DateTime? startDate, DateTime? endDate,
     int page, int pageSize);
         Task<Recipe?> GetByTitleAsync(string title);

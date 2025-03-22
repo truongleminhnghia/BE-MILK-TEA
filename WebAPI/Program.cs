@@ -23,6 +23,7 @@ using Business_Logic_Layer.Services.PromotionService;
 using Business_Logic_Layer.Services.PromotionDetailService;
 using Business_Logic_Layer.Services.DashboardService;
 using Business_Logic_Layer.Services.Carts;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -226,18 +227,26 @@ builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy(
+//         MyAllowSpecificOrigins,
+//         policy =>
+//         {
+//             policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500", "http://192.168.0.4:8081", "exp://192.168.0.4:8081") // Replace with your frontend URL
+//            .AllowAnyMethod()
+//            .AllowAnyHeader();
+//         //    .AllowCredentials();
+//         });
+// });
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(
-        MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500", "http://192.168.0.2:5173") // Replace with your frontend URL
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
+    options.AddPolicy("AllowExpoApp",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
 });
+
 builder.Services.AddHttpClient<AuthenService>();
 var app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -269,7 +278,7 @@ app.Use(
     }
 );
 app.MapControllers();
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors("AllowExpoApp");
 var webSocketOptions = new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromMinutes(

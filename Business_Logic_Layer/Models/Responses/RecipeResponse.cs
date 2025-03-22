@@ -15,6 +15,9 @@ namespace Business_Logic_Layer.Models.Responses
         public Guid Id { get; set; }
         public string RecipeTitle { get; set; }
         public string Content { get; set; }
+        public string ImageUrl { get; set; }
+        public RecipeStatusEnum RecipeStatus { get; set; }
+        public RecipeLevelEnum RecipeLevel { get; set; }
         public CategoryResponse Category { get; set; }
         public List<IngredientResponse> Ingredients { get; set; } = new();
         public List<RecipeIngredientResponse> IngredientRecipeResponse { get; set; } = new List<RecipeIngredientResponse>();
