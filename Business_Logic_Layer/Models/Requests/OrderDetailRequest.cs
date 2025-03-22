@@ -9,7 +9,7 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class OrderDetailRequest
     {
-        public Guid IngredientProductId { get; set; }
+        public Guid CartItemId { get; set; }
         public int Quantity { get; set; }
     }
 }
