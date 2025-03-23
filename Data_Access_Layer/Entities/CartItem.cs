@@ -36,7 +36,7 @@ namespace Data_Access_Layer.Entities
                 public Guid IngredientId { get; set; }
 
                 [Column("price")]
-                public double? Price { get; set; }
+                public double Price { get; set; }
 
                 [Column("total_price")]
                 public double? TotalPrice { get; set; }

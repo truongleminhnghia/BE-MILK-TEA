@@ -84,12 +84,12 @@ namespace Business_Logic_Layer.Services
                         throw new Exception($"Không tìm thấy nguyên liệu với ID {ingredientProduct.Id}");
                     }
 
-                    if (ingredientQuantityProduct.Quantity < orderDetail.Quantity)
+                    if (ingredientQuantityProduct.Quantity < cartItem.Quantity)
                     {
-                        throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({ingredientQuantityProduct.Quantity})");
+                        throw new Exception($"Số lượng đặt hàng ({cartItem.Quantity}) vượt quá số lượng sẵn có ({ingredientQuantityProduct.Quantity})");
                     }
                     //Trừ số lượng đang có trong database = số lượng đặt
-                    ingredientQuantityProduct.Quantity -= orderDetail.Quantity;
+                    ingredientQuantityProduct.Quantity -= cartItem.Quantity;
 
                     //Gán ingredientQuantityProduct thành IngredientQuantityRequest
                     var ingredientQuantityRequest = _mapper.Map<IngredientQuantityRequest>(ingredientQuantityProduct);
@@ -99,7 +99,7 @@ namespace Business_Logic_Layer.Services
                     //var chosenIngredient = await _ingredientService.GetById(ingredientProduct.IngredientId);
                     orderDetails.OrderId = createdOrder.Id;
                     orderDetails.CartItemId = orderDetail.CartItemId;
-                    orderDetails.Quantity = orderDetail.Quantity;
+                    orderDetails.Quantity = cartItem.Quantity;
 
 
                     //orderDetails.Price = orderDetail.Price;
