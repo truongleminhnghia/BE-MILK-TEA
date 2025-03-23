@@ -9,12 +9,12 @@ namespace Business_Logic_Layer.Services
     {
         Task<RecipeResponse> CreateRecipe(RecipeRequest request);
         Task<RecipeResponse?> GetRecipeById(Guid recipeId);
-        Task<RecipeResponse?> UpdateRecipe(Guid recipeId, RecipeRequest request);        
+        Task<RecipeResponse?> UpdateRecipe(Guid recipeId, RecipeRequest request);
         Task<PageResult<RecipeResponse>> GetAllRecipesAsync(
-            string? search, string? sortBy, bool isDescending,
-            RecipeStatusEnum? recipeStatus, Guid? categoryId,
-            DateTime? startDate, DateTime? endDate,
-            int page, int pageSize);
-
+    string? search, string? sortBy, bool isDescending,
+    RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
+    DateTime? startDate, DateTime? endDate,
+    int page, int pageSize);
+        Task<RecipeResponse?> UpdateRecipeStatusAsync(Guid recipeId, RecipeStatusEnum newStatus);
     }
 }

@@ -5,5 +5,6 @@
         BIN, // thùng
         BAG, // bịch
         BOX, // hộp
+
     }
 }
