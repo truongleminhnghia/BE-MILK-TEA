@@ -108,7 +108,7 @@ namespace Business_Logic_Layer.Services
                     var createOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
                     orderDetailList.Add(createOrderDetail);
                     createdOrder.Quantity += createOrderDetail.Quantity;
-                    createdOrder.TotalPrice += orderDetails.Price * createOrderDetail.Quantity;
+                    createdOrder.TotalPrice += ingredientProduct.PriceOrigin * createOrderDetail.Quantity;
 
                 }
                 createdOrder.OrderDetails = orderDetailList;
