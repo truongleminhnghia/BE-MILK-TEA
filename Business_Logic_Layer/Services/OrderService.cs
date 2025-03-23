@@ -96,7 +96,7 @@ namespace Business_Logic_Layer.Services
                     await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, ingredientQuantityRequest);
 
                     //tạo orderdetail
-                    //var chosenIngredient = await _ingredientService.GetById(ingredientProduct.IngredientId);
+                    
                     orderDetails.OrderId = createdOrder.Id;
                     orderDetails.CartItemId = orderDetail.CartItemId;
                     orderDetails.Quantity = cartItem.Quantity;
@@ -108,7 +108,7 @@ namespace Business_Logic_Layer.Services
                     var createOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
                     orderDetailList.Add(createOrderDetail);
                     createdOrder.Quantity += createOrderDetail.Quantity;
-                    createdOrder.TotalPrice += createOrderDetail.Price * createOrderDetail.Quantity;
+                    createdOrder.TotalPrice += orderDetails.Price * createOrderDetail.Quantity;
 
                 }
                 createdOrder.OrderDetails = orderDetailList;
