@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Business_Logic_Layer.Models;
+using Business_Logic_Layer.Utils;
 
 namespace Business_Logic_Layer.Services
 {
@@ -24,8 +25,9 @@ namespace Business_Logic_Layer.Services
         private readonly ApplicationDbContext _context;
         private readonly IIngredientRecipeRepository _ingredientRecipeRepository;
         private readonly ICategoryService _categoryService;
+        private readonly Source _source;
 
-        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository, ICategoryService categoryService)
+        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository, ICategoryService categoryService, Source source)
         {
             _recipeRepository = recipeRepository;
             _ingredientRepository = ingredientRepository;
@@ -33,6 +35,7 @@ namespace Business_Logic_Layer.Services
             _context = applicationDbContext;
             _ingredientRecipeRepository = ingredientRecipeRepository;
             _categoryService = categoryService;
+            _source = source;
         }
 
         public async Task<RecipeResponse> CreateRecipe(RecipeRequest request)
@@ -49,19 +52,18 @@ namespace Business_Logic_Layer.Services
                         throw new Exception("Danh mục không phải là danh mục công thức.");
                     }
 
-                    // Kiểm tra dữ liệu đầu vào
                     if (!IsValidText(request.RecipeTitle))
                     {
                         throw new Exception("Tên công thức chứa ký tự không hợp lệ.");
                     }
 
-                    // Chuẩn hóa dữ liệu
                     request.RecipeTitle = NormalizeText(request.RecipeTitle);
-                    var checkRepcipeTitle = await _recipeRepository.GetByTitleAsync(request.RecipeTitle);
-                    if (checkRepcipeTitle != null)
+                    var checkRecipeTitle = await _recipeRepository.GetByTitleAsync(request.RecipeTitle);
+                    if (checkRecipeTitle != null)
                     {
                         throw new Exception("Tên công thức đã tồn tại.");
                     }
+
                     request.Content = string.IsNullOrWhiteSpace(request.Content) ? null : NormalizeText(request.Content);
 
                     var recipe = _mapper.Map<Recipe>(request);
@@ -69,7 +71,6 @@ namespace Business_Logic_Layer.Services
 
                     await _recipeRepository.CreateRecipe(recipe);
 
-                    // Kiểm tra nguyên liệu
                     foreach (var ingredientRequest in request.Ingredients)
                     {
                         var ingredient = await _ingredientRepository.GetById(ingredientRequest.IngredientId);
@@ -94,6 +95,7 @@ namespace Business_Logic_Layer.Services
                 }
             });
         }
+
 
 
         public async Task<RecipeResponse?> GetRecipeById(Guid recipeId)
@@ -139,6 +141,8 @@ namespace Business_Logic_Layer.Services
                 recipe.RecipeTitle = request.RecipeTitle;
                 recipe.Content = request.Content;
                 recipe.CategoryId = request.CategoryId;
+                recipe.RecipeLevel = request.recipeLevel;
+                recipe.ImageUrl = request.ImageUrl;
 
                 // Xóa tất cả nguyên liệu cũ trước khi thêm mới
                 await _recipeRepository.DeleteIngredientsByRecipeIdAsync(recipeId);
@@ -166,15 +170,39 @@ namespace Business_Logic_Layer.Services
 
         public async Task<PageResult<RecipeResponse>> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
-    RecipeStatusEnum? recipeStatus, Guid? categoryId,
+    RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
     DateTime? startDate, DateTime? endDate,
     int page, int pageSize)
         {
             var (recipes, total) = await _recipeRepository.GetAllRecipesAsync(
-                search, sortBy, isDescending, recipeStatus, categoryId, startDate, endDate, page, pageSize);
+        search, sortBy, isDescending, recipeStatus, categoryId, recipeLevel, startDate, endDate, page, pageSize);
             if (recipes == null)
             {
                 throw new Exception("Recipe repository returned null.");
+            }
+
+            // Lấy tài khoản hiện tại (nếu không có, xem là Guest)
+            var currentAccount = await _source.GetCurrentAccount();
+
+            // Nếu không có tài khoản (Guest), chỉ thấy công thức PUBLIC
+            if (currentAccount == null)
+            {
+                recipes = recipes.Where(recipe => recipe.RecipeLevel == RecipeLevelEnum.PUBLIC).ToList();
+            }
+            else
+            {
+                // Nếu có tài khoản, lọc theo cấp bậc của tài khoản
+                switch (currentAccount.Customer.AccountLevel)
+                {
+                    case AccountLevelEnum.NORMAL:
+                        recipes = recipes.Where(recipe => recipe.RecipeLevel == RecipeLevelEnum.PUBLIC || recipe.RecipeLevel == RecipeLevelEnum.NORMAL).ToList();
+                        break;
+                    case AccountLevelEnum.VIP:
+                        // VIP thấy tất cả, không cần lọc thêm
+                        break;
+                    default:
+                        throw new UnauthorizedAccessException("Loại tài khoản không hợp lệ.");
+                }
             }
 
             return new PageResult<RecipeResponse>
@@ -185,7 +213,6 @@ namespace Business_Logic_Layer.Services
                 Total = total
             };
         }
-
 
         public async Task<RecipeResponse?> UpdateRecipeStatusAsync(Guid recipeId, RecipeStatusEnum newStatus)
         {
@@ -215,7 +242,6 @@ namespace Business_Logic_Layer.Services
             }
         }
 
-
         // Hàm chuẩn hóa dữ liệu (xoá khoảng trắng thừa, không có ký tự đặc biệt)
         private string NormalizeText(string input)
         {
@@ -240,6 +266,9 @@ namespace Business_Logic_Layer.Services
                 Id = recipe.Id,
                 RecipeTitle = recipe.RecipeTitle,
                 Content = recipe.Content,
+                ImageUrl = recipe.ImageUrl,
+                RecipeStatus = recipe.RecipeStatus,
+                RecipeLevel = recipe.RecipeLevel,
 
                 Category = recipe.Category == null ? null : new CategoryResponse
                 {

@@ -36,6 +36,10 @@ namespace Data_Access_Layer.Entities
         [EnumDataType(typeof(RecipeStatusEnum))]
         public RecipeStatusEnum RecipeStatus { get; set; }
 
+        [Column("recipe_level")]
+        [EnumDataType(typeof(RecipeLevelEnum))]
+        public RecipeLevelEnum RecipeLevel { get; set; }
+
         public Category? Category { get; set; }
 
         public ICollection<IngredientRecipe>? IngredientRecipes { get; set; }

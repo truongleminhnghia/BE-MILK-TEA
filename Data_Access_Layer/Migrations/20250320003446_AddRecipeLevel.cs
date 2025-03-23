@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data_Access_Layer.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class AddRecipeLevel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -253,6 +253,7 @@ namespace Data_Access_Layer.Migrations
                     image_url = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     category_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     recipe_status = table.Column<int>(type: "int", nullable: false),
+                    recipe_level = table.Column<int>(type: "int", nullable: false),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
@@ -353,13 +354,9 @@ namespace Data_Access_Layer.Migrations
                 {
                     cart_item_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     quantity = table.Column<int>(type: "int", nullable: false),
-                    product_type = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ProductType = table.Column<int>(type: "int", nullable: false),
                     cart_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    IngredientId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    price = table.Column<double>(type: "double", nullable: true),
-                    total_price = table.Column<double>(type: "double", nullable: true),
-                    isCart = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ingredient_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     create_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     update_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
@@ -373,8 +370,8 @@ namespace Data_Access_Layer.Migrations
                         principalColumn: "cart_id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_cart_item_ingredient_IngredientId",
-                        column: x => x.IngredientId,
+                        name: "FK_cart_item_ingredient_ingredient_id",
+                        column: x => x.ingredient_id,
                         principalTable: "ingredient",
                         principalColumn: "ingredient_id",
                         onDelete: ReferentialAction.Cascade);
@@ -536,16 +533,16 @@ namespace Data_Access_Layer.Migrations
                     quantity = table.Column<int>(type: "int", nullable: false),
                     price = table.Column<double>(type: "double", nullable: false),
                     order_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    cart_item_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                    ingredient_product_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_order_detail", x => x.order_detail_id);
                     table.ForeignKey(
-                        name: "FK_order_detail_cart_item_cart_item_id",
-                        column: x => x.cart_item_id,
-                        principalTable: "cart_item",
-                        principalColumn: "cart_item_id",
+                        name: "FK_order_detail_ingredient_product_ingredient_product_id",
+                        column: x => x.ingredient_product_id,
+                        principalTable: "ingredient_product",
+                        principalColumn: "ingredient_product_id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_order_detail_order_info_order_id",
@@ -574,9 +571,9 @@ namespace Data_Access_Layer.Migrations
                 column: "cart_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_cart_item_IngredientId",
+                name: "IX_cart_item_ingredient_id",
                 table: "cart_item",
-                column: "IngredientId");
+                column: "ingredient_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_customer_account_id",
@@ -641,9 +638,9 @@ namespace Data_Access_Layer.Migrations
                 column: "ingredient_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_order_detail_cart_item_id",
+                name: "IX_order_detail_ingredient_product_id",
                 table: "order_detail",
-                column: "cart_item_id");
+                column: "ingredient_product_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_order_detail_order_id",
@@ -686,6 +683,9 @@ namespace Data_Access_Layer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "cart_item");
+
+            migrationBuilder.DropTable(
                 name: "customer");
 
             migrationBuilder.DropTable(
@@ -693,9 +693,6 @@ namespace Data_Access_Layer.Migrations
 
             migrationBuilder.DropTable(
                 name: "image");
-
-            migrationBuilder.DropTable(
-                name: "ingredient_product");
 
             migrationBuilder.DropTable(
                 name: "ingredient_promotion");
@@ -725,19 +722,19 @@ namespace Data_Access_Layer.Migrations
                 name: "Tokens");
 
             migrationBuilder.DropTable(
+                name: "cart");
+
+            migrationBuilder.DropTable(
                 name: "recipe");
 
             migrationBuilder.DropTable(
-                name: "cart_item");
+                name: "ingredient_product");
 
             migrationBuilder.DropTable(
                 name: "order_info");
 
             migrationBuilder.DropTable(
                 name: "promotion");
-
-            migrationBuilder.DropTable(
-                name: "cart");
 
             migrationBuilder.DropTable(
                 name: "ingredient");
