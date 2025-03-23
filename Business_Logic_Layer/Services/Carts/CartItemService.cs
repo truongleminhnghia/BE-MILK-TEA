@@ -123,13 +123,13 @@ namespace Business_Logic_Layer.Services.Carts
             // Cập nhật giá theo IsCart
             if (item.IsCart)
             {
-                item.Price = OriginPrice;
-                item.TotalPrice = OriginTotalPrice;
+                item.Price = 0;
+                item.TotalPrice = 0; // Khi là giỏ hàng, lưu giá = 0
             }
             else
             {
-                item.Price = 0;
-                item.TotalPrice = 0;
+                item.Price = OriginPrice;
+                item.TotalPrice = OriginTotalPrice;
             }
 
             // Luôn lưu vào database
