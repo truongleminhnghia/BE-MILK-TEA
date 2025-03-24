@@ -140,6 +140,7 @@ namespace Business_Logic_Layer.Services
                     Account account = _mapper.Map<Account>(request);
                     account.Password = _passwordHasher.HashPassword(request.Password);
                     account.AccountStatus = AccountStatus.ACTIVE;
+                    account.CreateAt = DateTime.UtcNow;
                     if (isAdmin)
                     {
                         account.RoleName = request.RoleName;

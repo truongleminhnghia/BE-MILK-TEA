@@ -128,14 +128,14 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("by-ingredient/{ingredientId}")]
-        public async Task<IActionResult> GetByIngredientId(Guid ingredientId)
+        public async Task<IActionResult> GetByIngredientId(Guid? ingredientId, string? ingredientCode)
         {
             try
             {
-                var ingredientProducts = await _ingredientProductService.GetByIngredientIdAsync(ingredientId);
+                var ingredientProducts = await _ingredientProductService.GetByIngredientIdOrCodeAsync(ingredientId, ingredientCode);
                 if (ingredientProducts == null || !ingredientProducts.Any())
                 {
-                    return NotFound("Không tìm thấy Ingredient Id.");
+                    return NotFound("Không tìm thấy Ingredient Product.");
                 }
                 return Ok(new ApiResponse(
                         HttpStatusCode.OK.GetHashCode(),

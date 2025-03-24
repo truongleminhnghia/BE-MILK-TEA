@@ -102,6 +102,8 @@ namespace Business_Logic_Layer.Services
                 if (!string.IsNullOrEmpty(request.FirstName)) account.FirstName = request.FirstName;
                 if (!string.IsNullOrEmpty(request.LastName)) account.LastName = request.LastName;
                 if (!string.IsNullOrEmpty(request.Password)) account.Password = request.Password;
+                if (!string.IsNullOrEmpty(request.PhoneNumber)) account.Phone = request.PhoneNumber;
+                if (!string.IsNullOrEmpty(request.ImgUrl)) account.ImageUrl = request.ImgUrl;
 
                 // Cập nhật thông tin Customer nếu có
                 if (account.Customer != null && request.Customer != null && account.RoleName == RoleName.ROLE_CUSTOMER)
@@ -109,13 +111,18 @@ namespace Business_Logic_Layer.Services
                     account.Customer.TaxCode = request.Customer.TaxCode ?? account.Customer.TaxCode;
                     account.Customer.Address = request.Customer.Address ?? account.Customer.Address;
                 }
-
-                // Cập nhật thông tin Employee nếu có
-                if (account.Employee != null && request.Employee != null && account.RoleName == RoleName.ROLE_STAFF)
+                else
                 {
-                    account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
+                    throw new ArgumentException("Loại tài khoản không hợp lệ.");
                 }
 
+                    // BO CAP NHAT REFCODE CHO EMPLOYEE
+                    // Cập nhật thông tin Employee nếu có
+                    //if (account.Employee != null && request.Employee != null && account.RoleName == RoleName.ROLE_STAFF)
+                    //{
+                    //    account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
+                    //}
+                    account.UpdateAt = DateTime.UtcNow;
                 await _accountRepository.UpdateAccount(account);
                 return account;
             }

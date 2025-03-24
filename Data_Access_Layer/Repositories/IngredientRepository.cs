@@ -85,8 +85,8 @@ namespace Data_Access_Layer.Repositories
             string? search,
             string? categorySearch,
             Guid? categoryId,
-            DateTime? startDate,
-            DateTime? endDate,
+            DateOnly? startDate,
+            DateOnly? endDate,
             IngredientStatus? status,
             decimal? minPrice,
             decimal? maxPrice,
@@ -136,10 +136,12 @@ namespace Data_Access_Layer.Repositories
 
             if (startDate.HasValue || endDate.HasValue)
             {
-                DateTime adjustedStart = startDate?.Date ?? DateTime.MinValue;
-                DateTime adjustedEnd = endDate?.Date.AddDays(1).AddTicks(-1) ?? DateTime.MaxValue;
+                DateTime adjustedStart = startDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue;
+                DateTime adjustedEnd = endDate?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.MaxValue;
+
                 query = query.Where(i => i.CreateAt >= adjustedStart && i.CreateAt <= adjustedEnd);
             }
+
 
             return query;
         }
