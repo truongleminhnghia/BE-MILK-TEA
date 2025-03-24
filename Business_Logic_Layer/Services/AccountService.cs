@@ -15,6 +15,7 @@ using System.Web;
 using Azure.Core;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Business_Logic_Layer.Services
 {
@@ -61,12 +62,27 @@ namespace Business_Logic_Layer.Services
                 {
                     throw new Exception("Id bị thiếu");
                 }
-                var _account = await _accountRepository.GetById(id);
-                if (_account == null)
+
+                //kiem tra xem user dang dang nhap co phai la admin hay khong
+                //neu khong phai thi se tra ve thong tin cua user do
+                Account account;
+                var currentUser = await _source.GetCurrentAccount();
+                if (currentUser.RoleName != RoleName.ROLE_ADMIN)
+                {
+                    account = await _accountRepository.GetById(currentUser.Id);
+                    if (account == null)
+                    {
+                        throw new Exception("Tài khoản không tồn tại");
+                    }
+                    return MapToAccountResponse.ComplexAccountResponse(account);
+                }
+
+                account = await _accountRepository.GetById(id);
+                if (account == null)
                 {
                     throw new Exception("Tài khoản không tồn tại");
                 }
-                return MapToAccountResponse.ComplexAccountResponse(_account);
+                return MapToAccountResponse.ComplexAccountResponse(account);
             }
             catch (Exception ex)
             {
@@ -116,6 +132,11 @@ namespace Business_Logic_Layer.Services
         {
             var (accounts, total) = await _accountRepository.GetAllAccountsAsync(
                 search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
+
+            if (accounts.IsNullOrEmpty())
+            {
+                throw new Exception("Không tìm thấy danh sach tài khoản nào");
+            }
 
             return new PageResult<AccountResponse>
             {

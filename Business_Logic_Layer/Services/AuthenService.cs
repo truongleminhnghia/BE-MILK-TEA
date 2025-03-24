@@ -68,12 +68,12 @@ namespace Business_Logic_Layer.Services
                 Account account;
                 string token = "";
 
-                if (type.Trim().IsNullOrEmpty() || type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
+                if (string.IsNullOrEmpty(type?.Trim()) || type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
                     account = await _accountRepository.GetByEmail(request.Email);
                     if (account == null)
                     {
-                        throw new Exception("Tài khoản không tồn tại");
+                        throw new UnauthorizedAccessException("Tài khoản không tồn tại");
                     }
                     bool checkPassword = _passwordHasher.VerifyPassword(request.Password, account.Password);
                     if (checkPassword)
@@ -82,7 +82,7 @@ namespace Business_Logic_Layer.Services
                     }
                     else
                     {
-                        throw new Exception("Mật khẩu không hợp lệ");
+                        throw new UnauthorizedAccessException("Mật khẩu không hợp lệ");
                     }
                 }
                 else if (type.Trim().Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
@@ -102,13 +102,14 @@ namespace Business_Logic_Layer.Services
                         account = _mapper.Map<Account>(registerRequest);
                         account.AccountStatus = AccountStatus.ACTIVE;
                         account.RoleName = RoleName.ROLE_CUSTOMER;
+                        account.CreateAt = DateTime.UtcNow;
                         await _accountRepository.Create(account);
                     }
                     token = _jwtService.GenerateJwtToken(account);
                 }
                 else
                 {
-                    throw new Exception("Login Type không hợp lệ");
+                    throw new ArgumentException("Login Type không hợp lệ");
                 }
 
                 AccountResponse _accountResponse = _mapper.Map<AccountResponse>(account);
@@ -189,13 +190,8 @@ namespace Business_Logic_Layer.Services
                             await _employeeRepository.Create(account.Employee);
                         }
                     }
-                    else
-                    {
-                        throw new Exception("Bạn không có quyền thực hiện chức năng này");
-                    }
 
-
-                        await transaction.CommitAsync(); // Commit transaction khi mọi thứ thành công
+                    await transaction.CommitAsync(); // Commit transaction khi mọi thứ thành công
                     return MapToAccountResponse.ComplexAccountResponse(account);
                 }
                 catch (Exception ex)
