@@ -244,7 +244,7 @@ namespace Business_Logic_Layer.Services.IngredientProductService
                 .ToListAsync();
         }
 
-        public async Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid? ingredientId, string? ingredientCode)
+        public async Task<List<IngredientProduct>> GetByIngredientIdOrCodeAsync(Guid? ingredientId, string? ingredientCode)
         {
             return await _ingredientProductRepository.GetByIngredientIdAsync(ingredientId, ingredientCode);
         }
