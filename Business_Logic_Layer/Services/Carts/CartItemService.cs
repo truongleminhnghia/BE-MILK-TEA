@@ -111,19 +111,38 @@ namespace Business_Logic_Layer.Services.Carts
             {
                 cartExisting = await CreateNewCart(account);
             }
+
             CartItem item = _mapper.Map<CartItem>(cartItemRequest);
             item.CartId = cartExisting.Id;
             item.CreateAt = DateTime.Now;
             item.UpdateAt = DateTime.Now;
-            var cartItem = await _cartItemRepository.SaveCartItem(item);
-            if (cartItem == null)
+
+            double OriginPrice = GetPrice(ingre);
+            double OriginTotalPrice = OriginPrice * item.Quantity;
+
+            // Cập nhật giá theo IsCart
+            if (item.IsCart)
             {
-                throw new Exception("Thêm giỏ hàng thất bại");
+                item.Price = OriginPrice;
+                item.TotalPrice = OriginTotalPrice;
             }
+            else
+            {
+                item.Price = 0;
+                item.TotalPrice = 0;
+            }
+
+            // Luôn lưu vào database
+            CartItem cartItem = await _cartItemRepository.SaveCartItem(item);
+
+            // Đảm bảo cartItem không null trước khi thêm vào danh sách
             cartExisting.CartItems.Add(cartItem);
+
+            // Tạo response trả về
             CartItemResponse cartItemResponse = _mapper.Map<CartItemResponse>(cartItem);
-            cartItemResponse.Price = GetPrice(ingre);
-            cartItemResponse.TotalPrice = cartItemRequest.Quantity * cartItemResponse.Price;
+            cartItemResponse.Price = OriginPrice;
+            cartItemResponse.TotalPrice = OriginTotalPrice;
+
             return cartItemResponse;
         }
 
@@ -145,7 +164,7 @@ namespace Business_Logic_Layer.Services.Carts
         {
             if (cartId == null)
             {
-                throw new Exception("card id khoogn được rỗng");
+                throw new Exception("card id khong được rỗng");
             }
             var cartItems = await _cartItemRepository.GetByCart(cartId);
             if (cartItems == null)

@@ -76,6 +76,7 @@ var connectionString =
 
 
 
+
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new Exception("DATABASE_CONNECTION is not set!");
@@ -102,10 +103,10 @@ var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
 //muốn chạy thì comment từ đây lại, + xóa Migration
-// if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
-// {
-//   throw new InvalidOperationException("JWT environment variables are not set properly.");
-// }
+ if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
+ {
+   throw new InvalidOperationException("JWT environment variables are not set properly.");
+}
 
 // đăng kí xác thực
 builder

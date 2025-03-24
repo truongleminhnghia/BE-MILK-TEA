@@ -31,7 +31,7 @@ namespace WebAPI.Controllers
             try
             {
                 var cart = await _cartService.CreateCart(accountId);
-                return CreatedAtAction(nameof(accountId), new { id = cart.Id }, new ApiResponse(201, true, "Tạo giỏ hàng thành công", cart));
+                return Ok(new ApiResponse(201, true, "Tạo giỏ hàng thành công", cart));
             }
             catch (KeyNotFoundException ex)
             {

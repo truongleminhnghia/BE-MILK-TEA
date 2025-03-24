@@ -17,6 +17,7 @@ namespace Business_Logic_Layer.AutoMappers
         {
             CreateMap<OrderDetailRequest, OrderDetail>().ReverseMap();
             CreateMap<OrderDetail, OrderDetailResponse>().ReverseMap();
+            CreateMap<CreateOrderDetailRequest, OrderDetail>();
         }
     }
 }

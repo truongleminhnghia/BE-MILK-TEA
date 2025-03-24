@@ -30,7 +30,15 @@ namespace Business_Logic_Layer.Services.Carts
                 throw new Exception("Tài khoảng không tồn tại");
             }
             Cart newCart = await CreateNewCart(accountExisting);
+            try
+            {
             return _mapper.Map<CartResponse>(newCart);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<CartResponse> GetByAccount(Guid accountId)
@@ -84,12 +92,16 @@ namespace Business_Logic_Layer.Services.Carts
             cart.CreateAt = DateTime.Now;
             cart.UpdateAt = DateTime.Now;
             cart.CartItems = null;
-            var newCart = await _cartRepository.Save(cart);
-            if (newCart == null)
+
+            try
             {
-                throw new Exception("Tạo cart không thành công");
+                return await _cartRepository.Save(cart);
+
             }
-            return cart;
+            catch (Exception e)
+            {
+                throw new Exception( e.Message);
+            }
         }
     }
 }
