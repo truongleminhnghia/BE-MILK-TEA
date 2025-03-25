@@ -9,10 +9,11 @@ namespace Business_Logic_Layer.Models.Requests
 {
     public class CartItemRequest
     {
-        // public Guid Id { get; set; }
+        //public Guid Id { get; set; }
         public Guid AccountId { get; set; }
         public int Quantity { get; set; }
         public Guid IngredientId { get; set; }
         public ProductType ProductType { get; set; }
+        public bool IsCart { get; set; }
     }
 }

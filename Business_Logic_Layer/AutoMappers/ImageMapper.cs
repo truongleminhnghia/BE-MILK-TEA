@@ -11,8 +11,8 @@ namespace Business_Logic_Layer.AutoMappers
         public ImageMapper()
         {
             CreateMap<ImageRequest, Image>().ReverseMap();
-            CreateMap<ImageRespone, Image>().ReverseMap();
-            CreateMap<ImageRequest, ImageRespone>().ReverseMap();
+            CreateMap<ImageResponse, Image>().ReverseMap();
+            CreateMap<ImageRequest, ImageResponse>().ReverseMap();
         }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data_Access_Layer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250319022640_UpdateCart")]
-    partial class UpdateCart
+    [Migration("20250322145152_InitCreate")]
+    partial class InitCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -130,15 +130,28 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnName("create_at");
 
                     b.Property<Guid>("IngredientId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("ingredient_id");
+                        .HasColumnType("char(36)");
 
-                    b.Property<int>("ProductType")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsCart")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("isCart");
+
+                    b.Property<double?>("Price")
+                        .HasColumnType("double")
+                        .HasColumnName("price");
+
+                    b.Property<string>("ProductType")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("product_type");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("quantity");
+
+                    b.Property<double?>("TotalPrice")
+                        .HasColumnType("double")
+                        .HasColumnName("total_price");
 
                     b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime(6)")
@@ -615,9 +628,9 @@ namespace Data_Access_Layer.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("order_detail_id");
 
-                    b.Property<Guid>("IngredientProductId")
+                    b.Property<Guid>("CartItemId")
                         .HasColumnType("char(36)")
-                        .HasColumnName("ingredient_product_id");
+                        .HasColumnName("cart_item_id");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("char(36)")
@@ -633,7 +646,7 @@ namespace Data_Access_Layer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IngredientProductId");
+                    b.HasIndex("CartItemId");
 
                     b.HasIndex("OrderId");
 
@@ -816,6 +829,11 @@ namespace Data_Access_Layer.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("image_url");
+
+                    b.Property<string>("RecipeLevel")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("recipe_level");
 
                     b.Property<int>("RecipeStatus")
                         .HasColumnType("int")
@@ -1024,9 +1042,9 @@ namespace Data_Access_Layer.Migrations
 
             modelBuilder.Entity("Data_Access_Layer.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("Data_Access_Layer.Entities.IngredientProduct", "IngredientProducts")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("IngredientProductId")
+                    b.HasOne("Data_Access_Layer.Entities.CartItem", "CartItems")
+                        .WithMany()
+                        .HasForeignKey("CartItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1036,7 +1054,7 @@ namespace Data_Access_Layer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("IngredientProducts");
+                    b.Navigation("CartItems");
 
                     b.Navigation("Orders");
                 });
@@ -1133,11 +1151,6 @@ namespace Data_Access_Layer.Migrations
                     b.Navigation("IngredientRecipes");
 
                     b.Navigation("IngredientReviews");
-                });
-
-            modelBuilder.Entity("Data_Access_Layer.Entities.IngredientProduct", b =>
-                {
-                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("Data_Access_Layer.Entities.Order", b =>

@@ -18,12 +18,27 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<Cart> FindByAccount(Guid id)
         {
-            return await _context.Carts.Include(c => c.Account).Include(c => c.CartItems).FirstOrDefaultAsync(c => c.AccountId == id);
+            return await _context.Carts
+       .Include(c => c.Account)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient.Images)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient.IngredientQuantities)
+       .FirstOrDefaultAsync(c => c.AccountId == id);
         }
 
         public async Task<Cart> FindById(Guid id)
         {
-            return await _context.Carts.Include(c => c.Account).Include(c => c.CartItems).FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Carts
+       .Include(c => c.Account)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient.Images)
+       .Include(c => c.CartItems)
+           .ThenInclude(ci => ci.Ingredient.IngredientQuantities).FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Cart> Save(Cart cart)
