@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/Promotions")]
+    [Route("api/v1/promotions")]
     public class PromotionController : ControllerBase
     {
         private readonly IMapper _mapper;
