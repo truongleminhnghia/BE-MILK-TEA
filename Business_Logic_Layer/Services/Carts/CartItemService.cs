@@ -112,57 +112,41 @@ namespace Business_Logic_Layer.Services.Carts
             {
                 cartExisting = await CreateNewCart(account);
             }
-            double OriginPrice = GetPrice(ingre);
-            double newTotalPrice = OriginPrice * cartItemRequest.Quantity;
+            var existingCartItem = cartExisting.CartItems
+        .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId);
 
-            CartItem existingCartItem = null;
-
-            // **Chỉ kiểm tra cộng dồn nếu IsCart == false**
-            if (!cartItemRequest.IsCart)
+            // **Nếu `IsCart == false` và đã có trong giỏ hàng, thì không lưu, báo lỗi**
+            if (!cartItemRequest.IsCart && existingCartItem != null)
             {
-                existingCartItem = cartExisting.CartItems
-                    .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId && !ci.IsCart);
+                throw new Exception("Đã có item trong giỏ hàng rồi");
             }
 
-            if (existingCartItem != null)
-            {
-                // **Cộng dồn số lượng và tổng giá tiền**
-                existingCartItem.Quantity += cartItemRequest.Quantity;
-                existingCartItem.TotalPrice = existingCartItem.Quantity * OriginPrice;
-                existingCartItem.UpdateAt = DateTime.Now;
+            // **Tạo mới CartItem**
+            CartItem item = _mapper.Map<CartItem>(cartItemRequest);
+            item.CartId = cartExisting.Id;
+            item.CreateAt = DateTime.Now;
+            item.UpdateAt = DateTime.Now;
 
-                await _cartItemRepository.UpdateCartItem(existingCartItem);
+            if (cartItemRequest.IsCart)
+            {
+                item.Price = 0;
+                item.TotalPrice = 0; // Khi là giỏ hàng, lưu giá = 0
             }
             else
             {
-                // **Tạo mới CartItem**
-                CartItem item = _mapper.Map<CartItem>(cartItemRequest);
-                item.CartId = cartExisting.Id;
-                item.CreateAt = DateTime.Now;
-                item.UpdateAt = DateTime.Now;
-
-                if (item.IsCart)
-                {
-                    item.Price = 0;
-                    item.TotalPrice = 0; // Khi là giỏ hàng, lưu giá = 0
-                }
-                else
-                {
-                    item.Price = OriginPrice;
-                    item.TotalPrice = newTotalPrice;
-                }
-
-                CartItem cartItem = await _cartItemRepository.SaveCartItem(item);
-                cartExisting.CartItems.Add(cartItem);
-                existingCartItem = cartItem; // Gán để dùng trong response
+                double OriginPrice = GetPrice(ingre);
+                item.Price = OriginPrice;
+                item.TotalPrice = OriginPrice * item.Quantity;
             }
 
+            CartItem cartItem = await _cartItemRepository.SaveCartItem(item);
+            cartExisting.CartItems.Add(cartItem);
+
             // **Tạo response trả về**
-            CartItemResponse cartItemResponse = _mapper.Map<CartItemResponse>(existingCartItem);
-            cartItemResponse.Price = OriginPrice;
-            cartItemResponse.TotalPrice = existingCartItem.TotalPrice;
+            CartItemResponse cartItemResponse = _mapper.Map<CartItemResponse>(cartItem);
 
             return cartItemResponse;
+
         }
 
         public async Task<bool> Delete(Guid id)
