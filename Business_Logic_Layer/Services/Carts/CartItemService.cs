@@ -106,42 +106,61 @@ namespace Business_Logic_Layer.Services.Carts
             {
                 throw new Exception("Số lượng không phù hợp");
             }
+
             var cartExisting = await _cartRepository.FindByAccount(cartItemRequest.AccountId);
             if (cartExisting == null)
             {
                 cartExisting = await CreateNewCart(account);
             }
-
-            CartItem item = _mapper.Map<CartItem>(cartItemRequest);
-            item.CartId = cartExisting.Id;
-            item.CreateAt = DateTime.Now;
-            item.UpdateAt = DateTime.Now;
-
             double OriginPrice = GetPrice(ingre);
-            double OriginTotalPrice = OriginPrice * item.Quantity;
+            double newTotalPrice = OriginPrice * cartItemRequest.Quantity;
 
-            // Cập nhật giá theo IsCart
-            if (item.IsCart)
+            CartItem existingCartItem = null;
+
+            // **Chỉ kiểm tra cộng dồn nếu IsCart == false**
+            if (!cartItemRequest.IsCart)
             {
-                item.Price = OriginPrice;
-                item.TotalPrice = OriginTotalPrice;
+                existingCartItem = cartExisting.CartItems
+                    .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId && !ci.IsCart);
+            }
+
+            if (existingCartItem != null)
+            {
+                // **Cộng dồn số lượng và tổng giá tiền**
+                existingCartItem.Quantity += cartItemRequest.Quantity;
+                existingCartItem.TotalPrice = existingCartItem.Quantity * OriginPrice;
+                existingCartItem.UpdateAt = DateTime.Now;
+
+                await _cartItemRepository.UpdateCartItem(existingCartItem);
             }
             else
             {
-                item.Price = 0;
-                item.TotalPrice = 0;
+                // **Tạo mới CartItem**
+                CartItem item = _mapper.Map<CartItem>(cartItemRequest);
+                item.CartId = cartExisting.Id;
+                item.CreateAt = DateTime.Now;
+                item.UpdateAt = DateTime.Now;
+
+                if (item.IsCart)
+                {
+                    item.Price = 0;
+                    item.TotalPrice = 0; // Khi là giỏ hàng, lưu giá = 0
+                }
+                else
+                {
+                    item.Price = OriginPrice;
+                    item.TotalPrice = newTotalPrice;
+                }
+
+                CartItem cartItem = await _cartItemRepository.SaveCartItem(item);
+                cartExisting.CartItems.Add(cartItem);
+                existingCartItem = cartItem; // Gán để dùng trong response
             }
 
-            // Luôn lưu vào database
-            CartItem cartItem = await _cartItemRepository.SaveCartItem(item);
-
-            // Đảm bảo cartItem không null trước khi thêm vào danh sách
-            cartExisting.CartItems.Add(cartItem);
-
-            // Tạo response trả về
-            CartItemResponse cartItemResponse = _mapper.Map<CartItemResponse>(cartItem);
+            // **Tạo response trả về**
+            CartItemResponse cartItemResponse = _mapper.Map<CartItemResponse>(existingCartItem);
             cartItemResponse.Price = OriginPrice;
-            cartItemResponse.TotalPrice = OriginTotalPrice;
+            cartItemResponse.TotalPrice = existingCartItem.TotalPrice;
 
             return cartItemResponse;
         }
