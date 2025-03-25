@@ -87,12 +87,30 @@ namespace Data_Access_Layer.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid ingredientId)
+        public async Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid? ingredientId, string? ingredientCode)
         {
-            return await _context.IngredientProducts
-                .Where(ip => ip.IngredientId == ingredientId)
-                .Include(ip => ip.Ingredient)
-                .ToListAsync();
+            //return await _context.IngredientProducts
+            //    .Where(ip => ip.IngredientId == ingredientId)
+            //    .Include(ip => ip.Ingredient)
+            //    .ToListAsync();
+
+            var query = _context.IngredientProducts.AsQueryable();
+
+            if (ingredientId.HasValue && !string.IsNullOrEmpty(ingredientCode))
+            {
+                query = query.Where(ip => ip.IngredientId == ingredientId.Value
+                                        && ip.Ingredient.IngredientCode == ingredientCode)
+                             .Include(ip => ip.Ingredient);
+            }
+            else if (ingredientId.HasValue)
+            {
+                query = query.Where(ip => ip.IngredientId == ingredientId.Value).Include(ip => ip.Ingredient); ;
+            }
+            else if (!string.IsNullOrEmpty(ingredientCode))
+            {
+                query = query.Where(ip => ip.Ingredient.IngredientCode == ingredientCode).Include(ip => ip.Ingredient); ;
+            }
+            return await query.ToListAsync();
         }
     }
 }

@@ -15,6 +15,7 @@ using System.Web;
 using Azure.Core;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Business_Logic_Layer.Services
 {
@@ -61,12 +62,27 @@ namespace Business_Logic_Layer.Services
                 {
                     throw new Exception("Id bị thiếu");
                 }
-                var _account = await _accountRepository.GetById(id);
-                if (_account == null)
+
+                //kiem tra xem user dang dang nhap co phai la admin hay khong
+                //neu khong phai thi se tra ve thong tin cua user do
+                Account account;
+                var currentUser = await _source.GetCurrentAccount();
+                if (currentUser.RoleName != RoleName.ROLE_ADMIN)
+                {
+                    account = await _accountRepository.GetById(currentUser.Id);
+                    if (account == null)
+                    {
+                        throw new Exception("Tài khoản không tồn tại");
+                    }
+                    return MapToAccountResponse.ComplexAccountResponse(account);
+                }
+
+                account = await _accountRepository.GetById(id);
+                if (account == null)
                 {
                     throw new Exception("Tài khoản không tồn tại");
                 }
-                return MapToAccountResponse.ComplexAccountResponse(_account);
+                return MapToAccountResponse.ComplexAccountResponse(account);
             }
             catch (Exception ex)
             {
@@ -86,6 +102,8 @@ namespace Business_Logic_Layer.Services
                 if (!string.IsNullOrEmpty(request.FirstName)) account.FirstName = request.FirstName;
                 if (!string.IsNullOrEmpty(request.LastName)) account.LastName = request.LastName;
                 if (!string.IsNullOrEmpty(request.Password)) account.Password = request.Password;
+                if (!string.IsNullOrEmpty(request.PhoneNumber)) account.Phone = request.PhoneNumber;
+                if (!string.IsNullOrEmpty(request.ImgUrl)) account.ImageUrl = request.ImgUrl;
 
                 // Cập nhật thông tin Customer nếu có
                 if (account.Customer != null && request.Customer != null && account.RoleName == RoleName.ROLE_CUSTOMER)
@@ -93,13 +111,18 @@ namespace Business_Logic_Layer.Services
                     account.Customer.TaxCode = request.Customer.TaxCode ?? account.Customer.TaxCode;
                     account.Customer.Address = request.Customer.Address ?? account.Customer.Address;
                 }
-
-                // Cập nhật thông tin Employee nếu có
-                if (account.Employee != null && request.Employee != null && account.RoleName == RoleName.ROLE_STAFF)
+                else
                 {
-                    account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
+                    throw new ArgumentException("Loại tài khoản không hợp lệ.");
                 }
 
+                    // BO CAP NHAT REFCODE CHO EMPLOYEE
+                    // Cập nhật thông tin Employee nếu có
+                    //if (account.Employee != null && request.Employee != null && account.RoleName == RoleName.ROLE_STAFF)
+                    //{
+                    //    account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
+                    //}
+                    account.UpdateAt = DateTime.UtcNow;
                 await _accountRepository.UpdateAccount(account);
                 return account;
             }
@@ -116,6 +139,11 @@ namespace Business_Logic_Layer.Services
         {
             var (accounts, total) = await _accountRepository.GetAllAccountsAsync(
                 search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
+
+            if (accounts.IsNullOrEmpty())
+            {
+                throw new Exception("Không tìm thấy danh sach tài khoản nào");
+            }
 
             return new PageResult<AccountResponse>
             {

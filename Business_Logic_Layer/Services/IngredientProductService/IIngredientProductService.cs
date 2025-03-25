@@ -18,6 +18,6 @@ namespace Business_Logic_Layer.Services.IngredientProductService
         Task<IEnumerable<IngredientProduct>> GetAllAsync(Guid? ingredientId, int page, int pageSize);
         Task<bool> DeleteAsync(Guid id);
 
-        Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid ingredientId);
+        Task<List<IngredientProduct>> GetByIngredientIdOrCodeAsync(Guid? ingredientId, string? ingredientCode);
     }
 }
