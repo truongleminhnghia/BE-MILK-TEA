@@ -127,6 +127,12 @@ namespace Data_Access_Layer.Repositories
                 return null;
             }
 
+            bool isRefCodeExists = await _context.Employees.AnyAsync(e => e.RefCode == order.RefCode);
+            if (!isRefCodeExists)
+            {
+                throw new Exception("RefCode không tồn tại trong bảng Employee.");
+            }
+
             existingOrder.RefCode = order.RefCode;
             existingOrder.ReasonCancel = order.ReasonCancel;
             existingOrder.OrderStatus = order.OrderStatus;

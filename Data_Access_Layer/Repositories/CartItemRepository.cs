@@ -36,7 +36,14 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<CartItem> GetById(Guid id)
         {
-            return await _context.CartItems.Include(ci => ci.Ingredient).Include(ci => ci.Cart).FirstOrDefaultAsync(ci => ci.Id == id);
+            return await _context.CartItems
+     .Include(ci => ci.Ingredient)
+         .ThenInclude(i => i.Images)
+     .Include(ci => ci.Ingredient)
+         .ThenInclude(i => i.IngredientQuantities)
+     .Include(ci => ci.Cart)
+     .FirstOrDefaultAsync(ci => ci.Id == id);
+
         }
 
         public async Task<CartItem> SaveCartItem(CartItem cartItem)

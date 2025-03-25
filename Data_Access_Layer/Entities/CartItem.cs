@@ -39,7 +39,7 @@ namespace Data_Access_Layer.Entities
                 public double Price { get; set; }
 
                 [Column("total_price")]
-                public double? TotalPrice { get; set; }
+                public double TotalPrice { get; set; }
 
                 [Column("isCart")]
                 [Required]

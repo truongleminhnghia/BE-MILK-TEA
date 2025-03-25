@@ -60,7 +60,7 @@ namespace Business_Logic_Layer.Services
                 var cartItem = await _cartItemRepository.GetById(orderDetail.CartItemId);
                 var ingredientProduct = await _ingredientRepository.GetById(cartItem.IngredientId);
                 orderDetail.Quantity = cartItem.Quantity;
-                orderDetail.Price = cartItem.Price;
+                //orderDetail.Price = cartItem.Price;
                 // Ensure ingredientProduct is not null
                 if (ingredientProduct == null)
                 {
