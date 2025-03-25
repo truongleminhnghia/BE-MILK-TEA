@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Business_Logic_Layer.Models.Requests;
+using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.NotificationService;
 using Business_Logic_Layer.Services.PaymentService;
 using Data_Access_Layer.Entities;
@@ -87,23 +88,46 @@ namespace WebAPI.Controllers
             {
                 _logger.LogInformation("Received VNPay callback URL: {Url}", request.FullUrl);
 
-                // Convert URL parameters to IQueryCollection
+                // Chuyển đổi tham số URL sang IQueryCollection
                 var uri = new Uri(request.FullUrl);
-                var queryCollection = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+                var queryCollection = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(
+                    uri.Query
+                );
 
-                // Convert to IQueryCollection
-                var queryDict = new QueryCollection(queryCollection.ToDictionary(k => k.Key, v => new StringValues(v.Value.ToArray())));
+                // Chuyển đổi IQueryCollection
+                var queryDict = new QueryCollection(
+                    queryCollection.ToDictionary(
+                        k => k.Key,
+                        v => new StringValues(v.Value.ToArray())
+                    )
+                );
 
-
-                // Process callback
+                // Quá trình callback
                 var response = await _paymentService.ProcessPaymentCallbackAsync(queryDict);
 
-                return response.Success ? Ok(response) : BadRequest(response);
+                // Tạo ApiResponse dựa trên phản hồi của ProcessPaymentCallbackAsync
+                var apiResponse = new ApiResponse(
+                    response.Success ? 200 : 400,
+                    response.Success,
+                    response.Success ? null : "Failed to process payment",
+                    response
+                );
+
+                // Trả về ApiResponse
+                return StatusCode(apiResponse.Code, apiResponse);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing VNPay callback.");
-                return StatusCode(500, new { message = "Internal Server Error", error = ex.Message });
+
+                var apiErrorResponse = new ApiResponse(
+                    500,
+                    false,
+                    "Internal Server Error",
+                    new { error = ex.Message }
+                );
+
+                return StatusCode(apiErrorResponse.Code, apiErrorResponse);
             }
         }
 
@@ -116,14 +140,10 @@ namespace WebAPI.Controllers
                 var payment = new Payment
                 {
                     AmountPaid = request.AmountPaid,
-                    TranscationId = Guid.NewGuid().ToString()
+                    TranscationId = Guid.NewGuid().ToString(),
                 };
 
-                var account = new Account
-                {
-                    Email = request.Email,
-                    FirstName = "Test User"
-                };
+                var account = new Account { Email = request.Email, FirstName = "Test User" };
 
                 await _emailService.SendPaymentSuccessEmailAsync(payment, account);
                 return Ok(new { message = $"✅ Test email sent to {request.Email}" });
@@ -134,6 +154,5 @@ namespace WebAPI.Controllers
                 return StatusCode(500, new { error = "Failed to send test email." });
             }
         }
-
     }
 }
