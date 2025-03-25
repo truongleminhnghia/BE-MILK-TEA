@@ -181,8 +181,17 @@ namespace Business_Logic_Layer.Services
                 throw new Exception("Recipe repository returned null.");
             }
 
-            // Lấy tài khoản hiện tại (nếu không có, xem là Guest)
-            var currentAccount = await _source.GetCurrentAccount();
+            
+            Account? currentAccount = null;
+            try
+            {
+                currentAccount = await _source.GetCurrentAccount();
+            }
+            catch
+            {
+                // Ghi log lỗi thay vì cho lỗi này rơi thẳng vào catch chính
+                Console.WriteLine("");
+            }
 
             // Nếu không có tài khoản (Guest), chỉ thấy công thức PUBLIC
             if (currentAccount == null)
