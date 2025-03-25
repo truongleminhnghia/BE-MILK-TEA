@@ -204,6 +204,7 @@ namespace Business_Logic_Layer.Services.Carts
             }
             // Cập nhật quantity và product type
             cartItem.Quantity = request.Quantity;
+            cartItem.TotalPrice = cartItem.Price * request.Quantity;
             //cartItem.ProductType = request.ProductType;
 
             _cartItemRepository.UpdateCartItem(cartItem);
