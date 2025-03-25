@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
@@ -42,10 +43,19 @@ namespace WebAPI.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    _logger.LogWarning(
-                        $"Invalid model state: {string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))}"
+                    var errorMessages = string.Join(
+                        ", ",
+                        ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
                     );
-                    return BadRequest(ModelState);
+                    _logger.LogWarning($"Invalid model state: {errorMessages}");
+                    return BadRequest(
+                        new ApiResponse(
+                            HttpStatusCode.BadRequest.GetHashCode(),
+                            false,
+                            "Invalid model state",
+                            errorMessages
+                        )
+                    );
                 }
 
                 var result = await _paymentService.CreatePaymentAsync(request, HttpContext);
@@ -53,12 +63,27 @@ namespace WebAPI.Controllers
                     $"Payment created successfully with PaymentId: {result.PaymentId}"
                 );
 
-                return Ok(result);
+                return Ok(
+                    new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Payment created successfully",
+                        result
+                    )
+                );
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in CreatePayment: {ex.Message}");
-                return StatusCode(500, ex.Message);
+                return StatusCode(
+                    500,
+                    new ApiResponse(
+                        HttpStatusCode.InternalServerError.GetHashCode(),
+                        false,
+                        ex.Message,
+                        null
+                    )
+                );
             }
         }
 
@@ -72,16 +97,44 @@ namespace WebAPI.Controllers
                 );
 
                 var payments = await _paymentService.GetPaymentsByOrderIdAsync(orderId);
-                return Ok(payments);
+
+                if (payments == null || !payments.Any())
+                {
+                    return BadRequest(
+                        new ApiResponse(
+                            HttpStatusCode.BadRequest.GetHashCode(),
+                            false,
+                            "No payments found for this OrderId",
+                            null
+                        )
+                    );
+                }
+
+                return Ok(
+                    new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Payments retrieved successfully",
+                        payments
+                    )
+                );
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in GetPaymentsByOrder: {ex.Message}");
-                return StatusCode(500, ex.Message);
+                return StatusCode(
+                    500,
+                    new ApiResponse(
+                        HttpStatusCode.InternalServerError.GetHashCode(),
+                        false,
+                        ex.Message,
+                        null
+                    )
+                );
             }
         }
 
-        [HttpPost("PaymentCallbackUrl")]
+        [HttpPost("payment-callback-url")]
         public async Task<IActionResult> PaymentCallbackUrl([FromBody] PaymentUrlRequest request)
         {
             try
@@ -105,15 +158,15 @@ namespace WebAPI.Controllers
                 // Quá trình callback
                 var response = await _paymentService.ProcessPaymentCallbackAsync(queryDict);
 
-                // Tạo ApiResponse dựa trên phản hồi của ProcessPaymentCallbackAsync
                 var apiResponse = new ApiResponse(
                     response.Success ? 200 : 400,
                     response.Success,
-                    response.Success ? null : "Failed to process payment",
+                    response.Success
+                        ? "Payment processed successfully"
+                        : "Failed to process payment",
                     response
                 );
 
-                // Trả về ApiResponse
                 return StatusCode(apiResponse.Code, apiResponse);
             }
             catch (Exception ex)
