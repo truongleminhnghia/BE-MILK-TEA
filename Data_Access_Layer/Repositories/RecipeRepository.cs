@@ -60,11 +60,9 @@ namespace Data_Access_Layer.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Recipe>> GetAllRecipes(
-    string? search, string? sortBy, bool isDescending,
-    Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus)
+        public async Task<List<Recipe>> GetAllRecipes()
         {
-            var query = _context.Recipes
+            return await _context.Recipes
                 .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
                     .ThenInclude(ir => ir.Ingredient)
@@ -75,43 +73,7 @@ namespace Data_Access_Layer.Repositories
                  .Include(r => r.IngredientRecipes)
                     .ThenInclude(ir => ir.Ingredient)
                         .ThenInclude(i => i.IngredientQuantities)
-                .AsQueryable();
-
-            // **Lọc theo trạng thái**
-            if (recipeStatus.HasValue)
-            {
-                query = query.Where(r => r.RecipeStatus == recipeStatus.Value);
-            }
-
-            // **Tìm kiếm theo tiêu đề hoặc nội dung**
-            if (!string.IsNullOrEmpty(search))
-            {
-                string trimmedSearch = Regex.Replace(search.Trim(), @"\s+", " "); // Bỏ khoảng trắng thừa
-                query = query.Where(r =>
-                    r.RecipeTitle.Contains(trimmedSearch) ||
-                    (r.Content != null && r.Content.Contains(trimmedSearch))
-                );
-            }
-
-            // **Lọc theo danh mục**
-            if (categoryId.HasValue)
-            {
-                query = query.Where(r => r.CategoryId == categoryId.Value);
-            }
-
-            // **Sắp xếp dữ liệu**
-            var validSortColumns = new HashSet<string> { "RecipeTitle", "CategoryId", "RecipeStatus" };
-            if (!string.IsNullOrEmpty(sortBy) && validSortColumns.Contains(sortBy))
-            {
-                query = isDescending
-                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy))
-                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
-            }
-
-            // **Phân trang**
-            query = query.Skip((page - 1) * pageSize).Take(pageSize);
-
-            return await query.ToListAsync();
+                .ToListAsync();
         }
 
 
@@ -125,6 +87,13 @@ namespace Data_Access_Layer.Repositories
                 .Include(r => r.Category)
                 .Include(r => r.IngredientRecipes)
                     .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Category)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Images)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.IngredientQuantities)
                 .AsQueryable();
 
             // Apply Filters if not null

@@ -88,12 +88,13 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAllRecipes(
+            [FromQuery] Guid userId,
             [FromQuery] string? search,
             [FromQuery] string? sortBy,
-            [FromQuery] RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
+            [FromQuery] RecipeStatusEnum? recipeStatusEnum = null,
             [FromQuery] bool isDescending = false,
             [FromQuery] Guid? categoryId = null,
-            [FromQuery] RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
+            [FromQuery] RecipeLevelEnum? recipeLevel = null,
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null,
             [FromQuery] int page = 1,
@@ -102,7 +103,7 @@ namespace WebAPI.Controllers
             try
             {
                 var recipes = await _recipeService.GetAllRecipesAsync(
-             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize);
+             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize, userId);
 
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),

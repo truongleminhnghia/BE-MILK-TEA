@@ -59,16 +59,39 @@ namespace Business_Logic_Layer.Utils
         }
 
         // ham nay dung de lay thong tin cua user dang dang nhap
+        //public async Task<Account?> GetCurrentAccount()
+        //{
+        //    var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
+        //    if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+        //    {
+        //        throw new UnauthorizedAccessException("Người dùng chưa đăng nhập hoặc token không hợp lệ");
+        //    }
+
+        //    return await _accountRepository.GetById(userId);
+        //}
         public async Task<Account?> GetCurrentAccount()
         {
-            var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            if (_httpContextAccessor.HttpContext == null)
             {
-                throw new UnauthorizedAccessException("Người dùng chưa đăng nhập hoặc token không hợp lệ"); ;
+                throw new UnauthorizedAccessException("Không thể lấy thông tin HTTP Context.");
             }
 
-            return await _accountRepository.GetById(userId);
+            var userIdClaim = _httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("Người dùng chưa đăng nhập hoặc token không hợp lệ.");
+            }
+
+            var account = await _accountRepository.GetById(userId);
+            if (account == null)
+            {
+                throw new UnauthorizedAccessException("Tài khoản không tồn tại.");
+            }
+
+            return account;
         }
+
+
 
         public string GenerateRandom8Digits()
         {

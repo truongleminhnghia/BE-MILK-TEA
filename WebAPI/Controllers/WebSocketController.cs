@@ -203,17 +203,17 @@ namespace WebAPI.Controllers
 
         [HttpGet("recipes")]
         public async Task<IActionResult> GetRecipesWebSocket(
+            [FromQuery] Guid userId,
             [FromQuery] string? search,
             [FromQuery] string? sortBy,
-            [FromQuery] RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
+            [FromQuery] RecipeStatusEnum? recipeStatusEnum = null,
             [FromQuery] bool isDescending = false,
             [FromQuery] Guid? categoryId = null,
-            [FromQuery] RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
+            [FromQuery] RecipeLevelEnum? recipeLevel = null,
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10
-        )
+            [FromQuery] int pageSize = 10)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
@@ -224,7 +224,7 @@ namespace WebAPI.Controllers
                     while (webSocket.State == WebSocketState.Open)
                     {
                         var recipes = await _recipeService.GetAllRecipesAsync(
-             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize);
+             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize, userId);
 
                         var recipeRes = _mapper.Map<IEnumerable<RecipeResponse>>(recipes);
                         string jsonString = JsonSerializer.Serialize(recipeRes);
