@@ -19,5 +19,6 @@ namespace Business_Logic_Layer.Services.PaymentService
         Task<PaymentResponse> ProcessPaymentCallbackAsync(IQueryCollection collections);
 
         Task<List<Payment>> GetPaymentsByOrderIdAsync(Guid orderId);
+        Task<PaymentResponse> ProcessCODPaymentAsync(PaymentCreateRequest request);
     }
 }

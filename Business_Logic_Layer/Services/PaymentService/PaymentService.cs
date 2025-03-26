@@ -92,6 +92,48 @@ namespace Business_Logic_Layer.Services.PaymentService
             }
         }
 
+        public async Task<PaymentResponse> ProcessCODPaymentAsync(PaymentCreateRequest request)
+        {
+        try {
+            var order = await _orderRepository.GetByIdAsync(request.OrderId);
+
+        
+            var payment = new Payment
+            {
+                OrderId = request.OrderId,
+                PaymentMethod = PaymentMethod.COD,
+                PaymentDate = DateTime.Now,
+                PaymentStatus = PaymentStatus.Success,
+                TotlaPrice = request.TotalPrice,
+                AmountPaid = 0,
+                RemainingAmount = request.TotalPrice,
+            };
+
+            await _paymentRepository.CreateAsync(payment);
+
+            // Cập nhật trạng thái đơn hàng
+            order.OrderStatus = OrderStatus.PENDING_SHIPMENT;
+            await _orderRepository.UpdateAsync(order);
+
+            return new PaymentResponse
+            {
+                PaymentId = payment.Id,
+                OrderId = payment.OrderId,
+                PaymentUrl = null,
+                Success = true,
+                PaymentMethod = PaymentMethod.COD,
+                PaymentDate = DateTime.Now,
+                Amount = request.TotalPrice,
+                Message = "Tạo đơn hàng COD thành công"
+            };
+        }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tạo thanh toán");
+                throw;
+            }
+}
+
         public async Task<PaymentResponse> ProcessPaymentCallbackAsync(IQueryCollection collections)
         {
             try
@@ -143,8 +185,8 @@ namespace Business_Logic_Layer.Services.PaymentService
                             pendingPayment.TranscationId = response.TransactionId;
                             pendingPayment.AmountPaid = response.Amount;
                             pendingPayment.RemainingAmount =
-                                pendingPayment.TotlaPrice - response.Amount;
-
+                            pendingPayment.TotlaPrice - response.Amount;
+                            await _orderRepository.UpdateAsync(order);
                             _logger.LogInformation(
                                 "Đang cập nhật thanh toán with: Status={Status}, TransactionId={TransactionId}, AmountPaid={AmountPaid}",
                                 pendingPayment.PaymentStatus,
@@ -241,5 +283,7 @@ namespace Business_Logic_Layer.Services.PaymentService
         {
             return await _paymentRepository.GetByOrderIdAsync(orderId);
         }
+
+        
     }
 }
