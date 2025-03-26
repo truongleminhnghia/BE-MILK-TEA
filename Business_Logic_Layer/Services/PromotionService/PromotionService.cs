@@ -24,6 +24,7 @@ namespace Business_Logic_Layer.Services.PromotionService
             DateTime? startDate, DateTime? endDate,
             int page, int pageSize);
         Task<PromotionResponse?> GetByIdAsync(Guid id);
+        Task<Promotion?> GetByCodeAsync(String code);
         Task<PromotionResponse> CreateAsync(PromotionRequest promotion);
         //Task<Promotion?> GetByNameAsync(string name);
         Task<Promotion?> UpdateAsync(Guid id, Promotion promotion);
@@ -32,6 +33,7 @@ namespace Business_Logic_Layer.Services.PromotionService
             bool isActive, string? search, string? sortBy, bool isDescending,
             PromotionType? promotionType, string? promotionCode, string? promotionName,
             DateTime? startDate, DateTime? endDate, int page, int pageSize);
+        Task<OrderPromotion> CreateOrderPromotionAsync(OrderPromotion orderPromotion);
     }
     public class PromotionService : IPromotionService
     {
@@ -196,5 +198,28 @@ namespace Business_Logic_Layer.Services.PromotionService
             };
         }
 
+        public async Task<Promotion?> GetByCodeAsync(string code)
+        {
+            try
+            {
+                var promotion = await _promotionRepository.GetByCodeAsync(code);
+                return promotion;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin promotion bằng id", ex);
+            }
+        }
+
+        public async Task<OrderPromotion> CreateOrderPromotionAsync(OrderPromotion orderPromotion)
+        {
+            if (orderPromotion == null)
+            {
+                throw new ArgumentNullException(nameof(orderPromotion), "Yêu cầu không được null");
+            }
+            var createdOrderPromotion = await _promotionRepository.CreateOrderPromotion(orderPromotion);
+
+            return createdOrderPromotion;
+        }
     }
 }

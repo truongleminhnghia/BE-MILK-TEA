@@ -25,6 +25,7 @@ namespace Data_Access_Layer.Repositories
         PromotionType? promotionType, string? promotionCode, string? promotionName,
         DateTime? startDate, DateTime? endDate, int page, int pageSize);
         Task<Promotion?> GetByIdAsync(Guid id);
+        Task<Promotion?> GetByCodeAsync(String code);
         Task<Promotion> CreateAsync(Promotion promotion);
         Task<Promotion?> UpdateAsync(Guid id, Promotion promotion);
         Task<IngredientPromotion> CreateProductPromotion(IngredientPromotion ingredientPromotion);
@@ -265,6 +266,21 @@ namespace Data_Access_Layer.Repositories
                 .ToListAsync();
 
             return (promotions, total);
+        }
+
+        public async Task<Promotion?> GetByCodeAsync(string code)
+        {
+            try
+            {
+                return await _context.Promotions.Include(o => o.PromotionDetail)
+                                            .FirstOrDefaultAsync(o => o.PromotionCode == code);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (if using logging)
+                Console.WriteLine($"loi o GetByIdAsync: {ex.Message}");
+                return null;
+            }
         }
     }
 }

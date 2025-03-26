@@ -75,7 +75,17 @@ namespace Business_Logic_Layer.Services.PromotionDetailService
                 throw new Exception($"Không thể lấy promotion detail với ID: {id}", ex);
             }
         }
-
+        public async Task<PromotionDetail> GetbyPromotionId(Guid promotionId)
+        {
+            try
+            {
+                return await _promotionDetailRepository.GetbyPromotionId(promotionId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Không thể lấy promotion detail với Promotion ID: {promotionId}", ex);
+            }
+        }
         public async Task<PromotionDetail> UpdateAsync(Guid id, PromotionDetail promotionDetail)
         {
             try

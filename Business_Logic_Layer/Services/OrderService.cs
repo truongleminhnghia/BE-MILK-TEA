@@ -10,6 +10,8 @@ using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.Carts;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
+using Business_Logic_Layer.Services.PromotionDetailService;
+using Business_Logic_Layer.Services.PromotionService;
 using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
@@ -37,14 +39,17 @@ namespace Business_Logic_Layer.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderDetailService _orderDetailService;
         private readonly IIngredientService _ingredientService;
-        //private readonly IIngredientProductService _ingredientProductService;
+        private readonly IPromotionService _promotionService;
+        private readonly IPromotionDetailService _promotionDetailService;
         private readonly IIngredientQuantityService _ingredientQuantityService;
         private readonly ICartItemService _cartItemService;
         private readonly IMapper _mapper;
         private readonly Source _source;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source, IIngredientQuantityService ingredientQuantityService, ICartItemService cartItemService , IIngredientService ingredientService )
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source, IIngredientQuantityService ingredientQuantityService, ICartItemService cartItemService , IIngredientService ingredientService, IPromotionDetailService promotionDetailService, IPromotionService promotionService )
         {
+            _promotionDetailService = promotionDetailService;
+            _promotionService = promotionService;
             _orderRepository = orderRepository;
             _mapper = mapper;
             _orderDetailService = orderDetailService;
@@ -58,12 +63,14 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
-                // var source = new Source();
                 var order = _mapper.Map<Order>(orderRequest);
                 order.OrderCode = "OD" + _source.GenerateRandom8Digits();
                 order.OrderDate = DateTime.Now;
                 order.OrderStatus= OrderStatus.PENDING_CONFIRMATION;
-                //order.PriceAfterPromotion = order.TotalPrice - promotionPrice;
+
+                double totalDiscount = 0;
+                double finalPrice = 0;
+
                 var createdOrder = await _orderRepository.CreateAsync(order);
                 List<OrderDetail> orderDetailList = new List<OrderDetail>();
 
@@ -102,21 +109,74 @@ namespace Business_Logic_Layer.Services
                     orderDetails.OrderId = createdOrder.Id;
                     orderDetails.CartItemId = orderDetail.CartItemId;
                     orderDetails.Quantity = cartItem.Quantity;
-
-
-                    //orderDetails.Price = orderDetail.Price;
-
                     orderDetails.Price = ingredientProduct.PriceOrigin;
+
                     var createOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
                     orderDetailList.Add(createOrderDetail);
                     createdOrder.Quantity += createOrderDetail.Quantity;
                     createdOrder.TotalPrice += ingredientProduct.PriceOrigin * createOrderDetail.Quantity;
 
                 }
+
+                finalPrice = createdOrder.TotalPrice;
+                if (!string.IsNullOrEmpty(orderRequest.PromotionCode))
+                {
+                    var promotion = await _promotionService.GetByCodeAsync(orderRequest.PromotionCode);
+                    if (promotion == null || !promotion.IsActive || promotion.EndDate < DateTime.Now)
+                    {
+                        throw new Exception("Mã khuyến mãi không hợp lệ hoặc đã hết hạn.");
+                    }
+
+                    if (promotion.PromotionType != PromotionType.PROMOTION_ORDER)
+                    {
+                        throw new Exception("Mã khuyến mãi không áp dụng cho đơn hàng.");
+                    }
+
+                    var promotionDetail = _promotionDetailService.GetbyPromotionId(promotion.Id);
+                    if (promotionDetail == null)
+                    {
+                        throw new Exception("Không tìm thấy thông tin chi tiết khuyến mãi.");
+                    }
+
+                    var promotionDetailValue = await promotionDetail;
+                    // Kiểm tra tổng giá trị đơn hàng có đạt mức tối thiểu không
+                    if (createdOrder.TotalPrice <= promotionDetailValue.MiniValue)
+                    {
+                        throw new Exception($"Đơn hàng chưa đạt giá trị tối thiểu để áp dụng khuyến mãi ({promotionDetailValue.MiniValue} VND).");
+                    }
+
+                    // Tính toán số tiền giảm giá
+                    double discountValue = promotionDetailValue.DiscountValue;
+                    double maxDiscount = promotionDetailValue.MaxValue;
+
+                    if (maxDiscount >= createdOrder.TotalPrice)
+                    {
+                        totalDiscount = createdOrder.TotalPrice * discountValue / 100;
+                    }
+                    else if (maxDiscount < createdOrder.TotalPrice)
+                    {
+                        totalDiscount = maxDiscount * discountValue / 100;
+                    }
+
+                    // Cập nhật tổng giá trị đơn hàng sau giảm giá
+                    finalPrice = createdOrder.TotalPrice - totalDiscount;
+
+                    // Lưu thông tin khuyến mãi vào bảng OrderPromotion
+                    var orderPromotion = new OrderPromotion
+                    {
+                        OrderId = createdOrder.Id,
+                        PromotionId = promotion.Id
+                    };
+                    await _promotionService.CreateOrderPromotionAsync(orderPromotion);
+                }
+
+                createdOrder.PriceAffterPromotion = finalPrice;
                 createdOrder.OrderDetails = orderDetailList;
                 createdOrder = await Update(createdOrder);
 
                 var returna = _mapper.Map<OrderResponse>(createdOrder);
+                returna.TotalPrice = createdOrder.TotalPrice; // Giá gốc
+                returna.PriceAfterPromotion = createdOrder.PriceAffterPromotion;
                 returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);
                 return returna;
             }
