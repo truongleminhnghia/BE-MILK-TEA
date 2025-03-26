@@ -13,6 +13,7 @@ namespace Business_Logic_Layer.Services.PromotionDetailService
         public Task<PromotionDetail> CreateAsync(PromotionDetail promotionDetail);
         public Task<List<PromotionDetailResponse>> GetAllPromotionDetailAsync(Guid PromotionId);
         public Task<PromotionDetail> GetbyId(Guid id);
+        public Task<PromotionDetail> GetbyPromotionId(Guid promotionId);
         public Task<PromotionDetail> UpdateAsync(Guid id, PromotionDetail promotionDetail);
         public Task<bool> DeleteByIdAsync(Guid id);
     }
