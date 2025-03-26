@@ -12,6 +12,7 @@ namespace Business_Logic_Layer.Models.Responses
 {
     public class OrderResponse
     {
+        public Guid Id { get; set; }
         public String? OrderCode { get; set; }
         public DateTime OrderDate { get; set; }
         public String? FullNameShipping { get; set; }
