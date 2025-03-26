@@ -98,9 +98,9 @@ namespace WebAPI.Controllers
         }
         //Create
         [HttpPost]
-        public async Task<IActionResult> AddPromotion([FromBody] PromotionRequest promotion)
+        public async Task<IActionResult> AddPromotion([FromBody] PromotionRequest promotion, [FromQuery] double maxPriceThreshold, [FromQuery] double minPriceThreshold)
         {
-            if (promotion == null || promotion.promotionDetail == null || !promotion.promotionDetail.Any())
+            if (promotion == null || promotion.promotionDetail == null || promotion.promotionDetail == null)
             {
                 return BadRequest(new ApiResponse(
                     (int)HttpStatusCode.BadRequest,
@@ -109,7 +109,7 @@ namespace WebAPI.Controllers
                 ));
             }
 
-            var createdPromotion = await _promotionService.CreateAsync(promotion);
+            var createdPromotion = await _promotionService.CreateAsync(promotion, maxPriceThreshold, minPriceThreshold);
 
             return Ok(new ApiResponse(
                 (int)HttpStatusCode.OK,
@@ -122,8 +122,7 @@ namespace WebAPI.Controllers
         [HttpPut("{promotionId}")]
         public async Task<IActionResult> UpdatePromotion(
         Guid promotionId,
-        [FromBody] PromotionUpdateRequest promotionUpdateRequest
-)
+        [FromBody] PromotionUpdateRequest promotionUpdateRequest, [FromQuery] double maxPriceThreshold, [FromQuery] double minPriceThreshold)
         {
             try
             {
@@ -137,7 +136,7 @@ namespace WebAPI.Controllers
                 }
 
                 var promotion = _mapper.Map<Promotion>(promotionUpdateRequest);
-                var updatedPromotion = await _promotionService.UpdateAsync(promotionId, promotion);
+                var updatedPromotion = await _promotionService.UpdateAsync(promotionId, promotion, maxPriceThreshold, minPriceThreshold);
 
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
