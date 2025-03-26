@@ -84,10 +84,7 @@ namespace Data_Access_Layer.Repositories
         {
             try
             {
-                // var query = _context.OrderDetails
-                //       .Include(o => o.Orders.Wh)
-                //       .Where(o => o.O == accountId)
-                //.AsQueryable();
+
                 var baseQuery = _context.OrderDetails.Where(w => w.Orders.AccountId == accountId).Include(ic => ic.Orders).AsQueryable();
                 var query = baseQuery.Select(o => new Order
                 {
@@ -104,9 +101,7 @@ namespace Data_Access_Layer.Repositories
                     AddressShipping = o.Orders.AddressShipping,
                     OrderDetails = o.Orders.OrderDetails 
                 }).AsQueryable();
-                //var a= _context.OrderDetails.Where(o => o.OrderId==)  .Include(o => o.Payments)
                 
-                var sql = query.ToQueryString();
 
                 if (!string.IsNullOrEmpty(search))
                 {
