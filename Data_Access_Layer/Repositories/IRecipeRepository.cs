@@ -14,8 +14,12 @@ namespace Data_Access_Layer.Repositories
         Task<(List<Recipe>, int)> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
     RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
-    DateTime? startDate, DateTime? endDate,
+    DateOnly? startDate, DateOnly? endDate,
     int page, int pageSize);
         Task<Recipe?> GetByTitleAsync(string title);
+        Task<List<Recipe>> GetFilteredRecipesAsync(
+        string? search, string? sortBy, bool isDescending,
+        RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
+        DateOnly? startDate, DateOnly? endDate);
     }
 }

@@ -13,7 +13,7 @@ namespace Business_Logic_Layer.Services
         Task<PageResult<RecipeResponse>> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
     RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
-    DateTime? startDate, DateTime? endDate,
+    DateOnly? startDate, DateOnly? endDate,
     int page, int pageSize, Guid userId);
         Task<RecipeResponse?> UpdateRecipeStatusAsync(Guid recipeId, RecipeStatusEnum newStatus);
     }

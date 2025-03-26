@@ -91,19 +91,19 @@ namespace WebAPI.Controllers
             [FromQuery] Guid userId,
             [FromQuery] string? search,
             [FromQuery] string? sortBy,
-            [FromQuery] RecipeStatusEnum? recipeStatusEnum = null,
+            [FromQuery] RecipeStatusEnum? recipeStatus = null,
             [FromQuery] bool isDescending = false,
             [FromQuery] Guid? categoryId = null,
             [FromQuery] RecipeLevelEnum? recipeLevel = null,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
+            [FromQuery] DateOnly? startDate = null,
+            [FromQuery] DateOnly? endDate = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
                 var recipes = await _recipeService.GetAllRecipesAsync(
-             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize, userId);
+             search, sortBy, isDescending, recipeStatus, categoryId, recipeLevel, startDate, endDate, page, pageSize, userId);
 
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),

@@ -210,8 +210,8 @@ namespace WebAPI.Controllers
             [FromQuery] bool isDescending = false,
             [FromQuery] Guid? categoryId = null,
             [FromQuery] RecipeLevelEnum? recipeLevel = null,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
+            [FromQuery] DateOnly? startDate = null,
+            [FromQuery] DateOnly? endDate = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
