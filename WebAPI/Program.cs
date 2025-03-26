@@ -76,6 +76,7 @@ var connectionString =
 
 
 
+
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new Exception("DATABASE_CONNECTION is not set!");
