@@ -64,7 +64,7 @@ builder.Services.AddSwaggerGen(c =>
             },
             Array.Empty<string>()
         }
-    );
+});
 });
 
 Env.Load();
@@ -253,15 +253,10 @@ var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 // });
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(
-        MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500", "http://192.168.0.2:5173") // Replace with your frontend URL
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
+    options.AddPolicy("AllowExpoApp",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
 });
 
 builder.Services.AddHttpClient<AuthenService>();
