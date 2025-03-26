@@ -19,7 +19,7 @@ namespace Data_Access_Layer.Repositories
         IQueryable<IngredientProduct> Query();
         Task<bool> DeleteAsync(IngredientProduct ingredientProduct);
 
-        Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid ingredientId);
+        Task<List<IngredientProduct>> GetByIngredientIdAsync(Guid? ingredientId, string? ingredientCode);
 
     }
 }

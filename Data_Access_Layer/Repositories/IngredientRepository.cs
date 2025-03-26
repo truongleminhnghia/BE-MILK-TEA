@@ -85,8 +85,8 @@ namespace Data_Access_Layer.Repositories
             string? search,
             string? categorySearch,
             Guid? categoryId,
-            DateTime? startDate,
-            DateTime? endDate,
+            DateOnly? startDate,
+            DateOnly? endDate,
             IngredientStatus? status,
             decimal? minPrice,
             decimal? maxPrice,
@@ -97,6 +97,7 @@ namespace Data_Access_Layer.Repositories
                 .Ingredients.Include(i => i.Category)
                 .Include(i => i.Images)
                 .Include(i => i.IngredientQuantities)
+                .Include(i => i.IngredientReviews)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
@@ -136,10 +137,12 @@ namespace Data_Access_Layer.Repositories
 
             if (startDate.HasValue || endDate.HasValue)
             {
-                DateTime adjustedStart = startDate?.Date ?? DateTime.MinValue;
-                DateTime adjustedEnd = endDate?.Date.AddDays(1).AddTicks(-1) ?? DateTime.MaxValue;
+                DateTime adjustedStart = startDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue;
+                DateTime adjustedEnd = endDate?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.MaxValue;
+
                 query = query.Where(i => i.CreateAt >= adjustedStart && i.CreateAt <= adjustedEnd);
             }
+
 
             return query;
         }
@@ -150,6 +153,7 @@ namespace Data_Access_Layer.Repositories
                 .Ingredients.Include(i => i.Images)
                 .Include(i => i.Category)
                 .Include(i => i.IngredientQuantities)
+                .Include(i => i.IngredientReviews)
                 .FirstAsync(a => a.Id.Equals(id));
         }
 
@@ -188,6 +192,13 @@ namespace Data_Access_Layer.Repositories
                 return true;
             }
             return false;
+        }
+
+        public async Task<IEnumerable<Ingredient>> GetIngredientsByPriceRangeAsync(double minPrice, double maxPrice)
+        {
+            return await _context.Ingredients
+                .Where(i => i.PriceOrigin >= minPrice && i.PriceOrigin <= maxPrice)
+                .ToListAsync();
         }
     }
 }

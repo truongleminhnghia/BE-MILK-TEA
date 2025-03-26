@@ -31,6 +31,8 @@ namespace Data_Access_Layer.Repositories
         Task<IngredientPromotion> CreateProductPromotion(IngredientPromotion ingredientPromotion);
         Task<OrderPromotion> CreateOrderPromotion(OrderPromotion orderPromotion);
         //Task<bool> DeleteAsync(Guid id);
+        Task CreateProductPromotionsBulkAsync(List<IngredientPromotion> ingredientPromotions);
+        Task RemoveProductPromotionsByPromotionIdAsync(Guid promotionId);
     }
 }
 
@@ -47,17 +49,11 @@ namespace Data_Access_Layer.Repositories
         }
         public async Task<Promotion> CreateAsync(Promotion promotion)
         {
-            if (promotion.StartDate > promotion.EndDate)
-            {
-                throw new ArgumentException("StartDate không thể lớn hơn EndDate.");
-            }
-            if (promotion.StartDate <= DateTime.UtcNow)
-            {
-                throw new ArgumentException("StartDate phải lớn hơn ngày hiện tại.");
-            }
             try
             {
-                _context.Promotions.Add(promotion);
+                // Lưu Promotion
+                promotion.CreateAt = DateTime.UtcNow;
+                await _context.Promotions.AddAsync(promotion);
                 await _context.SaveChangesAsync();
                 return promotion;
             }
@@ -178,6 +174,7 @@ namespace Data_Access_Layer.Repositories
             }
         }
 
+
         public async Task<IngredientPromotion> CreateProductPromotion(IngredientPromotion ingredientPromotion)
         {
             try
@@ -268,6 +265,7 @@ namespace Data_Access_Layer.Repositories
             return (promotions, total);
         }
 
+
         public async Task<Promotion?> GetByCodeAsync(string code)
         {
             try
@@ -282,5 +280,38 @@ namespace Data_Access_Layer.Repositories
                 return null;
             }
         }
+
+        public async Task CreateProductPromotionsBulkAsync(List<IngredientPromotion> ingredientPromotions)
+        {
+            if (ingredientPromotions == null || !ingredientPromotions.Any())
+            {
+                throw new ArgumentException("Danh sách IngredientPromotion không được rỗng.");
+            }
+
+            await _context.IngredientPromotions.AddRangeAsync(ingredientPromotions);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveProductPromotionsByPromotionIdAsync(Guid promotionId)
+        {
+            try
+            {
+                var ingredientPromotions = await _context.IngredientPromotions
+                    .Where(ip => ip.PromotionId == promotionId)
+                    .ToListAsync();
+
+                if (ingredientPromotions.Any())
+                {
+                    _context.IngredientPromotions.RemoveRange(ingredientPromotions);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi xóa danh sách IngredientPromotions của PromotionId: {promotionId}", ex);
+            }
+        }
+
+
     }
 }

@@ -14,8 +14,8 @@ namespace Data_Access_Layer.Repositories
         string? search,
         string? categorySearch,
         Guid? categoryId,
-        DateTime? startDate,
-        DateTime? endDate,
+        DateOnly? startDate,
+        DateOnly? endDate,
         IngredientStatus? status,
         decimal? minPrice,
         decimal? maxPrice,
@@ -25,5 +25,6 @@ namespace Data_Access_Layer.Repositories
         Task<Ingredient> UpdateAsync(Guid id, Ingredient ingredient);
         Task<bool> CheckCode(string code);
         Task<bool> ChangeStatus(Guid id);
+        Task<IEnumerable<Ingredient>> GetIngredientsByPriceRangeAsync(double minPrice, double maxPrice);
     }
 }

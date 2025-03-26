@@ -34,5 +34,7 @@ namespace Business_Logic_Layer.Models.Responses
         public List<ImageResponse?> Images { get; set; }
 
         public List<IngredientQuantityResponse>? IngredientQuantities { get; set; }
+
+        public List<IngredientReviewResponse>? IngredientReviews { get; set; }
     }
 }
