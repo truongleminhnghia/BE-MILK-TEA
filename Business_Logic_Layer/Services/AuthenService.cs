@@ -120,7 +120,7 @@ namespace Business_Logic_Layer.Services
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex.Message);
-                return new AuthenticateResponse("", new AccountResponse());
+                throw;
             }
         }
 
