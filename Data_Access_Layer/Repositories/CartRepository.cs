@@ -20,7 +20,7 @@ namespace Data_Access_Layer.Repositories
         {
             return await _context.Carts
                .Include(c => c.Account)
-               .Include(c => c.CartItems.Where(ci => ci.IsCart == false).OrderByDescending(ci => ci.CreateAt)) // Lọc và sắp xếp
+               .Include(c => c.CartItems.Where(ci => ci.IsCart == true).OrderByDescending(ci => ci.CreateAt)) // Lọc và sắp xếp
                    .ThenInclude(ci => ci.Ingredient)
                .Include(c => c.CartItems)
                    .ThenInclude(ci => ci.Ingredient.Images)
