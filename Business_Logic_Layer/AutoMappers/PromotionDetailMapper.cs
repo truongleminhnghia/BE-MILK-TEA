@@ -17,7 +17,10 @@ namespace Business_Logic_Layer.AutoMappers
             CreateMap<PromotionDetailRequest, PromotionDetail>();
             CreateMap<PromotionDetail, PromotionDetailResponse>();
             CreateMap<PromotionDetailUpdateRequest, PromotionDetail>().ReverseMap();
+            CreateMap<Order, OrderResponse>()
+            .ForMember(dest => dest.orderDetailResponses, opt => opt.MapFrom(src => src.OrderDetails));
+
         }
-            
+
     }
 }

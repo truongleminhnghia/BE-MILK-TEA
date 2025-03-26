@@ -73,7 +73,11 @@ namespace WebAPI.Controllers
             try
             {
                 var result = await _cartItemService.GetByCart(cartId);
-                return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Lấy danh sách sản phẩm trong giỏ hàng thành công", result));
+                if (result == null)
+                {
+                    return Ok(new ApiResponse((int)HttpStatusCode.OK, true, "Lấy danh sách sản phẩm trong giỏ hàng thành công", result));
+                }
+                return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, false, "danh sach khong ton tai"));
             }
             catch (Exception ex)
             {

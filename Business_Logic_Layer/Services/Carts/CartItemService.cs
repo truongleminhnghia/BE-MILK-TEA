@@ -177,7 +177,7 @@ namespace Business_Logic_Layer.Services.Carts
             var cartItems = await _cartItemRepository.GetByCart(cartId);
             if (cartItems == null)
             {
-                throw new Exception("rỗng");
+                throw new Exception("Cart rỗng");
             }
             return _mapper.Map<IEnumerable<CartItemResponse>>(cartItems);
         }
