@@ -87,6 +87,27 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpPost("createCod")]
+        public async Task<IActionResult> ProcessCODPayment([FromBody] PaymentCreateRequest request)
+        {
+            var result = await _paymentService.ProcessCODPaymentAsync(request);
+            if (result == null )
+            {
+                return BadRequest(
+                        new ApiResponse(
+                            HttpStatusCode.BadRequest.GetHashCode(),
+                            false,
+                            "Something went wrong"
+                        ));
+            }
+            return Ok(new ApiResponse(
+                HttpStatusCode.OK.GetHashCode(),
+                true,
+                "Success",
+                result));
+
+        }
+
         [HttpGet("orderId")]
         public async Task<IActionResult> GetPaymentsByOrder(Guid orderId)
         {
