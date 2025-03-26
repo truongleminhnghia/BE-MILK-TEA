@@ -14,6 +14,7 @@ using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
+using MailKit.Search;
 using Microsoft.Identity.Client;
 
 
@@ -25,6 +26,7 @@ namespace Business_Logic_Layer.Services
         public Task<OrderResponse> CreateAsync(OrderRequest order);
         public Task<List<OrderResponse>> GetAllAsync(Guid accountId, string? search, string? sortBy, bool isDescending, OrderStatus? orderStatus, DateTime? orderDate, int page, int pageSize);
         public Task<OrderResponse> GetByIdAsync(Guid orderId);
+        public Task<OrderResponse> GetByCodeAsync(String orderCode);
         public Task<Order> Update(Order orderId);
         public Task<Order> UpdateStatus(Guid id, Order order);
         //public Task<bool> DeleteByIdAsync(Guid orderId);
@@ -140,6 +142,19 @@ namespace Business_Logic_Layer.Services
             catch (Exception ex)
             {
                 throw new Exception("Không thể lấy list order", ex);
+            }
+        }
+
+        public async Task<OrderResponse> GetByCodeAsync(string orderCode)
+        {
+            try
+            {
+                var order = await _orderRepository.GetByCodeAsync(orderCode);
+                return order == null ? null : _mapper.Map<OrderResponse>(order);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin order bằng id", ex);
             }
         }
 

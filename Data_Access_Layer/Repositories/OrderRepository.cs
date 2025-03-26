@@ -40,7 +40,7 @@ namespace Data_Access_Layer.Repositories
         {
             try
             {
-                 _context.Orders.Add(order);
+                _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
                 return order;
             }
@@ -84,9 +84,25 @@ namespace Data_Access_Layer.Repositories
         {
             try
             {
-                var query = _context.Orders.AsQueryable();
-                query = query.Where(o => o.AccountId == accountId);
-                // Filtering by search term (case-insensitive)
+
+                var baseQuery = _context.OrderDetails.Where(w => w.Orders.AccountId == accountId).Include(ic => ic.Orders).AsQueryable();
+                var query = baseQuery.Select(o => new Order
+                {
+                    Id = o.Id,
+                    OrderCode = o.Orders.OrderCode,
+                    OrderDate = o.Orders.OrderDate,
+                    FullNameShipping = o.Orders.FullNameShipping,
+                    PhoneShipping = o.Orders.PhoneShipping,
+                    EmailShipping = o.Orders.EmailShipping,
+                    NoteShipping = o.Orders.NoteShipping,
+                    Quantity = o.Orders.Quantity,
+                    TotalPrice = o.Orders.TotalPrice,
+                    PriceAffterPromotion = o.Orders.PriceAffterPromotion,
+                    AddressShipping = o.Orders.AddressShipping,
+                    OrderDetails = o.Orders.OrderDetails 
+                }).AsQueryable();
+                
+
                 if (!string.IsNullOrEmpty(search))
                 {
                     query = query.Where(o => o.OrderCode.ToLower().Contains(search.ToLower()));
@@ -139,6 +155,23 @@ namespace Data_Access_Layer.Repositories
 
             await _context.SaveChangesAsync();
             return existingOrder;
+        }
+
+        public async Task<Order?> GetByCodeAsync(string id)
+        {
+            try
+            {
+                return await _context.Orders.Include(o => o.OrderDetails)
+                                            .Include(o => o.Payments)
+                                            .Include(o => o.OrderPromotions)
+                                            .FirstOrDefaultAsync(o => o.OrderCode == id);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (if using logging)
+                Console.WriteLine($"loi o GetByIdAsync: {ex.Message}");
+                return null;
+            }
         }
     }
 }
