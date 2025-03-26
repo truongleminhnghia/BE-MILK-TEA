@@ -194,13 +194,6 @@ namespace Business_Logic_Layer.Services
                 currentAccount.RoleName == RoleName.ROLE_MANAGER ||
                 currentAccount.RoleName == RoleName.ROLE_ADMIN)
             {
-                return new PageResult<RecipeResponse>
-                {
-                    Data = recipes.Select(ComplexRecipeResponse).ToList(),
-                    PageCurrent = page,
-                    PageSize = pageSize,
-                    Total = total
-                };
             }
             else
             {
@@ -218,12 +211,15 @@ namespace Business_Logic_Layer.Services
                 }
             }
 
+            // Phân trang sau khi đã lọc
+            var pagedRecipes = recipes.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             return new PageResult<RecipeResponse>
             {
-                Data = recipes.Select(ComplexRecipeResponse).ToList(),
+                Data = pagedRecipes.Select(ComplexRecipeResponse).ToList(),
                 PageCurrent = page,
                 PageSize = pageSize,
-                Total = total
+                Total = recipes.Count // Cập nhật total sau khi lọc
             };
         }
 
