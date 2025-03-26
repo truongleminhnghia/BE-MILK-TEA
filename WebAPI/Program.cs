@@ -64,8 +64,9 @@ builder.Services.AddSwaggerGen(c =>
             },
             Array.Empty<string>()
         }
-    );
+    });
 });
+
 
 Env.Load();
 
@@ -108,9 +109,9 @@ var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
 //muốn chạy thì comment từ đây lại, + xóa Migration
- if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
- {
-   throw new InvalidOperationException("JWT environment variables are not set properly.");
+if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
+{
+    throw new InvalidOperationException("JWT environment variables are not set properly.");
 }
 
 // đăng kí xác thực
@@ -238,7 +239,7 @@ builder.Services.AddHttpContextAccessor();
 
 
 // config CORS
-var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
+// var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 // builder.Services.AddCors(options =>
 // {
 //     options.AddPolicy(
@@ -251,18 +252,28 @@ var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 //         //    .AllowCredentials();
 //         });
 // });
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy(
+//         MyAllowSpecificOrigins,
+//         policy =>
+//         {
+//             policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500", "http://192.168.0.2:5173") // Replace with your frontend URL
+//                   .AllowAnyMethod()
+//                   .AllowAnyHeader()
+//                   .AllowCredentials();
+//         });
+// });
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(
-        MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500", "http://192.168.0.2:5173") // Replace with your frontend URL
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
+    options.AddPolicy("AllowExpoApp",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
 });
+
+builder.Services.AddHttpClient<AuthenService>();
 
 builder.Services.AddHttpClient<AuthenService>();
 var app = builder.Build();
