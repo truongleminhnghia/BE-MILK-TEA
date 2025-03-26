@@ -84,13 +84,16 @@ namespace Data_Access_Layer.Repositories
                 return null;
             }
             var cartItem = await _cartItemRepository.GetById(orderDetail.Id);
-            var ingredient = await _context.Ingredients.FirstOrDefaultAsync(i => i.Id == cartItem.IngredientId);
-            if (ingredient == null)
-            {
-                throw new Exception("Ingredient not found.");
-            }
-            existingOrderDetail.Quantity = orderDetail.Quantity;
-            // existingOrderDetail.Price = orderDetail.Quantity * cartItem.Price;
+            //var ingredient = await _context.Ingredients.FirstOrDefaultAsync(i => i.Id == cartItem.IngredientId);
+            //if (ingredient == null)
+            //{
+            //    throw new Exception("Ingredient not found.");
+            //}
+            existingOrderDetail.Quantity = cartItem.Quantity;
+            existingOrderDetail.Price = cartItem.Price;
+            existingOrderDetail.CartItemId = orderDetail.CartItemId;
+            existingOrderDetail.OrderId = orderDetail.OrderId;
+            _context.OrderDetails.Update(existingOrderDetail);
             await _context.SaveChangesAsync();
             return existingOrderDetail;
         }

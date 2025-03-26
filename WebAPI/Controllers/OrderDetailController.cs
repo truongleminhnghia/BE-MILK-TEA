@@ -6,6 +6,7 @@ using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
 using Data_Access_Layer.Entities;
+using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,55 +18,35 @@ namespace WebAPI.Controllers
     public class OrderDetailController : ControllerBase
     {
         private readonly IOrderDetailService _orderDetailService;
+        private readonly IOrderService _orderService;
         private readonly IMapper _mapper;
 
-        public OrderDetailController(IOrderDetailService orderDetailService, IMapper mapper)
+        public OrderDetailController(IOrderDetailService orderDetailService, IMapper mapper, IOrderService orderService)
         {
+            _orderService = orderService;
             _orderDetailService = orderDetailService;
             _mapper = mapper;
         }
         [HttpGet]
         public async Task<IActionResult> GetOrderDetails(
             [FromQuery] Guid? orderId,
-            [FromQuery] Guid? orderDetailId,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool isDescending = false)
         {
-            // Nếu nhập cả 2 ➝ Báo lỗi
-            if (orderId.HasValue && orderDetailId.HasValue)
-            {
-                return BadRequest(new ApiResponse(
-                    ((int)HttpStatusCode.BadRequest),
-                    false,
-                    "Chỉ được nhập một trong hai: orderId hoặc orderDetailId."
-                ));
-            }
+
 
             // Nếu không nhập gì ➝ Báo lỗi
-            if (!orderId.HasValue && !orderDetailId.HasValue)
+            if (!orderId.HasValue)
             {
                 return BadRequest(new ApiResponse(
                     ((int)HttpStatusCode.BadRequest),
                     false,
-                    "Vui lòng nhập một trong hai: orderId hoặc orderDetailId."
+                    "Vui lòng nhập orderId "
                 ));
             }
-
-            // Nếu có orderDetailId ➝ Lấy chi tiết đơn hàng
-            if (orderDetailId.HasValue)
-            {
-                var orderDetail = await _orderDetailService.GetByIdAsync(orderDetailId.Value);
-                return Ok(new ApiResponse(
-                    ((int)HttpStatusCode.OK),
-                    true,
-                    orderDetail != null ? "Lấy dữ liệu thành công!" : "Không có đơn hàng nào có ID đó cả.",
-                    orderDetail
-                ));
-            }
-
             // Nếu có orderId ➝ Lấy danh sách chi tiết đơn hàng
             if (orderId.HasValue)
             {
@@ -85,25 +66,56 @@ namespace WebAPI.Controllers
                 "Yêu cầu không hợp lệ."
             ));
         }
-        ////Create
-        [HttpPost]
-        public async Task<IActionResult> AddOrderDetail([FromBody] OrderDetailRequest orderDetails)
+
+        [HttpGet("{orderDetailId}")]
+        public async Task<IActionResult> GetById(Guid orderDetailId)
         {
+            var orderDetail = await _orderDetailService.GetByIdAsync(orderDetailId);
+
+            if (orderDetail == null)
+            {
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Không tìm thấy chi tiết đơn hàng.",
+                    null
+                ));
+            }
+
+            return Ok(new ApiResponse(
+                (int)HttpStatusCode.OK,
+                true,
+                "Lấy dữ liệu thành công!",
+                orderDetail
+            ));
+        }
+
+            ////Create
+            [HttpPost]
+        public async Task<IActionResult> AddOrderDetail([FromBody] CreateOrderDetailRequest orderDetails)
+        {
+            var order = await _orderService.GetByIdAsync(orderDetails.OrderId);
+         
             if (orderDetails == null)
             {
                 return BadRequest(new { message = "Invalid order detail data" });
+            }
+            if (order == null)
+            {
+                return BadRequest(new { message = "Không tồn tại order với id này" });
             }
             var orderDetailEntity = _mapper.Map<OrderDetail>(orderDetails);
 
             var createdOrderDetail = await _orderDetailService.CreateAsync(orderDetailEntity);
             return Ok(createdOrderDetail);
+
         }
         //UPDATE
         [HttpPut("{id}")]
 
         public async Task<IActionResult> UpdateOrderDetail(
             Guid id,
-            [FromBody] OrderDetailRequest orderDetailRequest
+            [FromBody] CreateOrderDetailRequest orderDetailRequest
         )
         {
             if (orderDetailRequest == null)

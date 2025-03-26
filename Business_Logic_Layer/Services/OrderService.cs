@@ -14,6 +14,7 @@ using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
+using MailKit.Search;
 using Microsoft.Identity.Client;
 
 
@@ -25,6 +26,7 @@ namespace Business_Logic_Layer.Services
         public Task<OrderResponse> CreateAsync(OrderRequest order);
         public Task<List<OrderResponse>> GetAllAsync(Guid accountId, string? search, string? sortBy, bool isDescending, OrderStatus? orderStatus, DateTime? orderDate, int page, int pageSize);
         public Task<OrderResponse> GetByIdAsync(Guid orderId);
+        public Task<OrderResponse> GetByCodeAsync(String orderCode);
         public Task<Order> Update(Order orderId);
         public Task<Order> UpdateStatus(Guid id, Order order);
         //public Task<bool> DeleteByIdAsync(Guid orderId);
@@ -84,22 +86,22 @@ namespace Business_Logic_Layer.Services
                         throw new Exception($"Không tìm thấy nguyên liệu với ID {ingredientProduct.Id}");
                     }
 
-                    if (ingredientQuantityProduct.Quantity < orderDetail.Quantity)
+                    if (ingredientQuantityProduct.Quantity < cartItem.Quantity)
                     {
-                        throw new Exception($"Số lượng đặt hàng ({orderDetail.Quantity}) vượt quá số lượng sẵn có ({ingredientQuantityProduct.Quantity})");
+                        throw new Exception($"Số lượng đặt hàng ({cartItem.Quantity}) vượt quá số lượng sẵn có ({ingredientQuantityProduct.Quantity})");
                     }
                     //Trừ số lượng đang có trong database = số lượng đặt
-                    ingredientQuantityProduct.Quantity -= orderDetail.Quantity;
+                    ingredientQuantityProduct.Quantity -= cartItem.Quantity;
 
                     //Gán ingredientQuantityProduct thành IngredientQuantityRequest
                     var ingredientQuantityRequest = _mapper.Map<IngredientQuantityRequest>(ingredientQuantityProduct);
                     await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, ingredientQuantityRequest);
 
                     //tạo orderdetail
-                    //var chosenIngredient = await _ingredientService.GetById(ingredientProduct.IngredientId);
+                    
                     orderDetails.OrderId = createdOrder.Id;
                     orderDetails.CartItemId = orderDetail.CartItemId;
-                    orderDetails.Quantity = orderDetail.Quantity;
+                    orderDetails.Quantity = cartItem.Quantity;
 
 
                     //orderDetails.Price = orderDetail.Price;
@@ -108,7 +110,7 @@ namespace Business_Logic_Layer.Services
                     var createOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
                     orderDetailList.Add(createOrderDetail);
                     createdOrder.Quantity += createOrderDetail.Quantity;
-                    createdOrder.TotalPrice += createOrderDetail.Price * createOrderDetail.Quantity;
+                    createdOrder.TotalPrice += ingredientProduct.PriceOrigin * createOrderDetail.Quantity;
 
                 }
                 createdOrder.OrderDetails = orderDetailList;
@@ -140,6 +142,19 @@ namespace Business_Logic_Layer.Services
             catch (Exception ex)
             {
                 throw new Exception("Không thể lấy list order", ex);
+            }
+        }
+
+        public async Task<OrderResponse> GetByCodeAsync(string orderCode)
+        {
+            try
+            {
+                var order = await _orderRepository.GetByCodeAsync(orderCode);
+                return order == null ? null : _mapper.Map<OrderResponse>(order);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin order bằng id", ex);
             }
         }
 

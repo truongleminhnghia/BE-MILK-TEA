@@ -11,6 +11,8 @@ public class OrderMapper:Profile
     {
         CreateMap<OrderRequest, Order>();
         CreateMap<OrderUpdateRequest, Order>().ReverseMap();
-        CreateMap<Order, OrderResponse>();
+        CreateMap<Order, OrderResponse>()
+            .ForMember(dest => dest.orderDetailResponses, opt => opt.MapFrom(src => src.OrderDetails));
+        CreateMap<OrderDetail, OrderDetailResponse>();
     }
 }

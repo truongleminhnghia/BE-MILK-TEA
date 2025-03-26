@@ -59,7 +59,8 @@ namespace Business_Logic_Layer.Services
                 // Fetch the ingredient product asynchronously
                 var cartItem = await _cartItemRepository.GetById(orderDetail.CartItemId);
                 var ingredientProduct = await _ingredientRepository.GetById(cartItem.IngredientId);
-
+                orderDetail.Quantity = cartItem.Quantity;
+                //orderDetail.Price = cartItem.Price;
                 // Ensure ingredientProduct is not null
                 if (ingredientProduct == null)
                 {
@@ -108,6 +109,7 @@ namespace Business_Logic_Layer.Services
                 {
                     return null;
                 }
+
                 return await _orderDetailRepository.UpdateAsync(id, orderDetail);
             }
             catch (Exception ex)

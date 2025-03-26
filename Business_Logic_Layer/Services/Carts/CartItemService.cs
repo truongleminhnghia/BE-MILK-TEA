@@ -106,26 +106,53 @@ namespace Business_Logic_Layer.Services.Carts
             {
                 throw new Exception("Số lượng không phù hợp");
             }
+
             var cartExisting = await _cartRepository.FindByAccount(cartItemRequest.AccountId);
             if (cartExisting == null)
             {
                 cartExisting = await CreateNewCart(account);
             }
+
+
+            // **Tìm CartItem có cùng IngredientId trong giỏ hàng**
+            var existingCartItem = cartExisting.CartItems
+                .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId);
+
+            // **Nếu IsCart == true và đã có nguyên liệu trong giỏ hàng => Báo lỗi**
+            if (cartItemRequest.IsCart && existingCartItem != null)
+            {
+                throw new Exception("Đã có item trong giỏ hàng rồi");
+            }
+
+            // **Tạo mới CartItem, không cộng dồn số lượng**
             CartItem item = _mapper.Map<CartItem>(cartItemRequest);
             item.CartId = cartExisting.Id;
             item.CreateAt = DateTime.Now;
             item.UpdateAt = DateTime.Now;
-            var cartItem = await _cartItemRepository.SaveCartItem(item);
-            if (cartItem == null)
+
+            double OriginPrice = GetPrice(ingre);
+            double OriginTotalPrice = OriginPrice * item.Quantity;
+
+            if (cartItemRequest.IsCart)
             {
-                throw new Exception("Thêm giỏ hàng thất bại");
+                item.Price = 0;
+                item.TotalPrice = 0; // Khi là giỏ hàng, lưu giá = 0
             }
+            else
+            {
+                item.Price = OriginPrice;
+                item.TotalPrice = OriginTotalPrice;
+            }
+
+            CartItem cartItem = await _cartItemRepository.SaveCartItem(item);
             cartExisting.CartItems.Add(cartItem);
+
+            // **Tạo response trả về**
             CartItemResponse cartItemResponse = _mapper.Map<CartItemResponse>(cartItem);
-            cartItemResponse.Price = GetPrice(ingre);
-            cartItemResponse.TotalPrice = cartItemRequest.Quantity * cartItemResponse.Price;
             return cartItemResponse;
         }
+
+        
 
         public async Task<bool> Delete(Guid id)
         {
@@ -150,7 +177,7 @@ namespace Business_Logic_Layer.Services.Carts
             var cartItems = await _cartItemRepository.GetByCart(cartId);
             if (cartItems == null)
             {
-                throw new Exception("rỗng");
+                throw new Exception("Cart rỗng");
             }
             return _mapper.Map<IEnumerable<CartItemResponse>>(cartItems);
         }
@@ -182,6 +209,7 @@ namespace Business_Logic_Layer.Services.Carts
             }
             // Cập nhật quantity và product type
             cartItem.Quantity = request.Quantity;
+            cartItem.TotalPrice = cartItem.Price * request.Quantity;
             //cartItem.ProductType = request.ProductType;
 
             _cartItemRepository.UpdateCartItem(cartItem);

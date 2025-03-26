@@ -4,6 +4,7 @@
     {
         BIN, // thùng
         BAG, // bịch
-        BÕ, // hộp
+        BOX, // hộp
+
     }
 }
