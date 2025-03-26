@@ -12,16 +12,12 @@ namespace Business_Logic_Layer.Models.Responses
 {
     public class PromotionResponse
     {
-        public String? PromotionCode { get; set; }
+        public Guid? Id { get; set; }
+        public string? PromotionCode { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool IsActive { get; set; }
         public PromotionType PromotionType { get; set; }
-        public List<PromotionDetailResponse> PromotionDetails { get; set; } = new List<PromotionDetailResponse>();
-
-        public void ConvertToPromotionDetailResponse(List<PromotionDetail> details, IMapper mapper)
-        {
-            this.PromotionDetails = details.Select(d => mapper.Map<PromotionDetailResponse>(d)).ToList();
-        }
+        public PromotionDetailResponse PromotionDetails { get; set; } = new PromotionDetailResponse();
     }
 }

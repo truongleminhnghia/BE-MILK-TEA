@@ -14,7 +14,7 @@ namespace Business_Logic_Layer.Services
     string? search, string? sortBy, bool isDescending,
     RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
     DateTime? startDate, DateTime? endDate,
-    int page, int pageSize);
+    int page, int pageSize, Guid userId);
         Task<RecipeResponse?> UpdateRecipeStatusAsync(Guid recipeId, RecipeStatusEnum newStatus);
     }
 }

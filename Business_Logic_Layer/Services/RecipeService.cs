@@ -26,8 +26,9 @@ namespace Business_Logic_Layer.Services
         private readonly IIngredientRecipeRepository _ingredientRecipeRepository;
         private readonly ICategoryService _categoryService;
         private readonly Source _source;
+        private readonly IAccountRepository _accountRepository;
 
-        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository, ICategoryService categoryService, Source source)
+        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository, ICategoryService categoryService, Source source, IAccountRepository accountRepository)
         {
             _recipeRepository = recipeRepository;
             _ingredientRepository = ingredientRepository;
@@ -36,6 +37,7 @@ namespace Business_Logic_Layer.Services
             _ingredientRecipeRepository = ingredientRecipeRepository;
             _categoryService = categoryService;
             _source = source;
+            _accountRepository = accountRepository;
         }
 
         public async Task<RecipeResponse> CreateRecipe(RecipeRequest request)
@@ -172,7 +174,7 @@ namespace Business_Logic_Layer.Services
     string? search, string? sortBy, bool isDescending,
     RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
     DateTime? startDate, DateTime? endDate,
-    int page, int pageSize)
+    int page, int pageSize, Guid userId)
         {
             var (recipes, total) = await _recipeRepository.GetAllRecipesAsync(
         search, sortBy, isDescending, recipeStatus, categoryId, recipeLevel, startDate, endDate, page, pageSize);
@@ -181,22 +183,17 @@ namespace Business_Logic_Layer.Services
                 throw new Exception("Recipe repository returned null.");
             }
 
-            
-            Account? currentAccount = null;
-            try
-            {
-                currentAccount = await _source.GetCurrentAccount();
-            }
-            catch
-            {
-                // Ghi log lỗi thay vì cho lỗi này rơi thẳng vào catch chính
-                Console.WriteLine("");
-            }
+            Account? currentAccount = await _accountRepository.GetById(userId);
 
             // Nếu không có tài khoản (Guest), chỉ thấy công thức PUBLIC
             if (currentAccount == null)
             {
                 recipes = recipes.Where(recipe => recipe.RecipeLevel == RecipeLevelEnum.PUBLIC).ToList();
+            }
+            else if (currentAccount.RoleName == RoleName.ROLE_STAFF ||
+                currentAccount.RoleName == RoleName.ROLE_MANAGER ||
+                currentAccount.RoleName == RoleName.ROLE_ADMIN)
+            {
             }
             else
             {
@@ -214,12 +211,15 @@ namespace Business_Logic_Layer.Services
                 }
             }
 
+            // Phân trang sau khi đã lọc
+            var pagedRecipes = recipes.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             return new PageResult<RecipeResponse>
             {
-                Data = recipes.Select(ComplexRecipeResponse).ToList(),
+                Data = pagedRecipes.Select(ComplexRecipeResponse).ToList(),
                 PageCurrent = page,
                 PageSize = pageSize,
-                Total = total
+                Total = recipes.Count // Cập nhật total sau khi lọc
             };
         }
 
