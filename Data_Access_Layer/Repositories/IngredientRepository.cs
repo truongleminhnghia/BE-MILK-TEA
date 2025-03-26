@@ -193,5 +193,12 @@ namespace Data_Access_Layer.Repositories
             }
             return false;
         }
+
+        public async Task<IEnumerable<Ingredient>> GetIngredientsByPriceRangeAsync(double minPrice, double maxPrice)
+        {
+            return await _context.Ingredients
+                .Where(i => i.PriceOrigin >= minPrice && i.PriceOrigin <= maxPrice)
+                .ToListAsync();
+        }
     }
 }

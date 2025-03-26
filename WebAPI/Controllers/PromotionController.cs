@@ -100,7 +100,7 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPromotion([FromBody] PromotionRequest promotion)
         {
-            if (promotion == null || promotion.promotionDetailList == null || !promotion.promotionDetailList.Any())
+            if (promotion == null || promotion.promotionDetail == null || !promotion.promotionDetail.Any())
             {
                 return BadRequest(new ApiResponse(
                     (int)HttpStatusCode.BadRequest,
