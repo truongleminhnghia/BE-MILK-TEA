@@ -23,6 +23,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> CreateRecipe([FromBody] RecipeRequest request)
         {
             try
@@ -43,6 +44,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetRecipeById(Guid id)
         {
             try
@@ -64,6 +66,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateRecipe(Guid id, [FromBody] RecipeRequest request)
         {
             try
@@ -87,6 +90,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> GetAllRecipes(
             [FromQuery] Guid userId,
             [FromQuery] string? search,
@@ -119,6 +125,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> DeleteRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
         {
             try
