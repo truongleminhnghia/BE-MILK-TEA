@@ -144,7 +144,7 @@ namespace Business_Logic_Layer.Services
                     {
                         throw new Exception($"Đơn hàng chưa đạt giá trị tối thiểu để áp dụng khuyến mãi ({promotionDetailValue.MiniValue} VND).");
                     }
-
+   
                     // Tính toán số tiền giảm giá
                     double discountValue = promotionDetailValue.DiscountValue;
                     double maxDiscount = promotionDetailValue.MaxValue;
@@ -168,16 +168,21 @@ namespace Business_Logic_Layer.Services
                         PromotionId = promotion.Id
                     };
                     await _promotionService.CreateOrderPromotionAsync(orderPromotion);
+                    createdOrder.PriceAffterPromotion = finalPrice;
                 }
-
-                createdOrder.PriceAffterPromotion = finalPrice;
+                else
+                {
+                    createdOrder.PriceAffterPromotion = 0;
+                }
+                
+                
                 createdOrder.OrderDetails = orderDetailList;
                 createdOrder = await Update(createdOrder);
 
                 var returna = _mapper.Map<OrderResponse>(createdOrder);
                 returna.TotalPrice = createdOrder.TotalPrice; // Giá gốc
                 returna.PriceAfterPromotion = createdOrder.PriceAffterPromotion;
-                returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);
+                returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);         
                 return returna;
             }
             catch (Exception ex)
