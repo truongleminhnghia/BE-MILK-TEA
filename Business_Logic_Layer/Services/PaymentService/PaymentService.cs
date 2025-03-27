@@ -72,7 +72,7 @@ namespace Business_Logic_Layer.Services.PaymentService
                 );
 
                 // Generate payment URL
-                string paymentUrl = _vnPayService.CreatePaymentUrl(request, httpContext);
+                string paymentUrl = _vnPayService.CreatePaymentUrl(request, httpContext, order.TotalPrice);
                 _logger.LogInformation("URL thanh toán được tạo: {PaymentUrl}", paymentUrl);
 
                 return new PaymentResponse
