@@ -27,7 +27,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("{accountId}")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> CreateCart(Guid accountId)
         {
             try
@@ -72,7 +72,7 @@ namespace WebAPI.Controllers
         // }
 
         [HttpGet("{accountId}")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetByAccount(Guid accountId)
         {
             try

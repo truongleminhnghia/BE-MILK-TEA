@@ -28,9 +28,9 @@ namespace WebAPI.Controllers
 
         //GET ALL
         [HttpGet]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> GetAll(
             [FromQuery] CategoryStatus? categoryStatus,
             [FromQuery] CategoryType? categoryType,
@@ -77,7 +77,7 @@ namespace WebAPI.Controllers
 
         //GET BY ID
         [HttpGet("{id}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var category = await _categoryService.GetByIdAsync(id);
@@ -98,7 +98,7 @@ namespace WebAPI.Controllers
 
         //CREATE
         [HttpPost]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryRequest category)
         {
@@ -132,7 +132,7 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
@@ -168,8 +168,8 @@ namespace WebAPI.Controllers
         //DELETE
         [HttpDelete("{id}")]
         [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             try

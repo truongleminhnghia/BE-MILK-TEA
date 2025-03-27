@@ -22,7 +22,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> CreateCartItem([FromBody] CartItemRequest request)
         {
             try
@@ -37,7 +37,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> DeleteCartItem([FromRoute] Guid id)
         {
             try
@@ -56,7 +56,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetCartItemById([FromRoute] Guid id)
         {
             try
@@ -71,7 +71,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("cart/{cartId}")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetCartItemsByCartId([FromRoute] Guid cartId)
         {
             try
@@ -90,7 +90,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> UpdateCartItem([FromRoute] Guid id, [FromBody] UpdateCartItemRequest request)
         {
             try

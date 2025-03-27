@@ -23,7 +23,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> CreateRecipe([FromBody] RecipeRequest request)
         {
             try
@@ -44,7 +44,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetRecipeById(Guid id)
         {
             try
@@ -66,7 +66,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateRecipe(Guid id, [FromBody] RecipeRequest request)
         {
             try
@@ -90,9 +90,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> GetAllRecipes(
             [FromQuery] Guid userId,
             [FromQuery] string? search,
@@ -125,9 +125,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("status/{id}")]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> UpdateRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
         {
             try

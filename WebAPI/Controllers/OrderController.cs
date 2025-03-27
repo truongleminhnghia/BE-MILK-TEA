@@ -29,10 +29,10 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{accountId?}")]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetOrder(
             [FromRoute] Guid accountId,
             [FromQuery] OrderStatus? orderStatus,
@@ -55,10 +55,10 @@ namespace WebAPI.Controllers
 
         // Get order by ID or Order Code
         [HttpGet]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetById(
             [FromQuery] Guid? orderId,
             [FromQuery] string? orderCode)
@@ -105,10 +105,10 @@ namespace WebAPI.Controllers
 
         //Create
         [HttpPost]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> AddOrder([FromBody] OrderRequest order)
         {
             if (order == null || order.orderDetailList == null || !order.orderDetailList.Any())
@@ -130,10 +130,10 @@ namespace WebAPI.Controllers
         }
         //UPDATE
         [HttpPut("{orderId}")]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
-        [Authorize("ROLE_CUSTOMER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateOrder(
             Guid orderId,

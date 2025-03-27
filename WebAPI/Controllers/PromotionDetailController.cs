@@ -23,9 +23,9 @@ namespace WebAPI.Controllers
         }
         // GET: Lấy danh sách hoặc chi tiết promotion detail theo ID
         [HttpGet]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotionDetails(
             [FromQuery] Guid? promotionId,
             [FromQuery] Guid? promotionDetailId)
@@ -78,7 +78,7 @@ namespace WebAPI.Controllers
         }
         // POST: Tạo mới PromotionDetail
         [HttpPost("{promotionId}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddPromotionDetail(Guid promotionId, [FromBody] PromotionDetailRequest promotionDetailRequest)
         {
             if (promotionDetailRequest == null)
@@ -104,7 +104,7 @@ namespace WebAPI.Controllers
         }
         // PUT: Cập nhật PromotionDetail theo ID
         [HttpPut("{id}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdatePromotionDetail(
             Guid id,
             [FromBody] PromotionDetailUpdateRequest promotionDetailRequest)

@@ -24,7 +24,7 @@ namespace WebAPI.Controllers
         }
         //CREATE
         [HttpPost]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddIngredientProduct([FromBody] IngredientProductRequest ingredientReq, [FromQuery] bool isCart)
         {
             try
@@ -46,7 +46,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetProductById(Guid id)
         {
             try
@@ -76,7 +76,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] IngredientProductRequest request, [FromQuery] bool isCart)
         {
             try
@@ -105,9 +105,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize("ROLE_STAFF")]
-        [Authorize("ROLE_ADMIN")]
-        [Authorize("ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
             try
@@ -135,7 +135,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("by-ingredient/{ingredientId}")]
-        [Authorize("ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetByIngredientId(Guid? ingredientId, string? ingredientCode)
         {
             try
