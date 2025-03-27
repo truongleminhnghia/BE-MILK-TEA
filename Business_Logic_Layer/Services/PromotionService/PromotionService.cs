@@ -35,9 +35,10 @@ namespace Business_Logic_Layer.Services.PromotionService
         Task<Promotion?> UpdateAsync(Guid id, Promotion promotion, double maxPriceThreshold, double minPriceThreshold);
 
         Task<PageResult<PromotionResponse>> GetAllPromotions(
-            bool isActive, string? search, string? sortBy, bool isDescending,
-            PromotionType? promotionType, string? promotionCode, string? promotionName,
-            DateTime? startDate, DateTime? endDate, int page, int pageSize);
+    string? search, string? sortBy, bool isDescending,
+    PromotionType? promotionType, string? promotionCode, string? promotionName,
+    DateOnly? startDate, DateOnly? endDate,
+    int page, int pageSize, Guid userId);
         Task<OrderPromotion> CreateOrderPromotionAsync(OrderPromotion orderPromotion);
     }
     public class PromotionService : IPromotionService
@@ -49,8 +50,9 @@ namespace Business_Logic_Layer.Services.PromotionService
         private readonly Source _source;
         private readonly IIngredientRepository _ingredientRepository;
         private readonly ApplicationDbContext _context;
+        private readonly IAccountRepository _accountRepository;
 
-        public PromotionService(IMapper mapper, IPromotionRepository promotionRepository, Source source, IPromotionDetailService promotionDetailService, IPromotionDetailRepository promotionDetailRepository, IIngredientRepository ingredientRepository, ApplicationDbContext context)
+        public PromotionService(IMapper mapper, IPromotionRepository promotionRepository, Source source, IPromotionDetailService promotionDetailService, IPromotionDetailRepository promotionDetailRepository, IIngredientRepository ingredientRepository, ApplicationDbContext context, IAccountRepository accountRepository)
         {
             _mapper = mapper;
             _promotionRepository = promotionRepository;
@@ -59,6 +61,7 @@ namespace Business_Logic_Layer.Services.PromotionService
             _promotionDetailRepository = promotionDetailRepository;
             _ingredientRepository = ingredientRepository;
             _context = context;
+            _accountRepository = accountRepository;
         }
 
         public async Task<PromotionResponse> CreateAsync(PromotionRequest promotionRequest)
@@ -224,24 +227,52 @@ namespace Business_Logic_Layer.Services.PromotionService
 
 
         public async Task<PageResult<PromotionResponse>> GetAllPromotions(
-        bool isActive, string? search, string? sortBy, bool isDescending,
-        PromotionType? promotionType, string? promotionCode, string? promotionName,
-        DateTime? startDate, DateTime? endDate, int page, int pageSize)
+    string? search, string? sortBy, bool isDescending,
+    PromotionType? promotionType, string? promotionCode, string? promotionName,
+    DateOnly? startDate, DateOnly? endDate,
+    int page, int pageSize, Guid userId)
         {
-            var (promotions, total) = await _promotionRepository.GetAllPromotions(
-                isActive, search, sortBy, isDescending, promotionType,
-                promotionCode, promotionName, startDate, endDate, page, pageSize);
+            Account? currentAccount = await _accountRepository.GetById(userId);
+            List<Promotion> promotions;
 
-            var promotionResponses = _mapper.Map<List<PromotionResponse>>(promotions);
+            if (currentAccount == null)
+            {
+                throw new Exception("Xin vui lòng đăng nhập để được xem thông tin khuyến mãi");
+            }
+            else if (currentAccount.RoleName is RoleName.ROLE_STAFF or RoleName.ROLE_ADMIN or RoleName.ROLE_MANAGER)
+            {
+                promotions = await _promotionRepository.GetFilteredPromotionsAsync(
+                    search, sortBy, isDescending, promotionType, promotionCode, promotionName, startDate, endDate, null);
+            }
+            else
+            {
+                promotions = await _promotionRepository.GetFilteredPromotionsAsync(
+                    search, sortBy, isDescending, promotionType, promotionCode, promotionName, startDate, endDate, true);
+            }
+
+            // Sắp xếp lại danh sách
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                promotions = isDescending
+                    ? promotions.OrderByDescending(p => p.GetType().GetProperty(sortBy)?.GetValue(p)).ToList()
+                    : promotions.OrderBy(p => p.GetType().GetProperty(sortBy)?.GetValue(p)).ToList();
+            }
+
+            // Tính lại tổng số lượng sau khi lọc
+            int total = promotions.Count;
+
+            // Phân trang
+            var pagedPromotions = promotions.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             return new PageResult<PromotionResponse>
             {
-                Data = promotionResponses,
+                Data = _mapper.Map<List<PromotionResponse>>(pagedPromotions),
                 PageCurrent = page,
                 PageSize = pageSize,
                 Total = total
             };
         }
+
 
         public async Task<Promotion?> GetByCodeAsync(string code)
         {

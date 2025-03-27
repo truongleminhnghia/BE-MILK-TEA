@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using AutoMapper;
@@ -28,19 +29,20 @@ namespace WebAPI.Controllers
         //Get all
         [HttpGet]
         public async Task<IActionResult> GetPromotion(
-    [FromQuery] bool isActive,
-    [FromQuery] string? promotionCode,
-    [FromQuery] string? promotionName,
-    [FromQuery] PromotionType? promotionType,
+            [FromQuery] Guid userId,
+    [FromQuery] bool? isActive = null,
+    [FromQuery] string? promotionCode = null,
+    [FromQuery] string? promotionName = null,
+    [FromQuery] PromotionType? promotionType = null,
     [FromQuery] int page = 1,
     [FromQuery] int pageSize = 10,
     [FromQuery] string? search = null,
     [FromQuery] string? sortBy = null,
     [FromQuery] bool isDescending = false,
-    [FromQuery] DateTime? startDate = null,
-    [FromQuery] DateTime? endDate = null)
+    [FromQuery] DateOnly? startDate = null,
+    [FromQuery] DateOnly? endDate = null
+    )
         {
-            {
             try
             {
                 if (startDate.HasValue && endDate.HasValue && startDate > endDate)
@@ -53,13 +55,13 @@ namespace WebAPI.Controllers
                 }
 
                 var promotions = await _promotionService.GetAllPromotions(
-                    isActive, search, sortBy, isDescending, promotionType,
-                    promotionCode, promotionName, startDate, endDate, page, pageSize);
+                    search, sortBy, isDescending, promotionType, promotionCode, promotionName,
+                    startDate, endDate, page, pageSize, userId);
 
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
                     true,
-                    promotions.Data != null ? "Lấy dữ liệu thành công!" : " Không có Promotion nào phù hợp",
+                    promotions.Data.Any() ? "Lấy dữ liệu thành công!" : "Không có Promotion nào phù hợp.",
                     promotions
                 ));
             }
@@ -73,8 +75,8 @@ namespace WebAPI.Controllers
                 ));
             }
         }
-    }
-        
+
+
         ////Get by id
         [HttpGet("{promotionId}")]
         public async Task<IActionResult> GetById(Guid promotionId)

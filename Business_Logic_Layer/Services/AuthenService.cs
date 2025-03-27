@@ -112,8 +112,8 @@ namespace Business_Logic_Layer.Services
                     throw new ArgumentException("Login Type không hợp lệ");
                 }
 
-                AccountResponse _accountResponse = _mapper.Map<AccountResponse>(account);
-                authenticateResponse = new AuthenticateResponse(token, _accountResponse);
+                AccountResponse accountResponse = _mapper.Map<AccountResponse>(account);
+                authenticateResponse = new AuthenticateResponse(token, accountResponse);
 
                 return authenticateResponse;
             }

@@ -33,6 +33,11 @@ namespace Data_Access_Layer.Repositories
         //Task<bool> DeleteAsync(Guid id);
         Task CreateProductPromotionsBulkAsync(List<IngredientPromotion> ingredientPromotions);
         Task RemoveProductPromotionsByPromotionIdAsync(Guid promotionId);
+
+        Task<List<Promotion>> GetFilteredPromotionsAsync(
+    string? search, string? sortBy, bool isDescending,
+    PromotionType? promotionType, string? promotionCode, string? promotionName,
+    DateOnly? startDate, DateOnly? endDate, bool? isActive);
     }
 }
 
@@ -263,6 +268,60 @@ namespace Data_Access_Layer.Repositories
                 .ToListAsync();
 
             return (promotions, total);
+        }
+
+        public async Task<List<Promotion>> GetFilteredPromotionsAsync(
+    string? search, string? sortBy, bool isDescending,
+    PromotionType? promotionType, string? promotionCode, string? promotionName,
+    DateOnly? startDate, DateOnly? endDate, bool? isActive)
+        {
+            var query = _context.Promotions.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(p => p.PromotionDetail.PromotionName.Contains(search));
+            }
+
+            if (promotionType.HasValue)
+            {
+                query = query.Where(p => p.PromotionType == promotionType.Value);
+            }
+
+            if (!string.IsNullOrEmpty(promotionCode))
+            {
+                query = query.Where(p => p.PromotionCode == promotionCode);
+            }
+
+            if (!string.IsNullOrEmpty(promotionName))
+            {
+                query = query.Where(p => p.PromotionDetail.PromotionName.Contains(promotionName));
+            }
+
+            if (startDate.HasValue || endDate.HasValue)
+            {
+                DateTime adjustedStart = startDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue;
+                DateTime adjustedEnd = endDate?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.MaxValue;
+                query = query.Where(p => p.StartDate >= adjustedStart && p.EndDate <= adjustedEnd);
+            }
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(p => p.IsActive == isActive.Value);
+            }
+
+            // Sorting
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                query = isDescending
+                    ? query.OrderByDescending(p => EF.Property<object>(p, sortBy))
+                    : query.OrderBy(p => EF.Property<object>(p, sortBy));
+            }
+            else
+            {
+                query = query.OrderByDescending(p => p.StartDate); // Default sort by latest start date
+            }
+
+            return await query.ToListAsync();
         }
 
 
