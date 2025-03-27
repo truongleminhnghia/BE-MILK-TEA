@@ -27,7 +27,8 @@ namespace Business_Logic_Layer.Services.IngredientService
         IngredientStatus? status,
         decimal? minPrice,
         decimal? maxPrice,
-        bool? isSale);
+        bool? isSale,
+        IngredientType? ingredientType);
         Task<IngredientResponse> GetById(Guid id);
         Task<IngredientResponse> CreateIngredientAsync(IngredientRequest request);
         Task<IngredientResponse> Update(Guid id, UpdateIngredientRequest request);

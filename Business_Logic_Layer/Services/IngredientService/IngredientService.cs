@@ -214,9 +214,10 @@ namespace Business_Logic_Layer.Services.IngredientService
         IngredientStatus? status,
         decimal? minPrice,
         decimal? maxPrice,
-        bool? isSale)
+        bool? isSale,
+        IngredientType? ingredientType)
         {
-            var query = _ingredientRepository.GetAll(search, categorySearch, categoryId, startDate, endDate, status, minPrice, maxPrice, isSale);
+            var query = _ingredientRepository.GetAll(search, categorySearch, categoryId, startDate, endDate, status, minPrice, maxPrice, isSale, ingredientType);
 
             // **Sắp xếp**
             var validSortColumns = new HashSet<string> { "IngredientName", "CreateAt", "PriceOrigin", "CategoryName" };
