@@ -77,7 +77,7 @@ namespace Business_Logic_Layer.Services
                 foreach (OrderDetailRequest orderDetail in orderRequest.orderDetailList)
                 {
                     //xử lý quantity
-                    var orderDetails = new OrderDetail();
+    
                     var cartItem = await _cartItemService.GetById(orderDetail.CartItemId);
                     var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
@@ -105,19 +105,23 @@ namespace Business_Logic_Layer.Services
                     await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, ingredientQuantityRequest);
 
                     //tạo orderdetail
-                    
-                    orderDetails.OrderId = createdOrder.Id;
-                    orderDetails.CartItemId = orderDetail.CartItemId;
-                    orderDetails.Quantity = cartItem.Quantity;
-                    orderDetails.Price = ingredientProduct.PriceOrigin;
 
-                    var createOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
-                    orderDetailList.Add(createOrderDetail);
-                    createdOrder.Quantity += createOrderDetail.Quantity;
-                    createdOrder.TotalPrice += ingredientProduct.PriceOrigin * createOrderDetail.Quantity;
+                    var orderDetails = new OrderDetail
+                    {
+                        OrderId = createdOrder.Id,
+                        CartItemId = orderDetail.CartItemId,
+                        Quantity = cartItem.Quantity,
+                        Price = ingredientProduct.PriceOrigin
+                    };
+                    var createdOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
+                    orderDetailList.Add(createdOrderDetail);
+
+                    createdOrder.Quantity += createdOrderDetail.Quantity;
+                    createdOrder.TotalPrice += createdOrderDetail.Price * createdOrderDetail.Quantity;
 
                 }
 
+                //check promotion
                 finalPrice = createdOrder.TotalPrice;
                 if (!string.IsNullOrEmpty(orderRequest.PromotionCode))
                 {
@@ -140,7 +144,7 @@ namespace Business_Logic_Layer.Services
 
                     var promotionDetailValue = await promotionDetail;
                     // Kiểm tra tổng giá trị đơn hàng có đạt mức tối thiểu không
-                    if (createdOrder.TotalPrice <= promotionDetailValue.MiniValue)
+                    if (createdOrder.TotalPrice < promotionDetailValue.MiniValue)
                     {
                         throw new Exception($"Đơn hàng chưa đạt giá trị tối thiểu để áp dụng khuyến mãi ({promotionDetailValue.MiniValue} VND).");
                     }
@@ -182,7 +186,11 @@ namespace Business_Logic_Layer.Services
                 var returna = _mapper.Map<OrderResponse>(createdOrder);
                 returna.TotalPrice = createdOrder.TotalPrice; // Giá gốc
                 returna.PriceAfterPromotion = createdOrder.PriceAffterPromotion;
-                returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);         
+                returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);
+                foreach (var orderDetail in orderRequest.orderDetailList)
+                {
+                    await _cartItemService.Delete(orderDetail.CartItemId);
+                }
                 return returna;
             }
             catch (Exception ex)
