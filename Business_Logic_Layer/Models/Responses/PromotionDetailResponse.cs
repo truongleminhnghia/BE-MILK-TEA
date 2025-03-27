@@ -19,7 +19,7 @@ namespace Business_Logic_Layer.Models.Responses
         public float? DiscountValue { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "MinValue phải là số dương")]
-        public double? MinValue { get; set; }
+        public double? MiniValue { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "MaxValue phải là số dương")]
         public double? MaxValue { get; set; }

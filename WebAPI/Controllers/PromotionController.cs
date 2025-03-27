@@ -98,7 +98,7 @@ namespace WebAPI.Controllers
         }
         //Create
         [HttpPost]
-        public async Task<IActionResult> AddPromotion([FromBody] PromotionRequest promotion, [FromQuery] double maxPriceThreshold, [FromQuery] double minPriceThreshold)
+        public async Task<IActionResult> AddPromotion([FromBody] PromotionRequest promotion)
         {
             if (promotion == null || promotion.promotionDetail == null || promotion.promotionDetail == null)
             {
@@ -109,7 +109,7 @@ namespace WebAPI.Controllers
                 ));
             }
 
-            var createdPromotion = await _promotionService.CreateAsync(promotion, maxPriceThreshold, minPriceThreshold);
+            var createdPromotion = await _promotionService.CreateAsync(promotion);
 
             return Ok(new ApiResponse(
                 (int)HttpStatusCode.OK,

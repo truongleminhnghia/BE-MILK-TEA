@@ -14,6 +14,7 @@ using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
 using MailKit.Search;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Business_Logic_Layer.Services.PromotionService
@@ -26,10 +27,9 @@ namespace Business_Logic_Layer.Services.PromotionService
             DateTime? startDate, DateTime? endDate,
             int page, int pageSize);
         Task<PromotionResponse?> GetByIdAsync(Guid id);
+        Task<PromotionResponse> CreateAsync(PromotionRequest promotion);
 
         Task<Promotion?> GetByCodeAsync(String code);
-
-        Task<PromotionResponse> CreateAsync(PromotionRequest promotion, double maxPriceThreshold, double minPriceThreshold);
 
         //Task<Promotion?> GetByNameAsync(string name);
         Task<Promotion?> UpdateAsync(Guid id, Promotion promotion, double maxPriceThreshold, double minPriceThreshold);
@@ -61,87 +61,68 @@ namespace Business_Logic_Layer.Services.PromotionService
             _context = context;
         }
 
-        public async Task<PromotionResponse> CreateAsync(PromotionRequest promotionRequest, double maxPriceThreshold, double minPriceThreshold)
+        public async Task<PromotionResponse> CreateAsync(PromotionRequest promotionRequest)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                // Check validation
-                if (promotionRequest.StartDate >= promotionRequest.EndDate)
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    throw new ArgumentException("StartDate không thể lớn hơn hoặc bằng EndDate.");
-                }
-                if (promotionRequest.StartDate < DateTime.UtcNow)
-                {
-                    throw new ArgumentException("StartDate phải lớn hơn hoặc là thời điểm hiện tại.");
-                }
-                if (promotionRequest.EndDate < DateTime.UtcNow)
-                {
-                    throw new ArgumentException("EndDate phải lớn hơn hoặc là thời điểm hiện tại.");
-                }
-                if (promotionRequest.PromotionType == null)
-                {
-                    throw new ArgumentException("PromotionType không được để trống.");
-                }
-
-                var promotion = _mapper.Map<Promotion>(promotionRequest);
-                promotion.PromotionCode = "PR" + _source.GenerateRandom8Digits();
-                promotion.CreateAt = DateTime.UtcNow;
-                promotion.IsActive = true;
-
-                await _promotionRepository.CreateAsync(promotion);
-
-                var promotionDetail = _mapper.Map<PromotionDetail>(promotionRequest.promotionDetail);
-                promotionDetail.PromotionId = promotion.Id;
-                if (promotionDetail.DiscountValue <= 0 || promotionDetail.DiscountValue > 100)
-                {
-                    throw new ArgumentException("DiscountValue không hợp lệ (phải trong khoảng 1-100%).");
-                }
-                await _promotionDetailService.CreateAsync(promotionDetail);
-
-                if (promotion.PromotionType == PromotionType.PROMOTION_PRODUCT)
-                {
-                    // Lấy danh sách ingredient theo khoảng giá
-                    // Lấy danh sách ingredient theo khoảng giá
-                    var ingredients = await _ingredientRepository.GetIngredientsByPriceRangeAsync(minPriceThreshold, maxPriceThreshold);
-
-                    // Danh sách ingredient promotion
-                    var ingredientPromotions = new List<IngredientPromotion>();
-
-                    foreach (var ingredient in ingredients)
+                    // Kiểm tra validation
+                    if (promotionRequest.StartDate >= promotionRequest.EndDate)
                     {
-                        // Cập nhật giá sale
-                        ingredient.PricePromotion = ingredient.PriceOrigin * (1 - (promotionDetail.DiscountValue / 100));
-
-                        // Thêm vào danh sách để lưu sau
-                        ingredientPromotions.Add(new IngredientPromotion
-                        {
-                            PromotionId = promotion.Id,
-                            IngredientId = ingredient.Id
-                        });
+                        throw new ArgumentException("StartDate không thể lớn hơn hoặc bằng EndDate.");
+                    }
+                    if (promotionRequest.StartDate < DateTime.UtcNow)
+                    {
+                        throw new ArgumentException("StartDate phải lớn hơn hoặc là thời điểm hiện tại.");
+                    }
+                    if (promotionRequest.EndDate < DateTime.UtcNow)
+                    {
+                        throw new ArgumentException("EndDate phải lớn hơn hoặc là thời điểm hiện tại.");
+                    }
+                    if (promotionRequest.PromotionType == null)
+                    {
+                        throw new ArgumentException("PromotionType không được để trống.");
                     }
 
-                    // Lưu toàn bộ danh sách ingredientPromotions một lần duy nhất
-                    await _promotionRepository.CreateProductPromotionsBulkAsync(ingredientPromotions);
-                }
-                //if (promotion.PromotionType == PromotionType.PROMOTION_ORDER) { }
+                    // Tạo promotion
+                    var promotion = _mapper.Map<Promotion>(promotionRequest);
+                    promotion.PromotionCode = "PR" + _source.GenerateRandom8Digits();
+                    promotion.CreateAt = DateTime.UtcNow;
+                    promotion.IsActive = true;
 
-                await transaction.CommitAsync();
-                var result = _mapper.Map<PromotionResponse>(promotion);
-                result.PromotionDetails = _mapper.Map<PromotionDetailResponse>(promotionDetail);                
-                return result;
-            }
-            catch (ArgumentException ex)
-            {
-                await transaction.RollbackAsync();
-                throw new ArgumentException(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                throw new Exception("Lỗi hệ thống khi tạo promotion.", ex);
-            }
+                    await _promotionRepository.CreateAsync(promotion);
+
+                    // Tạo promotion detail
+                    var promotionDetail = _mapper.Map<PromotionDetail>(promotionRequest.promotionDetail);
+                    promotionDetail.PromotionId = promotion.Id;
+
+                    if (promotionDetail.DiscountValue <= 0 || promotionDetail.DiscountValue > 100)
+                    {
+                        throw new ArgumentException("DiscountValue không hợp lệ (phải trong khoảng 1-100%).");
+                    }
+
+                    await _promotionDetailService.CreateAsync(promotionDetail);
+
+                    // Commit transaction
+                    await transaction.CommitAsync();
+
+                    // Tạo kết quả trả về
+                    var result = _mapper.Map<PromotionResponse>(promotion);
+                    result.PromotionDetails = _mapper.Map<PromotionDetailResponse>(promotionDetail);
+
+                    return result;
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
         }
+
 
 
         public async Task<IEnumerable<Promotion>> GetAllPromotionAsync(bool isActive, string? search, string? sortBy, bool isDescending, PromotionType? promotionType, DateTime? startDate, DateTime? endDate, int page, int pageSize)
@@ -163,7 +144,9 @@ namespace Business_Logic_Layer.Services.PromotionService
             try
             {
                 var promotion = await _promotionRepository.GetByIdAsync(id);
-                return promotion == null ? null : _mapper.Map<PromotionResponse>(promotion);
+                if (promotion == null) throw new Exception("Không thể lấy thông tin promotion");
+
+                return _mapper.Map<PromotionResponse>(promotion);
             }
             catch (Exception ex)
             {
@@ -171,76 +154,73 @@ namespace Business_Logic_Layer.Services.PromotionService
             }
         }
 
+
         public async Task<Promotion?> UpdateAsync(Guid id, Promotion promotion, double minPriceThreshold, double maxPriceThreshold)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                // Kiểm tra Promotion có tồn tại hay không
-                var existingPromotion = await _promotionRepository.GetByIdAsync(id);
-                if (existingPromotion == null)
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    throw new KeyNotFoundException("Không tìm thấy promotion để cập nhật.");
-                }
-
-                // Kiểm tra tính hợp lệ của ngày tháng
-                if (promotion.StartDate >= promotion.EndDate)
-                {
-                    throw new ArgumentException("StartDate không thể lớn hơn hoặc bằng EndDate.");
-                }
-                if (promotion.StartDate < DateTime.UtcNow)
-                {
-                    throw new ArgumentException("StartDate phải lớn hơn hoặc là thời điểm hiện tại.");
-                }
-
-                // Cập nhật dữ liệu của Promotion
-                _mapper.Map(promotion, existingPromotion);
-                existingPromotion.UpdateAt = DateTime.UtcNow;
-
-                // Lưu thay đổi Promotion
-                await _promotionRepository.UpdateAsync(existingPromotion.Id, existingPromotion);
-
-                if (existingPromotion.PromotionType == PromotionType.PROMOTION_PRODUCT)
-                {
-                    // Lấy danh sách ingredient theo khoảng giá
-                    var ingredients = await _ingredientRepository.GetIngredientsByPriceRangeAsync(minPriceThreshold, maxPriceThreshold);
-
-                    // Cập nhật giá sale và lưu vào IngredientPromotion
-                    var ingredientPromotions = new List<IngredientPromotion>();
-                    foreach (var ingredient in ingredients)
+                    // Kiểm tra Promotion có tồn tại hay không
+                    var existingPromotion = await _promotionRepository.GetByIdAsync(id);
+                    if (existingPromotion == null)
                     {
-                        ingredient.PricePromotion = ingredient.PriceOrigin * (1 - (existingPromotion.PromotionDetail.DiscountValue / 100));
+                        throw new KeyNotFoundException("Không tìm thấy promotion để cập nhật.");
+                    }
 
-                        ingredientPromotions.Add(new IngredientPromotion
+                    // Kiểm tra tính hợp lệ của ngày tháng
+                    if (promotion.StartDate >= promotion.EndDate)
+                    {
+                        throw new ArgumentException("StartDate không thể lớn hơn hoặc bằng EndDate.");
+                    }
+                    if (promotion.StartDate < DateTime.UtcNow)
+                    {
+                        throw new ArgumentException("StartDate phải lớn hơn hoặc là thời điểm hiện tại.");
+                    }
+
+                    // Cập nhật dữ liệu của Promotion
+                    _mapper.Map(promotion, existingPromotion);
+                    existingPromotion.UpdateAt = DateTime.UtcNow;
+
+                    // Lưu thay đổi Promotion
+                    await _promotionRepository.UpdateAsync(existingPromotion.Id, existingPromotion);
+
+                    if (existingPromotion.PromotionType == PromotionType.PROMOTION_PRODUCT)
+                    {
+                        // Lấy danh sách ingredient theo khoảng giá
+                        var ingredients = await _ingredientRepository.GetIngredientsByPriceRangeAsync(minPriceThreshold, maxPriceThreshold);
+
+                        // Cập nhật giá sale và lưu vào IngredientPromotion
+                        var ingredientPromotions = ingredients.Select(ingredient => new IngredientPromotion
                         {
                             PromotionId = existingPromotion.Id,
                             IngredientId = ingredient.Id
-                        });
+                        }).ToList();
+
+                        // Cập nhật giá promotion cho ingredients
+                        foreach (var ingredient in ingredients)
+                        {
+                            ingredient.PricePromotion = ingredient.PriceOrigin * (1 - (existingPromotion.PromotionDetail.DiscountValue / 100));
+                        }
+
+                        // Xóa danh sách cũ và thêm mới
+                        await _promotionRepository.RemoveProductPromotionsByPromotionIdAsync(existingPromotion.Id);
+                        await _promotionRepository.CreateProductPromotionsBulkAsync(ingredientPromotions);
                     }
 
-                    // Xóa danh sách cũ và thêm mới
-                    await _promotionRepository.RemoveProductPromotionsByPromotionIdAsync(existingPromotion.Id);
-                    await _promotionRepository.CreateProductPromotionsBulkAsync(ingredientPromotions);
+                    await transaction.CommitAsync();
+                    return existingPromotion;
                 }
-                await transaction.CommitAsync();
-                return existingPromotion;
-            }
-            catch (ArgumentException ex)
-            {
-                await transaction.RollbackAsync();
-                throw new ArgumentException(ex.Message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                await transaction.RollbackAsync();
-                throw new KeyNotFoundException(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                throw new Exception("Lỗi khi cập nhật promotion.", ex);
-            }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
         }
+
 
 
         public async Task<PageResult<PromotionResponse>> GetAllPromotions(
@@ -286,5 +266,25 @@ namespace Business_Logic_Layer.Services.PromotionService
 
             return createdOrderPromotion;
         }
+        private async Task CreateIngredientPromotionAsync(Guid promotionId, double discountValue, double minPriceThreshold, double maxPriceThreshold)
+        {
+            var ingredients = await _ingredientRepository.GetIngredientsByPriceRangeAsync(minPriceThreshold, maxPriceThreshold);
+
+            var ingredientPromotions = new List<IngredientPromotion>();
+
+            foreach (var ingredient in ingredients)
+            {
+                ingredient.PricePromotion = ingredient.PriceOrigin * (1 - (discountValue / 100));
+
+                ingredientPromotions.Add(new IngredientPromotion
+                {
+                    PromotionId = promotionId,
+                    IngredientId = ingredient.Id
+                });
+            }
+
+            await _promotionRepository.CreateProductPromotionsBulkAsync(ingredientPromotions);
+        }
+
     }
 }
