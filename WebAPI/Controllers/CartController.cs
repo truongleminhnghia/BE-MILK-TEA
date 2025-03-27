@@ -7,6 +7,7 @@ using Business_Logic_Layer.Services.Carts;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("{accountId}")]
+        [Authorize("ROLE_CUSTOMER")]
         public async Task<IActionResult> CreateCart(Guid accountId)
         {
             try
@@ -70,6 +72,7 @@ namespace WebAPI.Controllers
         // }
 
         [HttpGet("{accountId}")]
+        [Authorize("ROLE_CUSTOMER")]
         public async Task<IActionResult> GetByAccount(Guid accountId)
         {
             try
