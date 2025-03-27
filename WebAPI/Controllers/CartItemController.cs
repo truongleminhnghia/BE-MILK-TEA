@@ -5,7 +5,7 @@ using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.Carts;
 using Data_Access_Layer.Entities;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -22,6 +22,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> CreateCartItem([FromBody] CartItemRequest request)
         {
             try
@@ -36,6 +37,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> DeleteCartItem([FromRoute] Guid id)
         {
             try
@@ -54,6 +56,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetCartItemById([FromRoute] Guid id)
         {
             try
@@ -68,6 +71,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("cart/{cartId}")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetCartItemsByCartId([FromRoute] Guid cartId)
         {
             try
@@ -86,6 +90,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> UpdateCartItem([FromRoute] Guid id, [FromBody] UpdateCartItemRequest request)
         {
             try

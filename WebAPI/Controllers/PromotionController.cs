@@ -29,6 +29,9 @@ namespace WebAPI.Controllers
 
         //Get all
         [HttpGet]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetPromotion(
             [FromQuery] Guid userId,
     [FromQuery] bool? isActive = null,
@@ -80,6 +83,7 @@ namespace WebAPI.Controllers
 
         ////Get by id
         [HttpGet("{promotionId}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetById(Guid promotionId)
         {
             PromotionResponse promotions = await _promotionService.GetByIdAsync(promotionId);
@@ -101,6 +105,7 @@ namespace WebAPI.Controllers
         }
         //Create
         [HttpPost]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddPromotion([FromBody] PromotionRequest promotion)
         {
             if (promotion == null || promotion.promotionDetail == null || promotion.promotionDetail == null)
@@ -123,6 +128,7 @@ namespace WebAPI.Controllers
         }
         //UPDATE
         [HttpPut("{promotionId}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdatePromotion(
         Guid promotionId,
         [FromBody] PromotionUpdateRequest promotionUpdateRequest, [FromQuery] double maxPriceThreshold, [FromQuery] double minPriceThreshold)

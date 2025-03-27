@@ -4,6 +4,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.PromotionDetailService;
 using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -22,6 +23,9 @@ namespace WebAPI.Controllers
         }
         // GET: Lấy danh sách hoặc chi tiết promotion detail theo ID
         [HttpGet]
+        [Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotionDetails(
             [FromQuery] Guid? promotionId,
             [FromQuery] Guid? promotionDetailId)
@@ -74,6 +78,7 @@ namespace WebAPI.Controllers
         }
         // POST: Tạo mới PromotionDetail
         [HttpPost("{promotionId}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddPromotionDetail(Guid promotionId, [FromBody] PromotionDetailRequest promotionDetailRequest)
         {
             if (promotionDetailRequest == null)
@@ -99,6 +104,7 @@ namespace WebAPI.Controllers
         }
         // PUT: Cập nhật PromotionDetail theo ID
         [HttpPut("{id}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdatePromotionDetail(
             Guid id,
             [FromBody] PromotionDetailUpdateRequest promotionDetailRequest)
