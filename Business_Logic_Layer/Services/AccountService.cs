@@ -66,16 +66,16 @@ namespace Business_Logic_Layer.Services
                 //kiem tra xem user dang dang nhap co phai la admin hay khong
                 //neu khong phai thi se tra ve thong tin cua user do
                 Account account;
-                var currentUser = await _source.GetCurrentAccount();
-                if (currentUser.RoleName != RoleName.ROLE_ADMIN)
-                {
-                    account = await _accountRepository.GetById(currentUser.Id);
-                    if (account == null)
-                    {
-                        throw new Exception("Tài khoản không tồn tại");
-                    }
-                    return MapToAccountResponse.ComplexAccountResponse(account);
-                }
+                //var currentUser = await _source.GetCurrentAccount();
+                //if (currentUser.RoleName != RoleName.ROLE_ADMIN)
+                //{
+                //    account = await _accountRepository.GetById(currentUser.Id);
+                //    if (account == null)
+                //    {
+                //        throw new Exception("Tài khoản không tồn tại");
+                //    }
+                //    return MapToAccountResponse.ComplexAccountResponse(account);
+                //}
 
                 account = await _accountRepository.GetById(id);
                 if (account == null)
@@ -90,7 +90,7 @@ namespace Business_Logic_Layer.Services
                 return null;
             }
         }
-               
+
         public async Task<Account?> UpdateAccount(Guid id, UpdateAccountRequest request)
         {
             try
@@ -116,13 +116,13 @@ namespace Business_Logic_Layer.Services
                     throw new ArgumentException("Loại tài khoản không hợp lệ.");
                 }
 
-                    // BO CAP NHAT REFCODE CHO EMPLOYEE
-                    // Cập nhật thông tin Employee nếu có
-                    //if (account.Employee != null && request.Employee != null && account.RoleName == RoleName.ROLE_STAFF)
-                    //{
-                    //    account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
-                    //}
-                    account.UpdateAt = DateTime.UtcNow;
+                // BO CAP NHAT REFCODE CHO EMPLOYEE
+                // Cập nhật thông tin Employee nếu có
+                //if (account.Employee != null && request.Employee != null && account.RoleName == RoleName.ROLE_STAFF)
+                //{
+                //    account.Employee.RefCode = request.Employee.RefCode ?? account.Employee.RefCode;
+                //}
+                account.UpdateAt = DateTime.UtcNow;
                 await _accountRepository.UpdateAccount(account);
                 return account;
             }
@@ -154,7 +154,21 @@ namespace Business_Logic_Layer.Services
             };
         }
 
-
+        public async Task<AccountResponse> DeleteAccount(Guid id)
+        {
+            try
+            {
+                var account = await _accountRepository.GetById(id);
+                if (account == null) throw new Exception("Không tìm thấy tài khoản");
+                await _accountRepository.DeleteAsync(id);
+                return MapToAccountResponse.ComplexAccountResponse(account);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi ở DeleteAccount: " + ex.Message);
+                throw;
+            }
+        }
     }
 }
 
