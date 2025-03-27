@@ -124,11 +124,11 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("status/{id}")]
+        [HttpDelete("{id}")]
         [Authorize(Roles = "ROLE_STAFF")]
         [Authorize(Roles = "ROLE_ADMIN")]
         [Authorize(Roles = "ROLE_MANAGER")]
-        public async Task<IActionResult> UpdateRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
+        public async Task<IActionResult> DeleteRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
         {
             try
             {
@@ -140,7 +140,7 @@ namespace WebAPI.Controllers
                 return Ok(new ApiResponse(
                                 HttpStatusCode.OK.GetHashCode(),
                                 true,
-                                "Cập nhật công thức thành công!",
+                                "Cập nhật trạng thái công thức thành công!",
                                 isUpdated
                             ));
             }

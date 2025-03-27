@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using AutoMapper;
@@ -32,19 +33,20 @@ namespace WebAPI.Controllers
         [Authorize(Roles = "ROLE_MANAGER")]
         [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetPromotion(
-    [FromQuery] bool isActive,
-    [FromQuery] string? promotionCode,
-    [FromQuery] string? promotionName,
-    [FromQuery] PromotionType? promotionType,
+            [FromQuery] Guid userId,
+    [FromQuery] bool? isActive = null,
+    [FromQuery] string? promotionCode = null,
+    [FromQuery] string? promotionName = null,
+    [FromQuery] PromotionType? promotionType = null,
     [FromQuery] int page = 1,
     [FromQuery] int pageSize = 10,
     [FromQuery] string? search = null,
     [FromQuery] string? sortBy = null,
     [FromQuery] bool isDescending = false,
-    [FromQuery] DateTime? startDate = null,
-    [FromQuery] DateTime? endDate = null)
+    [FromQuery] DateOnly? startDate = null,
+    [FromQuery] DateOnly? endDate = null
+    )
         {
-            {
             try
             {
                 if (startDate.HasValue && endDate.HasValue && startDate > endDate)
@@ -57,13 +59,13 @@ namespace WebAPI.Controllers
                 }
 
                 var promotions = await _promotionService.GetAllPromotions(
-                    isActive, search, sortBy, isDescending, promotionType,
-                    promotionCode, promotionName, startDate, endDate, page, pageSize);
+                    search, sortBy, isDescending, promotionType, promotionCode, promotionName,
+                    startDate, endDate, page, pageSize, userId);
 
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
                     true,
-                    promotions.Data != null ? "Lấy dữ liệu thành công!" : " Không có Promotion nào phù hợp",
+                    promotions.Data.Any() ? "Lấy dữ liệu thành công!" : "Không có Promotion nào phù hợp.",
                     promotions
                 ));
             }
@@ -77,8 +79,8 @@ namespace WebAPI.Controllers
                 ));
             }
         }
-    }
-        
+
+
         ////Get by id
         [HttpGet("{promotionId}")]
         [Authorize(Roles = "ROLE_STAFF")]
@@ -161,6 +163,61 @@ namespace WebAPI.Controllers
                 ));
             }
         }
-        
+
+        //DELETE
+        [HttpDelete("{promotionId}")]
+        [Authorize(Roles = "ROLE_ADMIN,ROLE_STAFF,ROLE_MANAGER")]
+        public async Task<IActionResult> DeletePromotion(Guid promotionId)
+        {
+            try
+            {
+                var deletedPromotion = await _promotionService.DeleteAsync(promotionId);
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Xóa thành công.",
+                    deletedPromotion
+                ));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(
+                    (int)HttpStatusCode.BadRequest,
+                    false,
+                    ex.Message
+                ));
+            }
+        }
+
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActivePromotion(
+            [FromQuery] PromotionType? promotionType,
+            [FromQuery] double? orderTotalPrice,
+            [FromQuery] DateOnly? expiredDate,
+            [FromQuery] bool? isActive
+            )
+        {
+            try
+            {
+                var promotions = await _promotionService.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, isActive);
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Lấy dữ liệu thành công!",
+                    promotions
+                ));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy danh sách Promotion: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(
+                    (int)HttpStatusCode.InternalServerError,
+                    false,
+                    "Đã xảy ra lỗi trong quá trình xử lý yêu cầu."
+                ));
+            }
+        }
+
+
     }
 }

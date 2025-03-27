@@ -81,16 +81,18 @@ namespace WebAPI.Controllers
                         [FromQuery] DateOnly? startDate,
                         [FromQuery] DateOnly? endDate,
                         [FromQuery] IngredientStatus? status,
+                        [FromQuery] IngredientType? ingredientType,
                         [FromQuery] decimal? minPrice,
                         [FromQuery] decimal? maxPrice,
                         [FromQuery] bool? isSale,
                         [FromQuery] bool isDescending = false,
                         [FromQuery] int pageCurrent = 1,
-                        [FromQuery] int pageSize = 10)
+                        [FromQuery] int pageSize = 10
+                        )
         {
             var result = await _ingredientService.GetAllAsync(
                 search, categorySearch, categoryId, sortBy, isDescending,
-                pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale
+                pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale, ingredientType
             );
             if (result == null || !result.Data.Any())
             {

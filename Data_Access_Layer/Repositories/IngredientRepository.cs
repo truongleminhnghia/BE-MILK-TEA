@@ -90,7 +90,8 @@ namespace Data_Access_Layer.Repositories
             IngredientStatus? status,
             decimal? minPrice,
             decimal? maxPrice,
-            bool? isSale
+            bool? isSale,
+            IngredientType? ingredientType
         )
         {
             var query = _context
@@ -141,6 +142,10 @@ namespace Data_Access_Layer.Repositories
                 DateTime adjustedEnd = endDate?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.MaxValue;
 
                 query = query.Where(i => i.CreateAt >= adjustedStart && i.CreateAt <= adjustedEnd);
+            }
+            if (ingredientType.HasValue)
+            {
+                query = query.Where(i => i.IngredientType == ingredientType.Value);
             }
 
 

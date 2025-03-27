@@ -86,7 +86,8 @@ namespace Business_Logic_Layer.Services.IngredientService
                 {
                     throw new Exception("Mã nguyên liệu đã tồn tại");
                 }
-                if (_source.CheckDate(ingredient.ExpiredDate) == 1 || _source.CheckDate(ingredient.ExpiredDate) == -1)
+                int checkDate = _source.CheckDate(ingredient.ExpiredDate);
+                if ( checkDate == 1 || checkDate == -1)
                 {
                     throw new Exception("Hạn sử dụng chỉ còn 10 ngày hoặc hết hạn");
                 }
@@ -99,7 +100,7 @@ namespace Business_Logic_Layer.Services.IngredientService
 
                 List<ImageResponse> imageRespones = await _imageSerivce.AddImages(ingredientResponse.Id, request.ImageRequest);
 
-                // List<IngredientQuantityResponse> ingredientQuantities = await _ingredientQuantityService.CreateQuantitiesAsync(ingredientResponse.Id, request.IngredientQuantities);
+                List<IngredientQuantityResponse> ingredientQuantities = await _ingredientQuantityService.CreateQuantitiesAsync(ingredientResponse.Id, request.IngredientQuantities);
 
                 ingredient.Images = _mapper.Map<List<Image>>(imageRespones);
                 ingredientResponse.Category = _mapper.Map<CategoryResponse>(categoryExists);
@@ -214,9 +215,10 @@ namespace Business_Logic_Layer.Services.IngredientService
         IngredientStatus? status,
         decimal? minPrice,
         decimal? maxPrice,
-        bool? isSale)
+        bool? isSale,
+        IngredientType? ingredientType)
         {
-            var query = _ingredientRepository.GetAll(search, categorySearch, categoryId, startDate, endDate, status, minPrice, maxPrice, isSale);
+            var query = _ingredientRepository.GetAll(search, categorySearch, categoryId, startDate, endDate, status, minPrice, maxPrice, isSale, ingredientType);
 
             // **Sắp xếp**
             var validSortColumns = new HashSet<string> { "IngredientName", "CreateAt", "PriceOrigin", "CategoryName" };
