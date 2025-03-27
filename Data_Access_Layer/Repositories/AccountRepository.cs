@@ -46,12 +46,12 @@ namespace Data_Access_Layer.Repositories
             return response;
         }
 
-        public async Task<Account?> GetById(Guid _id)
+        public async Task<Account?> GetById(Guid id)
         {
-            return await _context
-                .Accounts.Include(a => a.Employee)
+            return await _context.Accounts
+                .Include(a => a.Employee)
                 .Include(a => a.Customer)
-                .FirstOrDefaultAsync(a => a.Id == _id);
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task<Account> GetByPhoneNumber(string phoneNumber)

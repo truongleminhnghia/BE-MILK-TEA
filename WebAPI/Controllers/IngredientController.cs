@@ -75,8 +75,8 @@ namespace WebAPI.Controllers
                         [FromQuery] string? categorySearch,
                         [FromQuery] Guid? categoryId,
                         [FromQuery] string? sortBy,
-                        [FromQuery] DateTime? startDate,
-                        [FromQuery] DateTime? endDate,
+                        [FromQuery] DateOnly? startDate,
+                        [FromQuery] DateOnly? endDate,
                         [FromQuery] IngredientStatus? status,
                         [FromQuery] decimal? minPrice,
                         [FromQuery] decimal? maxPrice,
@@ -168,18 +168,9 @@ namespace WebAPI.Controllers
 
         [HttpPut("{id}")]
         //[Authorize(Roles = "ROLE_STAFF")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngredientRequest request, bool? status = false)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngredientRequest request)
         {
-            if (status == true && id != null)
-            {
-                bool result = await _ingredientService.ChangeStatus(id);
-                if (!result)
-                {
-                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
-                }
-                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thay đổi trạng thái thành công", null));
-            }
-            else if (id != null && request != null)
+            if (id != null && request != null)
             {
                 IngredientResponse ingredientResponse = await _ingredientService.Update(id, request);
                 if (ingredientResponse == null)
@@ -193,7 +184,28 @@ namespace WebAPI.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError,
                                     new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
             }
+        }
 
+        [HttpPut("status/{id}")]
+        public async Task<IActionResult> UpdateStatus(Guid id, bool? status)
+        {
+            try
+            {                
+                if (status == null)
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
+                }
+                bool result = await _ingredientService.ChangeStatus(id);
+                if (!result)
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
+                }
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thay đổi trạng thái thành công", null));
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
+            }
         }
     }
 }

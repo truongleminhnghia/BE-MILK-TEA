@@ -20,6 +20,8 @@ namespace Business_Logic_Layer.Models.Responses
                 AccountStatus = account.AccountStatus,
                 Phone = account.Phone,
                 RoleName = account.RoleName,
+                CreateAt = account.CreateAt,
+                UpdateAt = account.UpdateAt,
 
                 // Safe mapping: Only map Employee if it exists
                 Employee = account.Employee != null ? new EmployeeResponse

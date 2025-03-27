@@ -5,11 +5,14 @@ using Business_Logic_Layer.Configurations;
 using Business_Logic_Layer.Middleware;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
+using Business_Logic_Layer.Services.DashboardService;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientReviewService;
 using Business_Logic_Layer.Services.IngredientService;
 using Business_Logic_Layer.Services.NotificationService;
 using Business_Logic_Layer.Services.PaymentService;
+using Business_Logic_Layer.Services.PromotionDetailService;
+using Business_Logic_Layer.Services.PromotionService;
 using Business_Logic_Layer.Services.VNPayService;
 using Business_Logic_Layer.Utils;
 using Data_Access_Layer.Data;
@@ -36,6 +39,8 @@ builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection(
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+    // Cấu hình Swagger để hỗ trợ Authorization bằng Bearer Token
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -45,6 +50,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Nhập token vào trường bên dưới. Ví dụ: Bearer {token}"
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -71,8 +77,7 @@ var _databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME_LOCAL");
 var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
 var connectionString =
- $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
-
+    $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
 
 
 if (string.IsNullOrEmpty(connectionString))
@@ -101,9 +106,9 @@ var _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 // kiểm tra xem, nó có tồn tai hay khoong
 //muốn chạy thì comment từ đây lại, + xóa Migration
- if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
- {
-   throw new InvalidOperationException("JWT environment variables are not set properly.");
+if (string.IsNullOrEmpty(_secretKey) || string.IsNullOrEmpty(_issuer))
+{
+    throw new InvalidOperationException("JWT environment variables are not set properly.");
 }
 
 // đăng kí xác thực
@@ -212,10 +217,16 @@ builder.Services.AddScoped<IPromotionDetailService, PromotionDetailService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
 builder.Services.AddScoped<IPromotionDetailRepository, PromotionDetailRepository>();
+
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
+
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<ICartItemService, CartItemService>();
+
+
+
+// Register ImageRepository and ImageService
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -223,6 +234,8 @@ builder.Services.AddScoped<Source>();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
+
+// config CORS
 var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 // builder.Services.AddCors(options =>
 // {

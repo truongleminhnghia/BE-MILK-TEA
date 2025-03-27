@@ -10,8 +10,7 @@ namespace Data_Access_Layer.Repositories
         Task<Recipe?> GetRecipeById(Guid recipeId);
         Task<Recipe?> UpdateRecipe(Recipe recipe);
         Task DeleteIngredientsByRecipeIdAsync(Guid recipeId);
-        Task<IEnumerable<Recipe>> GetAllRecipes(string? search, string? sortBy, bool isDescending,
-            Guid? categoryId, int page, int pageSize, RecipeStatusEnum? recipeStatus);
+        Task<List<Recipe>> GetAllRecipes();
         Task<(List<Recipe>, int)> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
     RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
