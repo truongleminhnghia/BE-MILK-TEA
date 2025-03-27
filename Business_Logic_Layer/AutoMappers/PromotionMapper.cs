@@ -19,7 +19,7 @@ namespace Business_Logic_Layer.AutoMappers
             CreateMap<PromotionUpdateRequest, Promotion>().ReverseMap();
             CreateMap<Promotion, PromotionResponse>()
                 .ForMember(dest => dest.PromotionDetails, opt => opt.MapFrom(src => src.PromotionDetail));
-
+            CreateMap<ActivePromotionResponse, Promotion>().ReverseMap();
         }
     }
 }

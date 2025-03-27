@@ -73,6 +73,7 @@ namespace Business_Logic_Layer.Services.IngredientService
             try
             {
                 var list = new List<IngredientQuantityResponse>();
+                var prodTypeAmount = Enum.GetValues(typeof(ProductType)).Length;
 
                 var ingredientExisted = await _ingredientRepository.GetById(ingredientId);
                 if (ingredientExisted == null)
@@ -82,23 +83,22 @@ namespace Business_Logic_Layer.Services.IngredientService
 
                 var existingQuantities = await _ingredientQuantityRepository.GetByIngredientId(ingredientId);
 
-                if ((existingQuantities.Count == 0 || existingQuantities == null) && request.Count > 2)
+                // Kiểm tra tổng số lượng (tổng cả cũ và mới không vượt quá số enum)
+                if (existingQuantities.Count + request.Count > prodTypeAmount)
                 {
-                    throw new Exception("Không thể tạo quá 2 IngredientQuantity cho 1 Ingredient.");
-                }
-
-                // Kiểm tra tổng số lượng (tổng cả cũ và mới không vượt quá 2)
-                if (existingQuantities.Count + request.Count > 2)
-                {
-                    throw new Exception("Chỉ được tạo tối đa 2 IngredientQuantity cho 1 Ingredient.");
+                    throw new Exception($"Chỉ được tạo tối đa {prodTypeAmount} IngredientQuantity cho 1 Ingredient.");
                 }
 
                 // Kiểm tra trùng lặp ProductType trong danh sách request
-                var distinctProductTypes = request.Select(q => q.ProductType).Distinct().ToList();
-                if (distinctProductTypes.Count != request.Count)
+                //var distinctProductTypes = request.Select(q => q.ProductType).Distinct().ToList();
+                //if (distinctProductTypes.Count != request.Count)
+                //{
+                //    throw new Exception("Danh sách tạo mới có ProductType bị trùng.");
+                //}
+                if (request.GroupBy(q => q.ProductType).Any(g => g.Count() > 1))
                 {
                     throw new Exception("Danh sách tạo mới có ProductType bị trùng.");
-                }                
+                }
 
                 // Lấy danh sách các ProductType đã tồn tại trong db
                 var existingProductTypes = existingQuantities.Select(q => q.ProductType).ToList();
@@ -119,9 +119,9 @@ namespace Business_Logic_Layer.Services.IngredientService
 
                 return list;
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception("Lỗi khi tạo IngredientQuantity: " + ex.Message);
+                throw;
             }
         }
 

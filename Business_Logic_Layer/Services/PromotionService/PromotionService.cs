@@ -42,7 +42,7 @@ namespace Business_Logic_Layer.Services.PromotionService
     int page, int pageSize, Guid userId);
         Task<OrderPromotion> CreateOrderPromotionAsync(OrderPromotion orderPromotion);
         Task<PromotionResponse> DeleteAsync(Guid id);
-        Task<List<PromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
+        Task<List<ActivePromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
     }
     public class PromotionService : IPromotionService
     {
@@ -331,10 +331,10 @@ namespace Business_Logic_Layer.Services.PromotionService
             return _mapper.Map<PromotionResponse>(promotion);
         }
 
-        public async Task<List<PromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive)
+        public async Task<List<ActivePromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive)
         {
             var promotions = await _promotionRepository.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, isActive);
-            return _mapper.Map<List<PromotionResponse>>(promotions);
+            return _mapper.Map<List<ActivePromotionResponse>>(promotions);
         }
     }
 }
