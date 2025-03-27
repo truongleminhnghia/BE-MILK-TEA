@@ -15,6 +15,7 @@ using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Business_Logic_Layer.Services.PromotionService
@@ -40,6 +41,8 @@ namespace Business_Logic_Layer.Services.PromotionService
     DateOnly? startDate, DateOnly? endDate,
     int page, int pageSize, Guid userId);
         Task<OrderPromotion> CreateOrderPromotionAsync(OrderPromotion orderPromotion);
+        Task<PromotionResponse> DeleteAsync(Guid id);
+        Task<List<PromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
     }
     public class PromotionService : IPromotionService
     {
@@ -317,5 +320,21 @@ namespace Business_Logic_Layer.Services.PromotionService
             await _promotionRepository.CreateProductPromotionsBulkAsync(ingredientPromotions);
         }
 
+        public async Task<PromotionResponse> DeleteAsync(Guid id)
+        {
+            var promotion = await _promotionRepository.GetByIdAsync(id);
+            if (promotion == null)
+            {
+                throw new Exception("Không tìm thấy promotion để xóa");
+            }
+            await _promotionRepository.DeleteAsync(id);
+            return _mapper.Map<PromotionResponse>(promotion);
+        }
+
+        public async Task<List<PromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive)
+        {
+            var promotions = await _promotionRepository.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, isActive);
+            return _mapper.Map<List<PromotionResponse>>(promotions);
+        }
     }
 }

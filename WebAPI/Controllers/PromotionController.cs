@@ -9,6 +9,7 @@ using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.PromotionService;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -156,6 +157,61 @@ namespace WebAPI.Controllers
                 ));
             }
         }
-        
+
+        //DELETE
+        [HttpDelete("{promotionId}")]
+        [Authorize(Roles = "ROLE_ADMIN,ROLE_STAFF,ROLE_MANAGER")]
+        public async Task<IActionResult> DeletePromotion(Guid promotionId)
+        {
+            try
+            {
+                var deletedPromotion = await _promotionService.DeleteAsync(promotionId);
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Xóa thành công.",
+                    deletedPromotion
+                ));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(
+                    (int)HttpStatusCode.BadRequest,
+                    false,
+                    ex.Message
+                ));
+            }
+        }
+
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActivePromotion(
+            [FromQuery] PromotionType? promotionType,
+            [FromQuery] double? orderTotalPrice,
+            [FromQuery] DateOnly? expiredDate,
+            [FromQuery] bool? isActive
+            )
+        {
+            try
+            {
+                var promotions = await _promotionService.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, isActive);
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Lấy dữ liệu thành công!",
+                    promotions
+                ));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy danh sách Promotion: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(
+                    (int)HttpStatusCode.InternalServerError,
+                    false,
+                    "Đã xảy ra lỗi trong quá trình xử lý yêu cầu."
+                ));
+            }
+        }
+
+
     }
 }

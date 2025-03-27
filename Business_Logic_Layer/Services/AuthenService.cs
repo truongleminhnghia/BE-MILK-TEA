@@ -238,15 +238,22 @@ namespace Business_Logic_Layer.Services
                     FirstName = _request.FullName,
                     Phone = _request.PhoneNumber,
                     RoleName = RoleName.ROLE_CUSTOMER,
+                    ImageUrl = _request.Avatar,
                 };
                 await _accountRepository.Create(result);
             }
+            else
+            {
+                // Update the ImageUrl if it's different
+                if (result.ImageUrl != _request.Avatar)
+                {
+                    result.ImageUrl = _request.Avatar;
+                    await _accountRepository.UpdateAccount(result);
+                }
+            }
             string token = _jwtService.GenerateJwtToken(result);
             AccountResponse _accountResponse = _mapper.Map<AccountResponse>(result);
-            AuthenticateResponse _authenticateResponse = new AuthenticateResponse(
-                         token,
-                         _accountResponse
-                     );
+            AuthenticateResponse _authenticateResponse = new AuthenticateResponse(token, _accountResponse);
             return _authenticateResponse;
         }
     }

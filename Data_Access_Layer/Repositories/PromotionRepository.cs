@@ -38,6 +38,8 @@ namespace Data_Access_Layer.Repositories
     string? search, string? sortBy, bool isDescending,
     PromotionType? promotionType, string? promotionCode, string? promotionName,
     DateOnly? startDate, DateOnly? endDate, bool? isActive);
+        Task<Promotion> DeleteAsync(Guid id);
+        Task<List<Promotion>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
     }
 }
 
@@ -369,6 +371,55 @@ namespace Data_Access_Layer.Repositories
             {
                 throw new Exception($"Lỗi khi xóa danh sách IngredientPromotions của PromotionId: {promotionId}", ex);
             }
+        }
+
+        public async Task<Promotion> DeleteAsync(Guid id)
+        {
+            try
+            {
+                var promotion = await _context.Promotions.FindAsync(id);
+                if (promotion == null)
+                {
+                    throw new Exception("Không tìm thấy Promotion");
+                }
+                promotion.IsActive = false;
+                await _context.SaveChangesAsync();
+                return promotion;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi ở DeleteAsync: " + ex.Message);
+            }
+        }
+
+        public async Task<List<Promotion>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive)
+        {
+            var query = _context.Promotions
+                .Include(p => p.PromotionDetail)
+                .AsQueryable();
+
+            if (promotionType.HasValue)
+            {
+                query = query.Where(p => p.PromotionType == promotionType.Value);
+            }
+
+            if (expiredDate.HasValue)
+            {
+                query = query.Where(p => p.EndDate.Date >= expiredDate.Value.ToDateTime(TimeOnly.MinValue));
+            }
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(p => p.IsActive == isActive.Value);
+            }
+
+            if (orderTotalPrice.HasValue)
+            {
+                query = query.Where(p => p.PromotionDetail != null
+                                      && orderTotalPrice.Value >= p.PromotionDetail.MiniValue);
+            }
+
+            return await query.ToListAsync();
         }
 
 
