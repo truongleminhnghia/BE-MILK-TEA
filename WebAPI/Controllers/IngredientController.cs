@@ -70,9 +70,7 @@ namespace WebAPI.Controllers
         // }
         
         [HttpGet]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_ADMIN")]
-        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
         public async Task<IActionResult> SearchIngredients(
                         [FromQuery] string? search,
                         [FromQuery] string? categorySearch,
@@ -105,13 +103,13 @@ namespace WebAPI.Controllers
                 );
         }
 
-        [HttpGet("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet]
+        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
+        public async Task<IActionResult> GetById( [FromQuery] Guid? id, [FromQuery] string? code)
         {
             try
             {
-                var ingreReponse = await _ingredientService.GetById(id);
+                var ingreReponse = await _ingredientService.GetByIdOrCode(id, code);
                 if (ingreReponse == null)
                 {
                     return NotFound(
@@ -194,10 +192,8 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("status/{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_ADMIN")]
-        [Authorize(Roles = "ROLE_MANAGER")]
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
         public async Task<IActionResult> UpdateStatus(Guid id, bool? status)
         {
             try

@@ -39,7 +39,7 @@ namespace Business_Logic_Layer.Services.PromotionService
     string? search, string? sortBy, bool isDescending,
     PromotionType? promotionType, string? promotionCode, string? promotionName,
     DateOnly? startDate, DateOnly? endDate,
-    int page, int pageSize, Guid userId);
+    int page, int pageSize, bool? isActive);
         Task<OrderPromotion> CreateOrderPromotionAsync(OrderPromotion orderPromotion);
         Task<PromotionResponse> DeleteAsync(Guid id);
         Task<List<ActivePromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
@@ -233,25 +233,14 @@ namespace Business_Logic_Layer.Services.PromotionService
     string? search, string? sortBy, bool isDescending,
     PromotionType? promotionType, string? promotionCode, string? promotionName,
     DateOnly? startDate, DateOnly? endDate,
-    int page, int pageSize, Guid userId)
+    int page, int pageSize, bool? isActive)
         {
-            Account? currentAccount = await _accountRepository.GetById(userId);
             List<Promotion> promotions;
 
-            if (currentAccount == null)
-            {
-                throw new Exception("Xin vui lòng đăng nhập để được xem thông tin khuyến mãi");
-            }
-            else if (currentAccount.RoleName is RoleName.ROLE_STAFF or RoleName.ROLE_ADMIN or RoleName.ROLE_MANAGER)
-            {
+            
                 promotions = await _promotionRepository.GetFilteredPromotionsAsync(
-                    search, sortBy, isDescending, promotionType, promotionCode, promotionName, startDate, endDate, null);
-            }
-            else
-            {
-                promotions = await _promotionRepository.GetFilteredPromotionsAsync(
-                    search, sortBy, isDescending, promotionType, promotionCode, promotionName, startDate, endDate, true);
-            }
+                    search, sortBy, isDescending, promotionType, promotionCode, promotionName, startDate, endDate, isActive);
+            
 
             // Sắp xếp lại danh sách
             if (!string.IsNullOrEmpty(sortBy))
