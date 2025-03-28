@@ -9,7 +9,7 @@ namespace Data_Access_Layer.Repositories
     {
         Task<List<Image>> GetByIdAndIngredientByList(Guid id, Guid ingredientId);
         Task<List<Image>> GetByIngredient(Guid ingredientId);
-        Task<Image> GetIdAndIngredient(Guid id, Guid ingredientId);
+        Task<Image> GetIdAndIngredient(Guid? id, Guid ingredientId);
         Task<Image> AddImageAsync(Image image);
         Task<Image> GetById(Guid id);
         Task<bool> Update(Guid id, Image image);

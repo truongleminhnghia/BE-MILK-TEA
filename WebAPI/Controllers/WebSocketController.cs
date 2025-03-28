@@ -61,6 +61,7 @@ namespace WebAPI.Controllers
                         [FromQuery] DateOnly? startDate,
                         [FromQuery] DateOnly? endDate,
                         [FromQuery] IngredientStatus? status,
+                        [FromQuery] IngredientType? ingredientType,
                         [FromQuery] decimal? minPrice,
                         [FromQuery] decimal? maxPrice,
                         [FromQuery] bool? isSale,
@@ -77,7 +78,7 @@ namespace WebAPI.Controllers
                     {
                         var ingredients = await _ingredientService.GetAllAsync(
                             search, categorySearch, categoryId, sortBy, isDescending,
-                            pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale
+                            pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale, ingredientType
                         );
 
                         // var ingredientResponses = _mapper.Map<IEnumerable<IngredientResponse>>(ingredients);
@@ -210,8 +211,8 @@ namespace WebAPI.Controllers
             [FromQuery] bool isDescending = false,
             [FromQuery] Guid? categoryId = null,
             [FromQuery] RecipeLevelEnum? recipeLevel = null,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
+            [FromQuery] DateOnly? startDate = null,
+            [FromQuery] DateOnly? endDate = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {

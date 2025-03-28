@@ -3,6 +3,7 @@ using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Utils;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -33,16 +34,26 @@ namespace WebAPI.Controllers
         }
 
 
-        [HttpGet("staff/{id}")]
-        public async Task<IActionResult> GetStaffById(Guid id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAccountById(Guid id)
         {
-            var employee = await _employeeService.GetById(id);
-            if (employee == null)
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Cannot found"));
-
-            var employeeResponse = _mapper.Map<EmployeeResponse>(employee);
-            
-            return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Successfull", employeeResponse));
+            try
+            {
+                var account = await _accountService.GetById(id);
+                if (account == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(
+                        HttpStatusCode.InternalServerError.GetHashCode(),
+                        false,
+                        "Không tìm thấy tài khoản"
+                    ));                    
+                }
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Lấy tài khoản thành công", account));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
         }
 
         [HttpPost("create-account")]
@@ -57,6 +68,58 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> DeleteAccount(Guid id)
+        {
+            try
+            {
+                var account = await _accountService.DeleteAccount(id);
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Cấm tài khoản thành công", account));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+            }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> GetAllAccounts(
+            [FromQuery] string? search = null,
+            [FromQuery] AccountStatus? accountStatus = null,
+            [FromQuery] RoleName? roleName = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool isDescending = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var accounts = await _accountService.GetAllAccountsAsync(
+                            search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
+                if (accounts == null)
+                {
+                    return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    true,
+                    "Danh sách rỗng",
+                    accounts
+                ));
+                }
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Lấy danh sách tài khoản thành công",
+                    accounts
+                ));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
             }
         }
     }
