@@ -401,7 +401,13 @@ namespace Data_Access_Layer.Repositories
 
             if (expiredDate.HasValue)
             {
-                query = query.Where(p => p.EndDate.Date >= expiredDate.Value.ToDateTime(TimeOnly.MinValue));
+                DateTime startOfDay = expiredDate.Value.ToDateTime(TimeOnly.MinValue); // YYYY-MM-DD 00:00:00
+                DateTime endOfDay = expiredDate.Value.ToDateTime(TimeOnly.MaxValue);   // YYYY-MM-DD 23:59:59
+
+                query = query.Where(p =>
+                    p.EndDate >= startOfDay &&
+                    p.StartDate <= endOfDay);
+
             }
 
             if (isActive.HasValue)
