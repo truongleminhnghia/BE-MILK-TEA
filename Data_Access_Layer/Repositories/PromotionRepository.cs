@@ -277,7 +277,7 @@ namespace Data_Access_Layer.Repositories
     PromotionType? promotionType, string? promotionCode, string? promotionName,
     DateOnly? startDate, DateOnly? endDate, bool? isActive)
         {
-            var query = _context.Promotions.AsQueryable();
+            var query = _context.Promotions.Include(p => p.PromotionDetail).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {

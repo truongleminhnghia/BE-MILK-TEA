@@ -33,5 +33,6 @@ namespace Business_Logic_Layer.Services.IngredientService
         Task<IngredientResponse> CreateIngredientAsync(IngredientRequest request);
         Task<IngredientResponse> Update(Guid id, UpdateIngredientRequest request);
         Task<bool> ChangeStatus(Guid id);
+        Task<IngredientResponse> GetByIdOrCode(Guid? id, string? code);
     }
 }

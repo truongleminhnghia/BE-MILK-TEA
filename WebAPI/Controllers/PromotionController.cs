@@ -31,7 +31,6 @@ namespace WebAPI.Controllers
         [HttpGet]
         [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotion(
-            [FromQuery] Guid userId,
     [FromQuery] bool? isActive = null,
     [FromQuery] string? promotionCode = null,
     [FromQuery] string? promotionName = null,
@@ -58,7 +57,7 @@ namespace WebAPI.Controllers
 
                 var promotions = await _promotionService.GetAllPromotions(
                     search, sortBy, isDescending, promotionType, promotionCode, promotionName,
-                    startDate, endDate, page, pageSize, userId);
+                    startDate, endDate, page, pageSize, isActive);
 
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
