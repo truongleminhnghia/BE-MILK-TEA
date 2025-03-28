@@ -67,7 +67,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 Env.Load();
 
 var _server = Environment.GetEnvironmentVariable("SERVER_LOCAL");
@@ -79,8 +78,6 @@ var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
 var connectionString =
     $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
-
-
 
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -238,7 +235,7 @@ builder.Services.AddHttpContextAccessor();
 
 
 // config CORS
-// var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
+var MyAllowSpecificOrigins = "_feAllowSpecificOrigins";
 // builder.Services.AddCors(options =>
 // {
 //     options.AddPolicy(
@@ -251,19 +248,6 @@ builder.Services.AddHttpContextAccessor();
 //         //    .AllowCredentials();
 //         });
 // });
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy(
-//         MyAllowSpecificOrigins,
-//         policy =>
-//         {
-//             policy.WithOrigins("http://localhost:5173", "https://fe-milk-tea-project.vercel.app", "http://127.0.0.1:5500", "http://192.168.0.2:5173") // Replace with your frontend URL
-//                   .AllowAnyMethod()
-//                   .AllowAnyHeader()
-//                   .AllowCredentials();
-//         });
-// });
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowExpoApp",
@@ -271,8 +255,6 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod()
                         .AllowAnyHeader());
 });
-
-builder.Services.AddHttpClient<AuthenService>();
 
 builder.Services.AddHttpClient<AuthenService>();
 var app = builder.Build();

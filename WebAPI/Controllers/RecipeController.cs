@@ -23,6 +23,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> CreateRecipe([FromBody] RecipeRequest request)
         {
             try
@@ -43,6 +44,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetRecipeById(Guid id)
         {
             try
@@ -64,6 +66,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateRecipe(Guid id, [FromBody] RecipeRequest request)
         {
             try
@@ -87,22 +90,24 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
+        // [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetAllRecipes(
+            [FromQuery] Guid userId,
             [FromQuery] string? search,
             [FromQuery] string? sortBy,
-            [FromQuery] RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
+            [FromQuery] RecipeStatusEnum? recipeStatus = null,
             [FromQuery] bool isDescending = false,
             [FromQuery] Guid? categoryId = null,
-            [FromQuery] RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
+            [FromQuery] RecipeLevelEnum? recipeLevel = null,
+            [FromQuery] DateOnly? startDate = null,
+            [FromQuery] DateOnly? endDate = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
                 var recipes = await _recipeService.GetAllRecipesAsync(
-             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize);
+             search, sortBy, isDescending, recipeStatus, categoryId, recipeLevel, startDate, endDate, page, pageSize, userId);
 
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
@@ -117,8 +122,9 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("status/{id}")]
-        public async Task<IActionResult> UpdateRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
+        public async Task<IActionResult> DeleteRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
         {
             try
             {
@@ -130,7 +136,7 @@ namespace WebAPI.Controllers
                 return Ok(new ApiResponse(
                                 HttpStatusCode.OK.GetHashCode(),
                                 true,
-                                "Cập nhật công thức thành công!",
+                                "Cập nhật trạng thái công thức thành công!",
                                 isUpdated
                             ));
             }

@@ -28,6 +28,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
         [HttpGet]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
         public async Task<IActionResult> GetOrderDetails(
             [FromQuery] Guid? orderId,
             [FromQuery] int page = 1,
@@ -68,6 +69,8 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{orderDetailId}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
+
         public async Task<IActionResult> GetById(Guid orderDetailId)
         {
             var orderDetail = await _orderDetailService.GetByIdAsync(orderDetailId);
@@ -92,6 +95,8 @@ namespace WebAPI.Controllers
 
             ////Create
             [HttpPost]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
+
         public async Task<IActionResult> AddOrderDetail([FromBody] CreateOrderDetailRequest orderDetails)
         {
             var order = await _orderService.GetByIdAsync(orderDetails.OrderId);
@@ -112,6 +117,8 @@ namespace WebAPI.Controllers
         }
         //UPDATE
         [HttpPut("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
+
 
         public async Task<IActionResult> UpdateOrderDetail(
             Guid id,
@@ -145,6 +152,8 @@ namespace WebAPI.Controllers
         }
         //Delete by id
         [HttpDelete("{orderDetailId}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
+
         public async Task<IActionResult> DeleteOrder(Guid orderDetailId)
         {
             var result = await _orderDetailService.DeleteByIdAsync(orderDetailId);

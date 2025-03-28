@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data_Access_Layer.Enum;
 
 namespace Business_Logic_Layer.Models.Requests
 {
-    public class ImageRequest
+    public class UpdateAccountLevelRequest
     {
-        public Guid? Id { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
+        public AccountLevelEnum AccountLevel { get; set; }
     }
 }

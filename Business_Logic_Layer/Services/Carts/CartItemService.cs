@@ -96,7 +96,7 @@ namespace Business_Logic_Layer.Services.Carts
             {
                 throw new Exception("Cart không tồn tại");
             }
-            var ingre = await _ingredientRepository.GetById(cartItemRequest.IngredientId);
+            var ingre = await _ingredientRepository.GetById(cartItemRequest.IngredientId);  
             if (ingre == null)
             {
                 throw new Exception("Nguyên liệu không tồn tại");
@@ -116,7 +116,8 @@ namespace Business_Logic_Layer.Services.Carts
 
             // **Tìm CartItem có cùng IngredientId trong giỏ hàng**
             var existingCartItem = cartExisting.CartItems
-                .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId);
+     .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId
+                        && ci.ProductType == cartItemRequest.ProductType);
 
             // **Nếu IsCart == true và đã có nguyên liệu trong giỏ hàng => Báo lỗi**
             if (cartItemRequest.IsCart && existingCartItem != null)
@@ -214,6 +215,10 @@ namespace Business_Logic_Layer.Services.Carts
 
             _cartItemRepository.UpdateCartItem(cartItem);
             return true;
+        }
+        public async Task<bool> UpdateCartItemStatus(Guid cartItemId, bool isCart)
+        {
+            return await _cartItemRepository.UpdateCartItemStatus(cartItemId, isCart);
         }
     }
 }

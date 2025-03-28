@@ -61,6 +61,7 @@ namespace WebAPI.Controllers
                         [FromQuery] DateOnly? startDate,
                         [FromQuery] DateOnly? endDate,
                         [FromQuery] IngredientStatus? status,
+                        [FromQuery] IngredientType? ingredientType,
                         [FromQuery] decimal? minPrice,
                         [FromQuery] decimal? maxPrice,
                         [FromQuery] bool? isSale,
@@ -77,7 +78,7 @@ namespace WebAPI.Controllers
                     {
                         var ingredients = await _ingredientService.GetAllAsync(
                             search, categorySearch, categoryId, sortBy, isDescending,
-                            pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale
+                            pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale, ingredientType
                         );
 
                         // var ingredientResponses = _mapper.Map<IEnumerable<IngredientResponse>>(ingredients);
@@ -203,17 +204,17 @@ namespace WebAPI.Controllers
 
         [HttpGet("recipes")]
         public async Task<IActionResult> GetRecipesWebSocket(
+            [FromQuery] Guid userId,
             [FromQuery] string? search,
             [FromQuery] string? sortBy,
-            [FromQuery] RecipeStatusEnum? recipeStatusEnum = RecipeStatusEnum.INACTIVE,
+            [FromQuery] RecipeStatusEnum? recipeStatusEnum = null,
             [FromQuery] bool isDescending = false,
             [FromQuery] Guid? categoryId = null,
-            [FromQuery] RecipeLevelEnum? recipeLevel = RecipeLevelEnum.PUBLIC,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
+            [FromQuery] RecipeLevelEnum? recipeLevel = null,
+            [FromQuery] DateOnly? startDate = null,
+            [FromQuery] DateOnly? endDate = null,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10
-        )
+            [FromQuery] int pageSize = 10)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
@@ -224,7 +225,7 @@ namespace WebAPI.Controllers
                     while (webSocket.State == WebSocketState.Open)
                     {
                         var recipes = await _recipeService.GetAllRecipesAsync(
-             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize);
+             search, sortBy, isDescending, recipeStatusEnum, categoryId, recipeLevel, startDate, endDate, page, pageSize, userId);
 
                         var recipeRes = _mapper.Map<IEnumerable<RecipeResponse>>(recipes);
                         string jsonString = JsonSerializer.Serialize(recipeRes);

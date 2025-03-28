@@ -14,8 +14,8 @@ namespace Business_Logic_Layer.AutoMappers
     {
         public PromotionDetailMapper() 
         {
-            CreateMap<PromotionDetailRequest, PromotionDetail>();
-            CreateMap<PromotionDetail, PromotionDetailResponse>();
+            CreateMap<PromotionDetailRequest, PromotionDetail>().ReverseMap();
+            CreateMap<PromotionDetail, PromotionDetailResponse>().ReverseMap();
             CreateMap<PromotionDetailUpdateRequest, PromotionDetail>().ReverseMap();
             CreateMap<Order, OrderResponse>()
             .ForMember(dest => dest.orderDetailResponses, opt => opt.MapFrom(src => src.OrderDetails));

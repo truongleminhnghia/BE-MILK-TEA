@@ -16,7 +16,7 @@ namespace Business_Logic_Layer.Models.Requests
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public PromotionType PromotionType { get; set; }
-
-        public List<PromotionDetailRequest> promotionDetailList { get; set; } = new List<PromotionDetailRequest>();
+        //public List<Guid> IngredientId { get; set; } = new List<Guid>();
+        public PromotionDetailRequest promotionDetail { get; set; }
     }
 }

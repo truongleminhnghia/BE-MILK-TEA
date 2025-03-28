@@ -46,12 +46,12 @@ namespace Data_Access_Layer.Repositories
             return response;
         }
 
-        public async Task<Account?> GetById(Guid _id)
+        public async Task<Account?> GetById(Guid id)
         {
-            return await _context
-                .Accounts.Include(a => a.Employee)
+            return await _context.Accounts
+                .Include(a => a.Employee)
                 .Include(a => a.Customer)
-                .FirstOrDefaultAsync(a => a.Id == _id);
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task<Account> GetByPhoneNumber(string phoneNumber)
@@ -120,9 +120,6 @@ namespace Data_Access_Layer.Repositories
             return (accounts, total);
         }
 
-
-
-
         public async Task<Account> GetAccountByOrderIdAsync(Guid orderId)
         {
             return await _context
@@ -130,5 +127,33 @@ namespace Data_Access_Layer.Repositories
                 .Select(o => o.Account)
                 .FirstOrDefaultAsync();
         }
+        public async Task<bool> UpdateCustomerAccountLevel(Guid accountId)
+        {
+            try
+            {
+                var customer = await _context.Customers.FirstOrDefaultAsync(c => c.AccountId == accountId);
+                if (customer == null) return false;
+
+                customer.Purchased = true;
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi cập nhật Purchased tài khoản: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
+        public async Task<Account> DeleteAsync(Guid id)
+        {
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == id);
+            if (account == null) throw new Exception("Account is not found");
+            account.AccountStatus = AccountStatus.NO_ACTIVE;
+            await _context.SaveChangesAsync();
+            return account;
+        }
+
     }
 }

@@ -57,7 +57,10 @@ namespace Data_Access_Layer.Repositories
         {
             return await _context.PromotionDetails.FirstOrDefaultAsync(c => c.Id == id);
         }
-
+        public async Task<PromotionDetail> GetbyPromotionId(Guid promotionId)
+        {
+            return await _context.PromotionDetails.FirstOrDefaultAsync(c => c.PromotionId == promotionId);
+        }
         public async Task<PromotionDetail> UpdateAsync(Guid id, PromotionDetail promotionDetail)
         {
             var existingPromotionDetail = await _context.PromotionDetails.FindAsync(id);

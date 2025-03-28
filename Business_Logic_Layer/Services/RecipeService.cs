@@ -26,8 +26,9 @@ namespace Business_Logic_Layer.Services
         private readonly IIngredientRecipeRepository _ingredientRecipeRepository;
         private readonly ICategoryService _categoryService;
         private readonly Source _source;
+        private readonly IAccountRepository _accountRepository;
 
-        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository, ICategoryService categoryService, Source source)
+        public RecipeService(IRecipeRepository recipeRepository, IIngredientRepository ingredientRepository, IMapper mapper, ApplicationDbContext applicationDbContext, IIngredientRecipeRepository ingredientRecipeRepository, ICategoryService categoryService, Source source, IAccountRepository accountRepository)
         {
             _recipeRepository = recipeRepository;
             _ingredientRepository = ingredientRepository;
@@ -36,6 +37,7 @@ namespace Business_Logic_Layer.Services
             _ingredientRecipeRepository = ingredientRecipeRepository;
             _categoryService = categoryService;
             _source = source;
+            _accountRepository = accountRepository;
         }
 
         public async Task<RecipeResponse> CreateRecipe(RecipeRequest request)
@@ -171,52 +173,63 @@ namespace Business_Logic_Layer.Services
         public async Task<PageResult<RecipeResponse>> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
     RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
-    DateTime? startDate, DateTime? endDate,
-    int page, int pageSize)
+    DateOnly? startDate, DateOnly? endDate,
+    int page, int pageSize, Guid userId)
         {
-            var (recipes, total) = await _recipeRepository.GetAllRecipesAsync(
-        search, sortBy, isDescending, recipeStatus, categoryId, recipeLevel, startDate, endDate, page, pageSize);
-            if (recipes == null)
-            {
-                throw new Exception("Recipe repository returned null.");
-            }
+            Account? currentAccount = await _accountRepository.GetById(userId);
 
-            
-            Account? currentAccount = null;
-            try
-            {
-                currentAccount = await _source.GetCurrentAccount();
-            }
-            catch
-            {
-                // Ghi log lỗi thay vì cho lỗi này rơi thẳng vào catch chính
-                Console.WriteLine("");
-            }
+            List<Recipe> recipes;
 
-            // Nếu không có tài khoản (Guest), chỉ thấy công thức PUBLIC
             if (currentAccount == null)
             {
-                recipes = recipes.Where(recipe => recipe.RecipeLevel == RecipeLevelEnum.PUBLIC).ToList();
+                // Guest: Chỉ thấy PUBLIC
+                recipes = await _recipeRepository.GetFilteredRecipesAsync(
+                    search, sortBy, isDescending, recipeStatus, categoryId, RecipeLevelEnum.PUBLIC, startDate, endDate);
+            }
+            else if (currentAccount.RoleName is RoleName.ROLE_STAFF or RoleName.ROLE_MANAGER or RoleName.ROLE_ADMIN)
+            {
+                // Admin, Staff, Manager: Nếu không truyền RecipeLevel thì lấy tất cả
+                recipes = await _recipeRepository.GetFilteredRecipesAsync(
+                    search, sortBy, isDescending, recipeStatus, categoryId, recipeLevel, startDate, endDate);
             }
             else
             {
-                // Nếu có tài khoản, lọc theo cấp bậc của tài khoản
-                switch (currentAccount.Customer.AccountLevel)
+                // Customer: Nếu không truyền recipeLevel, lấy PUBLIC + NORMAL
+                var defaultLevels = new List<RecipeLevelEnum> { RecipeLevelEnum.PUBLIC, RecipeLevelEnum.NORMAL };
+
+                if (recipeLevel.HasValue)
                 {
-                    case AccountLevelEnum.NORMAL:
-                        recipes = recipes.Where(recipe => recipe.RecipeLevel == RecipeLevelEnum.PUBLIC || recipe.RecipeLevel == RecipeLevelEnum.NORMAL).ToList();
-                        break;
-                    case AccountLevelEnum.VIP:
-                        // VIP thấy tất cả, không cần lọc thêm
-                        break;
-                    default:
-                        throw new UnauthorizedAccessException("Loại tài khoản không hợp lệ.");
+                    // Nếu truyền recipeLevel, chỉ lấy đúng loại đó
+                    recipes = await _recipeRepository.GetFilteredRecipesAsync(
+                        search, sortBy, isDescending, recipeStatus, categoryId, recipeLevel, startDate, endDate);
+                }
+                else
+                {
+                    // Lọc PUBLIC + NORMAL
+                    recipes = await _recipeRepository.GetFilteredRecipesAsync(
+                        search, sortBy, isDescending, recipeStatus, categoryId, null, startDate, endDate);
+
+                    recipes = recipes.Where(r => defaultLevels.Contains(r.RecipeLevel)).ToList();
                 }
             }
 
+            // Sắp xếp lại danh sách
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                recipes = isDescending
+                    ? recipes.OrderByDescending(r => r.GetType().GetProperty(sortBy)?.GetValue(r)).ToList()
+                    : recipes.OrderBy(r => r.GetType().GetProperty(sortBy)?.GetValue(r)).ToList();
+            }
+
+            // Tính lại tổng số lượng sau khi lọc
+            int total = recipes.Count;
+
+            // Phân trang
+            var pagedRecipes = recipes.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             return new PageResult<RecipeResponse>
             {
-                Data = recipes.Select(ComplexRecipeResponse).ToList(),
+                Data = pagedRecipes.Select(ComplexRecipeResponse).ToList(),
                 PageCurrent = page,
                 PageSize = pageSize,
                 Total = total

@@ -23,7 +23,5 @@ namespace Business_Logic_Layer.Models.Requests
         [Required]
         [Range(0, double.MaxValue, ErrorMessage = "MaxValue phải là số dương")]
         public double MaxValue { get; set; }
-
-
     }
 }
