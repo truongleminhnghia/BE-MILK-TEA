@@ -32,7 +32,6 @@ namespace WebAPI.Controllers
         [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotion(
     [FromQuery] bool? isActive = null,
-    [FromQuery] string? promotionCode = null,
     [FromQuery] string? promotionName = null,
     [FromQuery] PromotionType? promotionType = null,
     [FromQuery] int page = 1,
@@ -56,7 +55,7 @@ namespace WebAPI.Controllers
                 }
 
                 var promotions = await _promotionService.GetAllPromotions(
-                    search, sortBy, isDescending, promotionType, promotionCode, promotionName,
+                    search, sortBy, isDescending, promotionType, promotionName,
                     startDate, endDate, page, pageSize, isActive);
 
                 return Ok(new ApiResponse(
@@ -80,8 +79,8 @@ namespace WebAPI.Controllers
 
         ////Get by id
         [HttpGet("{promotionId}")]
-        [Authorize(Roles = "ROLE_STAFF")]
-        public async Task<IActionResult> GetById(Guid promotionId)
+        [Authorize(Roles = "ROLE_STAFF,ROLE_ADMIN,ROLE_MANAGER")]
+        public async Task<IActionResult> GetByIdOrCode(Guid promotionId)
         {
             PromotionResponse promotions = await _promotionService.GetByIdAsync(promotionId);
             if (promotions == null)
@@ -190,13 +189,11 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetActivePromotion(
             [FromQuery] PromotionType? promotionType,
             [FromQuery] double? orderTotalPrice,
-            [FromQuery] DateOnly? expiredDate,
-            [FromQuery] bool? isActive
-            )
+            [FromQuery] DateOnly? expiredDate)
         {
             try
             {
-                var promotions = await _promotionService.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, isActive);
+                var promotions = await _promotionService.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, true);
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
                     true,

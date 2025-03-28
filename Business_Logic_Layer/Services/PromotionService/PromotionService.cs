@@ -37,12 +37,13 @@ namespace Business_Logic_Layer.Services.PromotionService
 
         Task<PageResult<PromotionResponse>> GetAllPromotions(
     string? search, string? sortBy, bool isDescending,
-    PromotionType? promotionType, string? promotionCode, string? promotionName,
+    PromotionType? promotionType, string? promotionName,
     DateOnly? startDate, DateOnly? endDate,
     int page, int pageSize, bool? isActive);
         Task<OrderPromotion> CreateOrderPromotionAsync(OrderPromotion orderPromotion);
         Task<PromotionResponse> DeleteAsync(Guid id);
         Task<List<ActivePromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
+        Task<PromotionResponse?> GetByIdOrCode(Guid? promoId, string? promoCode);
     }
     public class PromotionService : IPromotionService
     {
@@ -160,6 +161,35 @@ namespace Business_Logic_Layer.Services.PromotionService
             }
         }
 
+        public async Task<PromotionResponse?> GetByIdOrCode(Guid? promoId, string? promoCode)
+        {
+            try
+            {
+                Promotion? promotion;
+                if (promoId.HasValue && string.IsNullOrEmpty(promoCode))
+                {
+                    promotion = await _promotionRepository.GetByIdAsync(promoId.Value);
+                }
+                else if (!string.IsNullOrEmpty(promoCode) && !promoId.HasValue)
+                {
+                    promotion = await _promotionRepository.GetByCodeAsync(promoCode);
+                }
+                else if (promoId.HasValue && !string.IsNullOrEmpty(promoCode))
+                {
+                    promotion = await _promotionRepository.GetByIdAndCode(promoId, promoCode);
+                }
+                else
+                {
+                    throw new Exception("Promotion Id và Promotion Code bị thiếu");
+                }
+                if (promotion == null) throw new Exception("Không tìm thấy thông tin promotion");
+                return _mapper.Map<PromotionResponse>(promotion);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin promotion bằng id hoặc code", ex);
+            }
+        }
 
         public async Task<Promotion?> UpdateAsync(Guid id, Promotion promotion, double minPriceThreshold, double maxPriceThreshold)
         {
@@ -231,7 +261,7 @@ namespace Business_Logic_Layer.Services.PromotionService
 
         public async Task<PageResult<PromotionResponse>> GetAllPromotions(
     string? search, string? sortBy, bool isDescending,
-    PromotionType? promotionType, string? promotionCode, string? promotionName,
+    PromotionType? promotionType, string? promotionName,
     DateOnly? startDate, DateOnly? endDate,
     int page, int pageSize, bool? isActive)
         {
@@ -239,7 +269,7 @@ namespace Business_Logic_Layer.Services.PromotionService
 
             
                 promotions = await _promotionRepository.GetFilteredPromotionsAsync(
-                    search, sortBy, isDescending, promotionType, promotionCode, promotionName, startDate, endDate, isActive);
+                    search, sortBy, isDescending, promotionType, promotionName, startDate, endDate, isActive);
             
 
             // Sắp xếp lại danh sách
@@ -322,6 +352,10 @@ namespace Business_Logic_Layer.Services.PromotionService
 
         public async Task<List<ActivePromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive)
         {
+            if(expiredDate == null)
+            {
+                expiredDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            }
             var promotions = await _promotionRepository.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, isActive);
             return _mapper.Map<List<ActivePromotionResponse>>(promotions);
         }

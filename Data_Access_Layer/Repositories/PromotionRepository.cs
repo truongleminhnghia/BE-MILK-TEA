@@ -36,10 +36,11 @@ namespace Data_Access_Layer.Repositories
 
         Task<List<Promotion>> GetFilteredPromotionsAsync(
     string? search, string? sortBy, bool isDescending,
-    PromotionType? promotionType, string? promotionCode, string? promotionName,
+    PromotionType? promotionType, string? promotionName,
     DateOnly? startDate, DateOnly? endDate, bool? isActive);
         Task<Promotion> DeleteAsync(Guid id);
         Task<List<Promotion>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
+        Task<Promotion?> GetByIdAndCode(Guid? id, string? code);
     }
 }
 
@@ -274,7 +275,7 @@ namespace Data_Access_Layer.Repositories
 
         public async Task<List<Promotion>> GetFilteredPromotionsAsync(
     string? search, string? sortBy, bool isDescending,
-    PromotionType? promotionType, string? promotionCode, string? promotionName,
+    PromotionType? promotionType, string? promotionName,
     DateOnly? startDate, DateOnly? endDate, bool? isActive)
         {
             var query = _context.Promotions.Include(p => p.PromotionDetail).AsQueryable();
@@ -287,11 +288,6 @@ namespace Data_Access_Layer.Repositories
             if (promotionType.HasValue)
             {
                 query = query.Where(p => p.PromotionType == promotionType.Value);
-            }
-
-            if (!string.IsNullOrEmpty(promotionCode))
-            {
-                query = query.Where(p => p.PromotionCode == promotionCode);
             }
 
             if (!string.IsNullOrEmpty(promotionName))
@@ -422,6 +418,12 @@ namespace Data_Access_Layer.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<Promotion?> GetByIdAndCode (Guid? id, string? code)
+        {
+            return await _context.Promotions
+                .Include(p => p.PromotionDetail)
+                .FirstOrDefaultAsync(p => p.Id == id && p.PromotionCode == code);
+        }
 
     }
 }
