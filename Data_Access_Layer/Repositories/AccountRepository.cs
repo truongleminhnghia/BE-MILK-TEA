@@ -146,6 +146,7 @@ namespace Data_Access_Layer.Repositories
 
 
 
+
         public async Task<Account> DeleteAsync(Guid id)
         {
             var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == id);
@@ -154,6 +155,7 @@ namespace Data_Access_Layer.Repositories
             await _context.SaveChangesAsync();
             return account;
         }
+
 
     }
 }
