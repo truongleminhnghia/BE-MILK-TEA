@@ -21,5 +21,6 @@ namespace Business_Logic_Layer.Services
 
         Task<bool> UpdateAccountLevel(Guid accountId);
         Task<AccountResponse> DeleteAccount(Guid id);
+
     }
 }
