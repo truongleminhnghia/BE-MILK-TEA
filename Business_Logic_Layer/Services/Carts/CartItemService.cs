@@ -216,5 +216,9 @@ namespace Business_Logic_Layer.Services.Carts
             _cartItemRepository.UpdateCartItem(cartItem);
             return true;
         }
+        public async Task<bool> UpdateCartItemStatus(Guid cartItemId, bool isCart)
+        {
+            return await _cartItemRepository.UpdateCartItemStatus(cartItemId, isCart);
+        }
     }
 }

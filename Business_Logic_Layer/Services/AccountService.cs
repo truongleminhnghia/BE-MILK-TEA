@@ -16,6 +16,7 @@ using Azure.Core;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 
 namespace Business_Logic_Layer.Services
 {
@@ -154,7 +155,18 @@ namespace Business_Logic_Layer.Services
             };
         }
 
-
+        public async Task<bool> UpdateAccountLevel(Guid accountId, AccountLevelEnum newLevel)
+        {
+            try
+            {
+                return await _accountRepository.UpdateCustomerAccountLevel(accountId, newLevel);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi trong quá trình cập nhật Account Level: {ex.Message}");
+                return false;
+            }
+        }
     }
 }
 

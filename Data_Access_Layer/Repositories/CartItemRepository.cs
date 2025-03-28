@@ -66,5 +66,21 @@ namespace Data_Access_Layer.Repositories
             _context.CartItems.Update(cartItem);
             return await _context.SaveChangesAsync() > 0;
         }
+        public async Task<bool> UpdateCartItemStatus(Guid cartItemId, bool isCart)
+        {
+            try
+            {
+                var cartItem = await _context.CartItems.FirstOrDefaultAsync(c => c.Id == cartItemId);
+                if (cartItem == null) return false;
+
+                cartItem.IsCart = isCart;
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠ Lỗi khi cập nhật trạng thái CartItem: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

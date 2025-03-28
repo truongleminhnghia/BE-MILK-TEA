@@ -36,6 +36,7 @@ namespace Business_Logic_Layer.Services
     }
     public class OrderService : IOrderService
     {
+        private readonly IAccountService _accountService;
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderDetailService _orderDetailService;
         private readonly IIngredientService _ingredientService;
@@ -46,8 +47,9 @@ namespace Business_Logic_Layer.Services
         private readonly IMapper _mapper;
         private readonly Source _source;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source, IIngredientQuantityService ingredientQuantityService, ICartItemService cartItemService , IIngredientService ingredientService, IPromotionDetailService promotionDetailService, IPromotionService promotionService )
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source, IIngredientQuantityService ingredientQuantityService, ICartItemService cartItemService , IIngredientService ingredientService, IPromotionDetailService promotionDetailService, IPromotionService promotionService, IAccountService accountService )
         {
+            _accountService = accountService;
             _promotionDetailService = promotionDetailService;
             _promotionService = promotionService;
             _orderRepository = orderRepository;
@@ -121,7 +123,7 @@ namespace Business_Logic_Layer.Services
 
                 }
 
-                //check promotion
+                //check promotion   
                 finalPrice = createdOrder.TotalPrice;
                 if (!string.IsNullOrEmpty(orderRequest.PromotionCode))
                 {
@@ -187,9 +189,20 @@ namespace Business_Logic_Layer.Services
                 returna.TotalPrice = createdOrder.TotalPrice; // Giá gốc
                 returna.PriceAfterPromotion = createdOrder.PriceAffterPromotion;
                 returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);
+
                 foreach (var orderDetail in orderRequest.orderDetailList)
                 {
-                    await _cartItemService.Delete(orderDetail.CartItemId);
+                    bool cartIsUpdated = await _cartItemService.UpdateCartItemStatus(orderDetail.CartItemId, false);
+                    if (!cartIsUpdated)
+                    {
+                        Console.WriteLine($"Không thể cập nhật trạng thái cho CartItemId: {orderDetail.CartItemId}");
+                    }
+                }
+
+                bool isUpdated = await _accountService.UpdateAccountLevel(orderRequest.AccountId, AccountLevelEnum.VIP);
+                if (!isUpdated)
+                {
+                    Console.WriteLine($"Không thể cập nhật account level cho accountId: {orderRequest.AccountId}");
                 }
                 return returna;
             }

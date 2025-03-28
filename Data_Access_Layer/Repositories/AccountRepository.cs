@@ -130,5 +130,22 @@ namespace Data_Access_Layer.Repositories
                 .Select(o => o.Account)
                 .FirstOrDefaultAsync();
         }
+        public async Task<bool> UpdateCustomerAccountLevel(Guid accountId, AccountLevelEnum newLevel)
+        {
+            try
+            {
+                var customer = await _context.Customers.FirstOrDefaultAsync(c => c.AccountId == accountId);
+                if (customer == null) return false;
+
+                customer.AccountLevel = newLevel;
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi cập nhật cấp độ tài khoản: {ex.Message}");
+                return false;
+            }
+        }
+
     }
 }
