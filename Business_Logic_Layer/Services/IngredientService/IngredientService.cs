@@ -301,5 +301,23 @@ namespace Business_Logic_Layer.Services.IngredientService
                 Total = total
             };
         }
+
+        public async Task<IngredientResponse> GetByIdOrCode(Guid? id, string? code)
+        {
+            if (id.HasValue)
+            {
+                return await GetById(id.Value);
+            }
+            if (!string.IsNullOrEmpty(code))
+            {
+                var ingredient = await _ingredientRepository.GetByIdOrCode(id, code);
+                if (ingredient == null)
+                {
+                    throw new KeyNotFoundException("Ingredient not found");
+                }
+                return _mapper.Map<IngredientResponse>(ingredient);
+            }
+            return null;
+        }
     }
 }
