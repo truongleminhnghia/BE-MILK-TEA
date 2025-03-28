@@ -32,6 +32,7 @@ namespace Data_Access_Layer.Entities
         public double MaxValue { get; set; }
 
         [Column("promtion_id")]
+        [Required]
         [ForeignKey("PromotionId")]
         public Guid PromotionId { get; set; }
 

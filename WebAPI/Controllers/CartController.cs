@@ -3,9 +3,15 @@ using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services;
+using Business_Logic_Layer.Services.Carts;
+using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Crmf;
 
 
 namespace WebAPI.Controllers
@@ -15,69 +21,78 @@ namespace WebAPI.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
-        private readonly IMapper _mapper;
-
-        public CartController(ICartService cartService, IMapper mapper)
+        public CartController(ICartService cartService)
         {
             _cartService = cartService;
-            _mapper = mapper;
         }
-        //Get by id
-        [HttpGet("{cartId}")]
-        public async Task<IActionResult> GetById(Guid cartId)
+
+        [HttpPost("{accountId}")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
+        public async Task<IActionResult> CreateCart(Guid accountId)
         {
-            var carts = await _cartService.GetByIdAsync(cartId);
-            if (carts == null)
+            try
             {
-                return Ok(new ApiResponse(
-                    ((int)HttpStatusCode.OK),
-                    true,
-                    "Không có cart nào có ID đó cả.",
-                    null
-                ));
+                var cart = await _cartService.CreateCart(accountId);
+                return Ok(new ApiResponse(201, true, "Tạo giỏ hàng thành công", cart));
             }
-            return Ok(new ApiResponse(
-                    ((int)HttpStatusCode.OK),
-                    true,
-                    "Lấy dữ liệu thành công!",
-                    carts
-                ));
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ApiResponse(404, false, ex.Message));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ApiResponse(400, false, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(500, false, "Lỗi server", ex.Message));
+            }
         }
 
-        ////Create
-        [HttpPost]
-        public async Task<IActionResult> AddCart([FromBody] CartRequest cart)
+        // [HttpGet("{id}")]
+        // public async Task<IActionResult> GetById(Guid id)
+        // {
+        //     try
+        //     {
+        //         var cart = await _cartService.GetById(id);
+        //         if (cart == null)
+        //         {
+        //             return NotFound(new ApiResponse(404, false, "Giỏ hàng không tồn tại"));
+        //         }
+        //         return Ok(new ApiResponse(200, true, "Lấy giỏ hàng thành công", cart));
+        //     }
+        //     catch (ArgumentException ex)
+        //     {
+        //         return BadRequest(new ApiResponse(400, false, ex.Message));
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, new ApiResponse(500, false, "Lỗi server", ex.Message));
+        //     }
+        // }
+
+        [HttpGet("{accountId}")]
+        [Authorize(Roles = "ROLE_CUSTOMER")]
+        public async Task<IActionResult> GetByAccount(Guid accountId)
         {
-            if (cart == null)
+            try
             {
-                return BadRequest(new { message = "Invalid cart data" });
+                var cart = await _cartService.GetByAccount(accountId);
+                return Ok(new ApiResponse(200, true, "Lấy giỏ hàng thành công", cart));
             }
-
-            var createCart = await _cartService.CreateAsync(cart);
-            return Ok(createCart);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ApiResponse(404, false, ex.Message));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ApiResponse(400, false, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(500, false, "Lỗi server", ex.Message));
+            }
         }
 
-        //UPDATE
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCart(
-        Guid id,
-            [FromBody] CartRequest cartRequest
-        )
-        {
-            if (cartRequest == null)
-            {
-                return BadRequest(new { message = "Invalid cart data" });
-            }
-
-            var cart = _mapper.Map<Cart>(cartRequest);
-            var updatedCart = await _cartService.UpdateAsync(id, cart);
-
-            if (updatedCart == null)
-            {
-                return NotFound(new { message = "Cart not found" });
-            }
-
-            return Ok(updatedCart);
-        }
     }
 }

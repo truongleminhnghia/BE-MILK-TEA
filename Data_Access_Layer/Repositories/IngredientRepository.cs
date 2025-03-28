@@ -82,20 +82,23 @@ namespace Data_Access_Layer.Repositories
         // }
 
         public IQueryable<Ingredient> GetAll(
-        string? search,
-        string? categorySearch,
-        Guid? categoryId,
-        DateTime? startDate,
-        DateTime? endDate,
-        IngredientStatus? status,
-        decimal? minPrice,
-        decimal? maxPrice,
-        bool? isSale)
+            string? search,
+            string? categorySearch,
+            Guid? categoryId,
+            DateOnly? startDate,
+            DateOnly? endDate,
+            IngredientStatus? status,
+            decimal? minPrice,
+            decimal? maxPrice,
+            bool? isSale,
+            IngredientType? ingredientType
+        )
         {
-            var query = _context.Ingredients
-                .Include(i => i.Category)
+            var query = _context
+                .Ingredients.Include(i => i.Category)
                 .Include(i => i.Images)
                 .Include(i => i.IngredientQuantities)
+                .Include(i => i.IngredientReviews)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
@@ -135,22 +138,67 @@ namespace Data_Access_Layer.Repositories
 
             if (startDate.HasValue || endDate.HasValue)
             {
-                DateTime adjustedStart = startDate?.Date ?? DateTime.MinValue;
-                DateTime adjustedEnd = endDate?.Date.AddDays(1).AddTicks(-1) ?? DateTime.MaxValue;
+                DateTime adjustedStart = startDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue;
+                DateTime adjustedEnd = endDate?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.MaxValue;
+
                 query = query.Where(i => i.CreateAt >= adjustedStart && i.CreateAt <= adjustedEnd);
             }
+            if (ingredientType.HasValue)
+            {
+                query = query.Where(i => i.IngredientType == ingredientType.Value);
+            }
+
 
             return query;
         }
 
+        public async Task<Ingredient> GetByIdOrCode(Guid? id, string? code)
+        {
+            if (id.HasValue && string.IsNullOrEmpty(code))
+            {
+                return await _context
+                    .Ingredients.Include(i => i.Images)
+                    .Include(i => i.Category)
+                    .Include(i => i.IngredientQuantities)
+                    .Include(i => i.IngredientReviews)
+                    .FirstAsync(a => a.Id.Equals(id));
+            }
+            else if (!id.HasValue && code != null)
+            {
+                if (code.Substring(0,1) != "P")
+                {
+                    throw new Exception("Định dạng nguyên liệu bị sai");
+                }
+                return await _context
+                    .Ingredients.Include(i => i.Images)
+                    .Include(i => i.Category)
+                    .Include(i => i.IngredientQuantities)
+                    .Include(i => i.IngredientReviews)
+                    .FirstAsync(a => a.IngredientCode.Equals(code));
+            }
+            else if (!id.HasValue && code != null)
+            {
+                return await _context
+                    .Ingredients.Include(i => i.Images)
+                    .Include(i => i.Category)
+                    .Include(i => i.IngredientQuantities)
+                    .Include(i => i.IngredientReviews)
+                    .FirstAsync(i => i.Id == id && i.IngredientCode == code);
+            }
+            else
+            {
+                return null;
+            }                
+        }
 
         public async Task<Ingredient> GetById(Guid id)
         {
-            return await _context.Ingredients
-            .Include(i => i.Images)
-            .Include(i => i.Category)
-            .Include(i => i.IngredientQuantities)
-            .FirstAsync(a => a.Id.Equals(id));
+            return await _context
+                .Ingredients.Include(i => i.Images)
+                .Include(i => i.Category)
+                .Include(i => i.IngredientQuantities)
+                .Include(i => i.IngredientReviews)
+                .FirstAsync(a => a.Id.Equals(id));
         }
 
         public async Task<Ingredient> CreateAsync(Ingredient ingredient)
@@ -173,8 +221,6 @@ namespace Data_Access_Layer.Repositories
             return existingIngredient;
         }
 
-
-
         public async Task<bool> CheckCode(string code)
         {
             return await _context.Ingredients.AnyAsync(a => a.IngredientCode.Equals(code));
@@ -190,6 +236,13 @@ namespace Data_Access_Layer.Repositories
                 return true;
             }
             return false;
+        }
+
+        public async Task<IEnumerable<Ingredient>> GetIngredientsByPriceRangeAsync(double minPrice, double maxPrice)
+        {
+            return await _context.Ingredients
+                .Where(i => i.PriceOrigin >= minPrice && i.PriceOrigin <= maxPrice)
+                .ToListAsync();
         }
     }
 }

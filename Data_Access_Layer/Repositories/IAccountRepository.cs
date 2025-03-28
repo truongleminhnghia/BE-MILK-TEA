@@ -15,7 +15,14 @@ namespace Data_Access_Layer.Repositories
         public Task<bool> EmailExisting(string _email);
         Task<Account> GetByPhoneNumber(string phoneNumber);
         Task UpdateAccount(Account account);
+        Task<Account> GetAccountByOrderIdAsync(Guid orderId);
+        Task<(IEnumerable<Account>, int TotalCount)> GetAllAccountsAsync(
+    string? search, AccountStatus? accountStatus, RoleName? roleName,
+    string? sortBy, bool isDescending, int page, int pageSize);
+        Task<bool> UpdateCustomerAccountLevel(Guid accountId);
 
-        Task<IEnumerable<Account>> GetAllAccounts (string? search, string? sortBy, bool isDescending, AccountStatus? accountStatus, RoleName? role, int page, int pageSize);
+        Task<Account> DeleteAsync(Guid id);
+
     }
 }
+

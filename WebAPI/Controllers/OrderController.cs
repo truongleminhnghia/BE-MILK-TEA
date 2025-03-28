@@ -8,6 +8,8 @@ using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.CategoryService;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
+using MailKit.Search;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,11 +28,10 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
 
-        //Get all
-        [HttpGet] // accountId có thể NULL để tránh bắt buộc nhập
+        [HttpGet("{accountId?}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetOrder(
-            [FromQuery] Guid? accountId,
-            [FromQuery] Guid? orderId,
+            [FromRoute] Guid accountId,
             [FromQuery] OrderStatus? orderStatus,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
@@ -39,80 +40,66 @@ namespace WebAPI.Controllers
             [FromQuery] bool isDescending = false,
             [FromQuery] DateTime? orderDate = null)
         {
-            // Nếu nhập cả 2 ➝ Báo lỗi
-            if (accountId.HasValue && orderId.HasValue)
-            {
-                return BadRequest(new ApiResponse(
-                    ((int)HttpStatusCode.BadRequest),
-                    false,
-                    "Chỉ được nhập một trong hai: accountId hoặc orderId."
-                ));
-            }
+            var orders = await _orderService.GetAllAsync(accountId, search, sortBy, isDescending, orderStatus, orderDate, page, pageSize);
 
-            // Nếu không nhập gì ➝ Báo lỗi
-            if (!accountId.HasValue && !orderId.HasValue)
-            {
-                return BadRequest(new ApiResponse(
-                    ((int)HttpStatusCode.BadRequest),
-                    false,
-                    "Vui lòng nhập một trong hai: accountId hoặc orderId."
-                ));
-            }
-
-            // Nếu có orderId ➝ Lấy theo orderId
-            if (orderId.HasValue)
-            {
-                var order = await _orderService.GetByIdAsync(orderId.Value);
-                return Ok(new ApiResponse(
-                    ((int)HttpStatusCode.OK),
-                    true,
-                    order != null ? "Lấy dữ liệu thành công!" : "Không có đơn hàng nào có ID đó cả.",
-                    order
-                ));
-            }
-
-            // Nếu có accountId ➝ Lấy danh sách đơn hàng theo accountId
-            if (accountId.HasValue)
-            {
-                var orders = await _orderService.GetAllAsync(accountId.Value, search, sortBy, isDescending, orderStatus, orderDate, page, pageSize);
-                return Ok(new ApiResponse(
-                    ((int)HttpStatusCode.OK),
-                    true,
-                    orders.Count != 0 ? "Lấy dữ liệu thành công!" : "Không có đơn hàng nào cả.",
-                    orders
-                ));
-            }
-
-            // Trường hợp không hợp lệ (không nên xảy ra)
-            return BadRequest(new ApiResponse(
-                ((int)HttpStatusCode.BadRequest),
-                false,
-                "Yêu cầu không hợp lệ."
+            return Ok(new ApiResponse(
+                (int)HttpStatusCode.OK,
+                true,
+                orders.Count != 0 ? "Lấy dữ liệu thành công!" : "Không có đơn hàng nào cả.",
+                orders
             ));
         }
-        ////Get by id
-        //[HttpGet("{orderId}")]
-        //public async Task<IActionResult> GetById(Guid orderId)
-        //{
-        //    OrderResponse orders = await _orderService.GetByIdAsync(orderId);
-        //    if (orders == null)
-        //    {
-        //        return Ok(new ApiResponse(
-        //            ((int)HttpStatusCode.OK),
-        //            true,
-        //            "Không có đơn hàng nào có ID đó cả.",
-        //            null
-        //        ));
-        //    }
-        //    return Ok(new ApiResponse(
-        //            ((int)HttpStatusCode.OK),
-        //            true,
-        //            "Lấy dữ liệu thành công!",
-        //            orders
-        //        ));
-        //}
+
+        // Get order by ID or Order Code
+        [HttpGet]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
+        public async Task<IActionResult> GetById(
+            [FromQuery] Guid? orderId,
+            [FromQuery] string? orderCode)
+        {
+            // Kiểm tra chỉ được nhập một trong hai giá trị
+            if ((orderId.HasValue && !string.IsNullOrEmpty(orderCode)) || (!orderId.HasValue && string.IsNullOrEmpty(orderCode)))
+            {
+                return BadRequest(new ApiResponse(
+                    (int)HttpStatusCode.BadRequest,
+                    false,
+                    "Vui lòng chỉ nhập một trong hai giá trị: orderId hoặc orderCode.",
+                    null
+                ));
+            }
+
+            OrderResponse? orders = null;
+
+            if (orderId.HasValue)
+            {
+                orders = await _orderService.GetByIdAsync(orderId.Value);
+            }
+            else if (!string.IsNullOrEmpty(orderCode))
+            {
+                orders = await _orderService.GetByCodeAsync(orderCode);
+            }
+
+            if (orders == null)
+            {
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Không tìm thấy đơn hàng.",
+                    null
+                ));
+            }
+
+            return Ok(new ApiResponse(
+                (int)HttpStatusCode.OK,
+                true,
+                "Lấy dữ liệu thành công!",
+                orders
+            ));
+        }
+
         //Create
         [HttpPost]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
         public async Task<IActionResult> AddOrder([FromBody] OrderRequest order)
         {
             if (order == null || order.orderDetailList == null || !order.orderDetailList.Any())
@@ -134,6 +121,7 @@ namespace WebAPI.Controllers
         }
         //UPDATE
         [HttpPut("{orderId}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
         //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateOrder(
             Guid orderId,
@@ -166,18 +154,6 @@ namespace WebAPI.Controllers
             );
         }
 
-        //Delete by id
-        //[HttpDelete("{orderId}")]
-        //public async Task<IActionResult> DeleteOrder(Guid orderId)
-        //{
-        //    var result = await _orderService.DeleteByIdAsync(orderId);
 
-        //    if (!result)
-        //    {
-        //        return NotFound(new { message = "Order not found" });
-        //    }
-
-        //    return Ok(new { message = "Order deleted successfully" });
-        //}
     }
 }

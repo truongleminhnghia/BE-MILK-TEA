@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Business_Logic_Layer.Models.Requests
+namespace Data_Access_Layer.Enum
 {
-    public class CartRequest
+    public enum UnitOfIngredientEnum
     {
-        
+        KG,
+        GRAM,
+        ML,
+        L
     }
 }

@@ -10,11 +10,11 @@ namespace Business_Logic_Layer.Models.Requests
     public class IngredientQuantityRequest
     {
         public Guid? Id { get; set; }
-        [Required(ErrorMessage = "Chưa có nguyên liệu")]
-        public Guid IngredientId { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
-        [Required]
+        public Guid? IngredientId { get; set; }
+
+        [Required(ErrorMessage = "Số lượng không được để trống.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public int Quantity { get; set; }
 
         [Required(ErrorMessage = "Chưa có loại hàng")]

@@ -36,62 +36,39 @@ namespace WebAPI.Controllers
         [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllAccounts(
             [FromQuery] string? search = null,
+            [FromQuery] AccountStatus? accountStatus = null,
+            [FromQuery] RoleName? roleName = null,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool isDescending = false,
-            [FromQuery] RoleName? roleName = null,
-            [FromQuery] AccountStatus? accountStatus = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
-                var accounts = await _accountService.GetAllAccounts(
-                search, sortBy, isDescending, accountStatus, roleName, page, pageSize);
-
-                var accountResponses = _mapper.Map<IEnumerable<AccountResponse>>(accounts);
-
+                var accounts = await _accountService.GetAllAccountsAsync(
+                            search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
+                if(accounts == null) {
+                    return BadRequest(new ApiResponse(
+                    HttpStatusCode.BadRequest.GetHashCode(),
+                    true,
+                    "Danh sách rỗng",
+                    accounts
+                ));
+                }
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
                     "Lấy danh sách tài khoản thành công",
-                    accountResponses
+                    accounts
                 ));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetAccountById(Guid id)
-        {
-            try
-            {
-                var account = await _accountService.GetById(id);
-                if (account == null)
-                {
-                    return NotFound(new ApiResponse(
-                        HttpStatusCode.NotFound.GetHashCode(),
-                        false,
-                        "Không tìm thấy tài khoản",
-                        null
-                    ));
-                }
-
-                var accountResponse = _mapper.Map<AccountResponse>(account);
-                return Ok(new ApiResponse(
-                    HttpStatusCode.OK.GetHashCode(),
-                    true,
-                    "Lấy thông tin tài khoản thành công",
-                    accountResponse
-                ));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
-            }
-        }
+        
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAccount(Guid id, [FromBody] UpdateAccountRequest request)

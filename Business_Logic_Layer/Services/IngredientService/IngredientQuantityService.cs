@@ -54,12 +54,14 @@ namespace Business_Logic_Layer.Services.IngredientService
                 //{
                 //    throw new KeyNotFoundException("Không tìm thấy nguyên liệu");
                 //}
-
+                if (request.Id != null) request.Id = null;
                 var newIngredientQuantity = _mapper.Map<IngredientQuantity>(request);
                 newIngredientQuantity.CreateAt = DateTime.UtcNow;
 
-                await _ingredientQuantityRepository.AddAsync(newIngredientQuantity);
-                return _mapper.Map<IngredientQuantityResponse>(newIngredientQuantity);
+                var created = await _ingredientQuantityRepository.AddAsync(newIngredientQuantity);
+                var response = _mapper.Map<IngredientQuantityResponse>(created);
+                response.Id = created.Id;
+                return response;
             }
             catch (Exception ex)
             {
@@ -71,30 +73,64 @@ namespace Business_Logic_Layer.Services.IngredientService
             try
             {
                 var list = new List<IngredientQuantityResponse>();
+                var prodTypeAmount = Enum.GetValues(typeof(ProductType)).Length;
+
                 var ingredientExisted = await _ingredientRepository.GetById(ingredientId);
                 if (ingredientExisted == null)
                 {
-                    throw new Exception("Nguyên liệu không tồn tại");
+                    throw new Exception("Nguyên liệu không tồn tại.");
                 }
+
+                var existingQuantities = await _ingredientQuantityRepository.GetByIngredientId(ingredientId);
+
+                // Kiểm tra tổng số lượng (tổng cả cũ và mới không vượt quá số enum)
+                if (existingQuantities.Count + request.Count > prodTypeAmount)
+                {
+                    throw new Exception($"Chỉ được tạo tối đa {prodTypeAmount} IngredientQuantity cho 1 Ingredient.");
+                }
+
+                // Kiểm tra trùng lặp ProductType trong danh sách request
+                //var distinctProductTypes = request.Select(q => q.ProductType).Distinct().ToList();
+                //if (distinctProductTypes.Count != request.Count)
+                //{
+                //    throw new Exception("Danh sách tạo mới có ProductType bị trùng.");
+                //}
+                if (request.GroupBy(q => q.ProductType).Any(g => g.Count() > 1))
+                {
+                    throw new Exception("Danh sách tạo mới có ProductType bị trùng.");
+                }
+
+                // Lấy danh sách các ProductType đã tồn tại trong db
+                var existingProductTypes = existingQuantities.Select(q => q.ProductType).ToList();
+
+                // Kiểm tra xem có ProductType nào trong request đã tồn tại không
+                var duplicateProductTypes = request.Where(q => existingProductTypes.Contains(q.ProductType)).ToList();
+                if (duplicateProductTypes.Any())
+                {
+                    throw new Exception("Đã tồn tại ProductType này.");
+                }
+
                 foreach (var item in request)
                 {
                     item.IngredientId = ingredientId;
                     var savedQuantities = await CreateAsync(item);
                     list.Add(savedQuantities);
                 }
+
                 return list;
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception("Lỗi khi tạo IngredientQuantity: " + ex.Message);
+                throw;
             }
         }
 
-        public async Task<IngredientQuantityResponse> UpdateAsync(Guid id, IngredientQuantityRequest request)
+
+        public async Task<IngredientQuantityResponse> UpdateAsync(Guid ingredientId, IngredientQuantityRequest request)
         {
             try
             {
-                var ingredientQuantity = await _ingredientQuantityRepository.GetById(id);
+                var ingredientQuantity = await _ingredientQuantityRepository.GetById(ingredientId);
                 if (ingredientQuantity == null)
                 {
                     throw new KeyNotFoundException("Không tìm thấy mẫu mã sản phẩm");
@@ -116,25 +152,73 @@ namespace Business_Logic_Layer.Services.IngredientService
             try
             {
                 var list = new List<IngredientQuantityResponse>();
+
+                // Kiểm tra nguyên liệu có tồn tại không
                 var ingredientExisted = await _ingredientRepository.GetById(ingredientId);
                 if (ingredientExisted == null)
                 {
                     throw new Exception("Nguyên liệu không tồn tại");
                 }
+
+                // Kiểm tra trùng lặp ProductType trong request trước khi xử lý
+                var distinctProductTypes = request.Select(q => q.ProductType).Distinct().ToList();
+                if (distinctProductTypes.Count != request.Count)
+                {
+                    throw new Exception("Danh sách cập nhật có ProductType bị trùng.");
+                }
+
+                // Lấy danh sách hiện có trong database
+                var existingQuantities = await _ingredientQuantityRepository.GetByIngredientId(ingredientId);
+                var existingProductTypes = existingQuantities.Select(q => q.ProductType).ToList();
+
+                // Kiểm tra xem ProductType trong request có bị trùng với dữ liệu cũ không (trừ trường hợp cập nhật chính nó)
+                foreach (var item in request)
+                {
+                    var existingItem = existingQuantities.FirstOrDefault(q => q.Id == item.Id);
+                    if (existingItem == null)
+                    {
+                        throw new KeyNotFoundException($"Không tìm thấy IngredientQuantity với ID: {item.Id}");
+                    }
+
+                    if (existingProductTypes.Contains(item.ProductType) && existingItem.ProductType != item.ProductType)
+                    {
+                        throw new Exception($"ProductType '{item.ProductType}' đã tồn tại trong database.");
+                    }
+                }
+
                 foreach (var item in request)
                 {
                     item.IngredientId = ingredientId;
-                    var savedQuantities = await UpdateAsync((Guid)item.Id, item);
-                    list.Add(savedQuantities);
+                    var updatedQuantity = await UpdateAsync((Guid)item.Id, item);
+                    list.Add(updatedQuantity);
                 }
+
                 return list;
             }
             catch (Exception ex)
             {
-                throw new Exception("Lỗi khi cập nhật danh sach IngredientQuantity: " + ex.Message);
+                throw new Exception("Lỗi khi cập nhật danh sách IngredientQuantity: " + ex.Message);
             }
         }
 
+
+
+        public async Task<IngredientQuantityResponse> GetByIdAndProductType(Guid ingredientId, ProductType ProductType)
+        {
+            try
+            {
+                var ingredientQuantity = await _ingredientQuantityRepository.GetByIdAndProductType(ingredientId, ProductType);
+                if (ingredientQuantity == null)
+                {
+                    throw new KeyNotFoundException("Không tìm thấy nguyên liệu với loại sản phẩm đã chỉ định");
+                }
+                return _mapper.Map<IngredientQuantityResponse>(ingredientQuantity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi truy vấn IngredientQuantity: " + ex.Message);
+            }
+        }
         public async Task<IngredientQuantity> Save(IngredientQuantity ingredientQuantity)
         {
             await _ingredientQuantityRepository.AddAsync(ingredientQuantity);

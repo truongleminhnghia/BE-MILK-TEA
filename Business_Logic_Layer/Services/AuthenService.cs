@@ -68,12 +68,12 @@ namespace Business_Logic_Layer.Services
                 Account account;
                 string token = "";
 
-                if (type.Trim().IsNullOrEmpty() || type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
+                if (string.IsNullOrEmpty(type?.Trim()) || type.Equals(TypeLogin.LOGIN_LOCAL.ToString()))
                 {
                     account = await _accountRepository.GetByEmail(request.Email);
                     if (account == null)
                     {
-                        throw new Exception("Account does not exist");
+                        throw new UnauthorizedAccessException("Tài khoản không tồn tại");
                     }
                     bool checkPassword = _passwordHasher.VerifyPassword(request.Password, account.Password);
                     if (checkPassword)
@@ -82,7 +82,7 @@ namespace Business_Logic_Layer.Services
                     }
                     else
                     {
-                        throw new Exception("Invalid password");
+                        throw new UnauthorizedAccessException("Mật khẩu không hợp lệ");
                     }
                 }
                 else if (type.Trim().Equals(TypeLogin.LOGIN_GOOGLE.ToString()))
@@ -102,68 +102,54 @@ namespace Business_Logic_Layer.Services
                         account = _mapper.Map<Account>(registerRequest);
                         account.AccountStatus = AccountStatus.ACTIVE;
                         account.RoleName = RoleName.ROLE_CUSTOMER;
+                        account.CreateAt = DateTime.UtcNow;
                         await _accountRepository.Create(account);
                     }
                     token = _jwtService.GenerateJwtToken(account);
                 }
                 else
                 {
-                    throw new Exception("Invalid login type");
+                    throw new ArgumentException("Login Type không hợp lệ");
                 }
 
-                AccountResponse _accountResponse = _mapper.Map<AccountResponse>(account);
-                authenticateResponse = new AuthenticateResponse(token, _accountResponse);
+                AccountResponse accountResponse = _mapper.Map<AccountResponse>(account);
+                authenticateResponse = new AuthenticateResponse(token, accountResponse);
 
                 return authenticateResponse;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex.Message);
-                return new AuthenticateResponse("", new AccountResponse());
+                throw;
             }
         }
 
         public async Task<AccountResponse> Register(CreateAccountRequest request, bool isAdmin)
         {
-            var strategy = _context.Database.CreateExecutionStrategy(); // Lấy chiến lược thực thi an toàn
+            var strategy = _context.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync(async () =>
             {
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-
-                    // Account? currentUser = null;
-
-                    // try
-                    // {
-                    //     currentUser = await _source.GetCurrentAccount();
-                    // }
-                    // catch (Exception ex)
-                    // {
-                    //     // Ghi log lỗi thay vì cho lỗi này rơi thẳng vào catch chính
-                    //     Console.WriteLine("Lỗi khi lấy CurrentUser: " + ex.Message);
-                    // }
-
                     var existingEmail = await _accountRepository.GetByEmail(request.Email);
                     if (existingEmail != null)
                     {
                         throw new Exception("Email đã tồn tại.");
                     }
-
                     Account account = _mapper.Map<Account>(request);
                     account.Password = _passwordHasher.HashPassword(request.Password);
                     account.AccountStatus = AccountStatus.ACTIVE;
+                    account.CreateAt = DateTime.UtcNow;
                     if (isAdmin)
                     {
                         account.RoleName = request.RoleName;
-
                     }
                     else
                     {
                         account.RoleName = RoleName.ROLE_CUSTOMER;
                     }
                     await _accountRepository.Create(account);
-
                     if (account.RoleName.ToString() == RoleName.ROLE_CUSTOMER.ToString())
                     {
                         account.Customer = new Customer();
@@ -177,7 +163,7 @@ namespace Business_Logic_Layer.Services
                         account.Employee = new Employee();
                         account.Employee.AccountId = account.Id;
                         string refCode = _source.GenerateRandom8Digits().ToString();
-                        
+
                         if (await _employeeRepository.CheckRefCode(refCode))
                         {
                             throw new Exception("RefCode đã tồn tại");
@@ -186,8 +172,7 @@ namespace Business_Logic_Layer.Services
 
                         await _employeeRepository.Create(account.Employee);
                     }
-
-                    await transaction.CommitAsync(); // Commit transaction khi mọi thứ thành công
+                    await transaction.CommitAsync();
                     return MapToAccountResponse.ComplexAccountResponse(account);
                 }
                 catch (Exception ex)
@@ -253,15 +238,22 @@ namespace Business_Logic_Layer.Services
                     FirstName = _request.FullName,
                     Phone = _request.PhoneNumber,
                     RoleName = RoleName.ROLE_CUSTOMER,
+                    ImageUrl = _request.Avatar,
                 };
                 await _accountRepository.Create(result);
             }
+            else
+            {
+                // Update the ImageUrl if it's different
+                if (result.ImageUrl != _request.Avatar)
+                {
+                    result.ImageUrl = _request.Avatar;
+                    await _accountRepository.UpdateAccount(result);
+                }
+            }
             string token = _jwtService.GenerateJwtToken(result);
             AccountResponse _accountResponse = _mapper.Map<AccountResponse>(result);
-            AuthenticateResponse _authenticateResponse = new AuthenticateResponse(
-                         token,
-                         _accountResponse
-                     );
+            AuthenticateResponse _authenticateResponse = new AuthenticateResponse(token, _accountResponse);
             return _authenticateResponse;
         }
     }

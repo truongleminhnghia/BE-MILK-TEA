@@ -1,4 +1,5 @@
-﻿using Data_Access_Layer.Enum;
+﻿using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using System.ComponentModel.DataAnnotations;
 
 namespace Business_Logic_Layer.Models.Responses

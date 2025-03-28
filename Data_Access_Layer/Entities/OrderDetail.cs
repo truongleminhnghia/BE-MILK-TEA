@@ -28,13 +28,14 @@ namespace Data_Access_Layer.Entities
         [Required]
         public Guid OrderId { get; set; }
 
-        [Column("ingredient_product_id")]
-        [ForeignKey("IngredientProductId")]
+        [Column("cart_item_id")]
+        [ForeignKey("CartItemId")]
         [Required]
-        public Guid IngredientProductId { get; set; }
+        public Guid CartItemId { get; set; }
 
         public virtual Order? Orders { get; set; }
 
-        public IngredientProduct? IngredientProducts { get; set; }
+        public CartItem? CartItems { get; set; }
+
     }
 }

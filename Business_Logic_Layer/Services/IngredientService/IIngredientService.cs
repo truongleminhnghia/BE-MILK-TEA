@@ -22,15 +22,17 @@ namespace Business_Logic_Layer.Services.IngredientService
         bool isDescending,
         int pageCurrent,
         int pageSize,
-        DateTime? startDate,
-        DateTime? endDate,
+        DateOnly? startDate,
+        DateOnly? endDate,
         IngredientStatus? status,
         decimal? minPrice,
         decimal? maxPrice,
-        bool? isSale);
+        bool? isSale,
+        IngredientType? ingredientType);
         Task<IngredientResponse> GetById(Guid id);
         Task<IngredientResponse> CreateIngredientAsync(IngredientRequest request);
         Task<IngredientResponse> Update(Guid id, UpdateIngredientRequest request);
         Task<bool> ChangeStatus(Guid id);
+        Task<IngredientResponse> GetByIdOrCode(Guid? id, string? code);
     }
 }

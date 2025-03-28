@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
 using AutoMapper;
 using Business_Logic_Layer.Models;
 using Business_Logic_Layer.Models.Requests;
@@ -30,61 +33,29 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _categoryService = categoryService;
         }
-
-        // [HttpGet]
-        // public async Task<IActionResult> GetAll(
-        //     [FromQuery] string? search,
-        //     [FromQuery] Guid? categoryId,
-        //     [FromQuery] IngredientStatus? status,
-        //     [FromQuery] string? sortBy,
-        //     [FromQuery] bool isDescending = false,
-        //     [FromQuery] int page = 1,
-        //     [FromQuery] int pageSize = 10,
-        //     [FromQuery] DateTime? startDate = null,
-        //     [FromQuery] DateTime? endDate = null
-        // )
-        // {
-        //     var ingredients = await _ingredientService.GetAllIngredientsAsync(
-        //         search,
-        //         categoryId,
-        //         sortBy,
-        //         isDescending,
-        //         page,
-        //         pageSize,
-        //         startDate,
-        //         endDate,
-        //         status
-        //     );
-        //     var ingredientResponses = _mapper.Map<List<IngredientResponse>>(ingredients);
-        //     return Ok(
-        //         new ApiResponse(
-        //             HttpStatusCode.OK.GetHashCode(),
-        //             true,
-        //             "Thành công",
-        //             ingredientResponses
-        //         )
-        //     );
-        // }
-
-        [HttpGet]
+        
+        [HttpGet("search")]
+        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
         public async Task<IActionResult> SearchIngredients(
                         [FromQuery] string? search,
                         [FromQuery] string? categorySearch,
                         [FromQuery] Guid? categoryId,
                         [FromQuery] string? sortBy,
-                        [FromQuery] DateTime? startDate,
-                        [FromQuery] DateTime? endDate,
+                        [FromQuery] DateOnly? startDate,
+                        [FromQuery] DateOnly? endDate,
                         [FromQuery] IngredientStatus? status,
+                        [FromQuery] IngredientType? ingredientType,
                         [FromQuery] decimal? minPrice,
                         [FromQuery] decimal? maxPrice,
                         [FromQuery] bool? isSale,
                         [FromQuery] bool isDescending = false,
                         [FromQuery] int pageCurrent = 1,
-                        [FromQuery] int pageSize = 10)
+                        [FromQuery] int pageSize = 10
+                        )
         {
             var result = await _ingredientService.GetAllAsync(
                 search, categorySearch, categoryId, sortBy, isDescending,
-                pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale
+                pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale, ingredientType
             );
             if (result == null || !result.Data.Any())
             {
@@ -97,12 +68,13 @@ namespace WebAPI.Controllers
                 );
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet]
+        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
+        public async Task<IActionResult> GetById( [FromQuery] Guid? id, [FromQuery] string? code)
         {
             try
             {
-                var ingreReponse = await _ingredientService.GetById(id);
+                var ingreReponse = await _ingredientService.GetByIdOrCode(id, code);
                 if (ingreReponse == null)
                 {
                     return NotFound(
@@ -122,6 +94,7 @@ namespace WebAPI.Controllers
 
         //[Authorize(Roles = "ROLE_STAFF")]
         [HttpPost]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> Add([FromBody] IngredientRequest ingredientRequest)
         {
             try
@@ -165,18 +138,10 @@ namespace WebAPI.Controllers
 
         [HttpPut("{id}")]
         //[Authorize(Roles = "ROLE_STAFF")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngredientRequest request, bool? status = false)
+        [Authorize(Roles = "ROLE_STAFF")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngredientRequest request)
         {
-            if (status == true && id != null)
-            {
-                bool result = await _ingredientService.ChangeStatus(id);
-                if (!result)
-                {
-                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
-                }
-                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thay đổi trạng thái thành công", null));
-            }
-            else if (id != null && request != null)
+            if (id != null && request != null)
             {
                 IngredientResponse ingredientResponse = await _ingredientService.Update(id, request);
                 if (ingredientResponse == null)
@@ -190,7 +155,29 @@ namespace WebAPI.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError,
                                     new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
             }
+        }
 
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
+        public async Task<IActionResult> UpdateStatus(Guid id, bool? status)
+        {
+            try
+            {                
+                if (status == null)
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
+                }
+                bool result = await _ingredientService.ChangeStatus(id);
+                if (!result)
+                {
+                    return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
+                }
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thay đổi trạng thái thành công", null));
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
+            }
         }
     }
 }

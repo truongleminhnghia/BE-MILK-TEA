@@ -21,7 +21,7 @@ namespace Business_Logic_Layer.Models.Responses
         public IngredientStatus IngredientStatus { get; set; }
         public float WeightPerBag { get; set; }
         public int QuantityPerCarton { get; set; }
-        public string Unit { get; set; }
+        public UnitOfIngredientEnum Unit { get; set; }
         public double PriceOrigin { get; set; }
         public double PricePromotion { get; set; }
         public CategoryResponse? Category { get; set; }
@@ -31,8 +31,10 @@ namespace Business_Logic_Layer.Models.Responses
         public DateTime UpdateAt { get; set; }
         public string IngredientType { get; set; }
 
-        public List<ImageRespone?> Images { get; set; }
+        public List<ImageResponse?> Images { get; set; }
 
         public List<IngredientQuantityResponse>? IngredientQuantities { get; set; }
+
+        public List<IngredientReviewResponse>? IngredientReviews { get; set; }
     }
 }

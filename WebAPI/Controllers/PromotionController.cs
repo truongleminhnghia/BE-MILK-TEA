@@ -1,16 +1,21 @@
 ﻿using System.Net;
+using System.Net.WebSockets;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.PromotionService;
 using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/Promotions")]
+    [Route("api/v1/promotions")]
     public class PromotionController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -24,21 +29,23 @@ namespace WebAPI.Controllers
 
         //Get all
         [HttpGet]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotion(
-            [FromQuery] bool IsActive,
-            [FromQuery] PromotionType? promotionType,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] string? search = null,
-            [FromQuery] string? sortBy = null,
-            [FromQuery] bool isDescending = false,
-            [FromQuery] DateTime? StartDate = null,
-            [FromQuery] DateTime? EndDate = null
-            )
+    [FromQuery] bool? isActive = null,
+    [FromQuery] string? promotionName = null,
+    [FromQuery] PromotionType? promotionType = null,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? search = null,
+    [FromQuery] string? sortBy = null,
+    [FromQuery] bool isDescending = false,
+    [FromQuery] DateOnly? startDate = null,
+    [FromQuery] DateOnly? endDate = null
+    )
         {
             try
             {
-                if (StartDate.HasValue && EndDate.HasValue && StartDate > EndDate)
+                if (startDate.HasValue && endDate.HasValue && startDate > endDate)
                 {
                     return BadRequest(new ApiResponse(
                         (int)HttpStatusCode.BadRequest,
@@ -47,14 +54,14 @@ namespace WebAPI.Controllers
                     ));
                 }
 
-                var promotions = await _promotionService.GetAllPromotionAsync(
-                 IsActive, search, sortBy, isDescending, promotionType, StartDate, EndDate, page, pageSize
-             );
+                var promotions = await _promotionService.GetAllPromotions(
+                    search, sortBy, isDescending, promotionType, promotionName,
+                    startDate, endDate, page, pageSize, isActive);
 
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
                     true,
-                    promotions != null ? "Lấy dữ liệu thành công!" : " Không có Promotion nào phù hợp",
+                    promotions.Data.Any() ? "Lấy dữ liệu thành công!" : "Không có Promotion nào phù hợp.",
                     promotions
                 ));
             }
@@ -68,11 +75,14 @@ namespace WebAPI.Controllers
                 ));
             }
         }
+
+
         ////Get by id
-        [HttpGet("{promotionId}")]
-        public async Task<IActionResult> GetById(Guid promotionId)
+        [HttpGet("get-by-id-or-code")]
+        [Authorize(Roles = "ROLE_STAFF,ROLE_ADMIN,ROLE_MANAGER")]
+        public async Task<IActionResult> GetByIdOrCode([FromQuery] Guid? promotionId, [FromQuery] string? promoCode)
         {
-            PromotionResponse promotions = await _promotionService.GetByIdAsync(promotionId);
+            PromotionResponse? promotions = await _promotionService.GetByIdOrCode(promotionId,promoCode);
             if (promotions == null)
             {
                 return Ok(new ApiResponse(
@@ -91,43 +101,33 @@ namespace WebAPI.Controllers
         }
         //Create
         [HttpPost]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddPromotion([FromBody] PromotionRequest promotion)
         {
-            try
-            {
-                if (promotion == null)
-                {
-                    return BadRequest(new ApiResponse(
-                        (int)HttpStatusCode.BadRequest,
-                        false,
-                        "Dữ liệu promotion lỗi."
-                    ));
-                }
-
-                var createdPromotion = await _promotionService.CreateAsync(promotion);
-
-                return Ok(new ApiResponse(
-                    (int)HttpStatusCode.OK,
-                    true,
-                    "Thêm promotion thành công!",
-                    createdPromotion
-                ));
-            }
-            catch (ArgumentException ex)
+            if (promotion == null || promotion.promotionDetail == null || promotion.promotionDetail == null)
             {
                 return BadRequest(new ApiResponse(
                     (int)HttpStatusCode.BadRequest,
                     false,
-                    ex.Message
+                    "Dữ liệu promotion lỗi hoặc không có PromotionDetail."
                 ));
             }
+
+            var createdPromotion = await _promotionService.CreateAsync(promotion);
+
+            return Ok(new ApiResponse(
+                (int)HttpStatusCode.OK,
+                true,
+                "Thêm promotion thành công!",
+                createdPromotion
+            ));
         }
         //UPDATE
         [HttpPut("{promotionId}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdatePromotion(
         Guid promotionId,
-        [FromBody] PromotionUpdateRequest promotionUpdateRequest
-)
+        [FromBody] PromotionUpdateRequest promotionUpdateRequest, [FromQuery] double maxPriceThreshold, [FromQuery] double minPriceThreshold)
         {
             try
             {
@@ -141,7 +141,7 @@ namespace WebAPI.Controllers
                 }
 
                 var promotion = _mapper.Map<Promotion>(promotionUpdateRequest);
-                var updatedPromotion = await _promotionService.UpdateAsync(promotionId, promotion);
+                var updatedPromotion = await _promotionService.UpdateAsync(promotionId, promotion, maxPriceThreshold, minPriceThreshold);
 
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
@@ -159,6 +159,58 @@ namespace WebAPI.Controllers
                 ));
             }
         }
-        
+
+        //DELETE
+        [HttpDelete("{promotionId}")]
+        [Authorize(Roles = "ROLE_ADMIN,ROLE_STAFF,ROLE_MANAGER")]
+        public async Task<IActionResult> DeletePromotion(Guid promotionId)
+        {
+            try
+            {
+                var deletedPromotion = await _promotionService.DeleteAsync(promotionId);
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Xóa thành công.",
+                    deletedPromotion
+                ));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(
+                    (int)HttpStatusCode.BadRequest,
+                    false,
+                    ex.Message
+                ));
+            }
+        }
+
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActivePromotion(
+            [FromQuery] PromotionType? promotionType,
+            [FromQuery] double? orderTotalPrice)
+        {
+            try
+            {
+                var promotions = await _promotionService.GetActivePromotions(promotionType, orderTotalPrice);
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Lấy dữ liệu thành công!",
+                    promotions
+                ));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy danh sách Active Promotion: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(
+                    (int)HttpStatusCode.InternalServerError,
+                    false,
+                    "Đã xảy ra lỗi trong quá trình xử lý yêu cầu."
+                ));
+            }
+        }
+
+
     }
 }

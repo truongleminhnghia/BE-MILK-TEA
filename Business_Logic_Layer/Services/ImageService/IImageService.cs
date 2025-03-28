@@ -11,12 +11,12 @@ namespace Business_Logic_Layer.Services
     public interface IImageService
     {
         // Task<IEnumerable<ImageRespone>> GetAllImagesAsync();
-        Task<List<ImageRespone>> GetByIngredient(Guid ingredientId);
-        Task<ImageRespone> GetById(Guid id);
+        Task<List<ImageResponse>> GetByIngredient(Guid ingredientId);
+        Task<ImageResponse> GetById(Guid id);
         Task<Image> AddImageAsync(Image image);
-        Task<List<ImageRespone>> AddImages(Guid ingredientId, List<ImageRequest> request);
-        Task<ImageRespone> UpdateImageAsync(Guid id, Guid ingredientId, ImageRequest request);
-        Task<List<ImageRespone>> UpdateImages(List<ImageRequest> request, Guid ingredientId);
+        Task<List<ImageResponse>> AddImages(Guid ingredientId, List<ImageRequest> request);
+        Task<ImageResponse> UpdateImageAsync(Guid id, Guid ingredientId, ImageRequest request);
+        Task<List<ImageResponse>> UpdateImages(List<ImageRequest> request, Guid ingredientId);
         Task<bool> DeleteImageAsync(Guid id, Guid ingredientId);
     }
 

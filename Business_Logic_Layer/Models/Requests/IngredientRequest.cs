@@ -11,6 +11,7 @@ namespace Business_Logic_Layer.Models.Requests
 
         [Required(ErrorMessage = "Tên nguyên liệu là bắt buộc")]
         public string IngredientName { get; set; }
+
         public string Description { get; set; }
         public string FoodSafetyCertification { get; set; }
 
@@ -20,16 +21,19 @@ namespace Business_Logic_Layer.Models.Requests
         [Required(ErrorMessage = "Trạng thái nguyên liệu không được bỏ trống")]
         public IngredientStatus IngredientStatus { get; set; }
 
-        [Required(ErrorMessage = "Số lượng trong mỗi túi không được bỏ trống")]
-        [Range(0.1, float.MaxValue, ErrorMessage = "Số lượng trong mỗi túi phải lớn hơn 0")]
+        [Required(ErrorMessage = "Khối lượng trong mỗi túi không được bỏ trống")]
+        [Range(0.1, float.MaxValue, ErrorMessage = "Khối lượng trong mỗi túi phải lớn hơn 0")]
         public float WeightPerBag { get; set; }
+
+        [Required(ErrorMessage = "Khối lượng trong mỗi túi không được bỏ trống")]
+        [Range(0.1, double.MaxValue, ErrorMessage = "Khối lượng trong mỗi túi phải lớn hơn 0")]
         public int QuantityPerCarton { get; set; }
 
         [Required(ErrorMessage = "Loại nguyên liệu không được bỏ trống")]
         public IngredientType IngredientType { get; set; }
 
         [Required(ErrorMessage = "Đơn vị không được bỏ trống")]
-        public string Unit { get; set; }
+        public UnitOfIngredientEnum Unit { get; set; }
 
         [Required(ErrorMessage = "Giá không được bỏ trống")]
         public double PriceOrigin { get; set; }

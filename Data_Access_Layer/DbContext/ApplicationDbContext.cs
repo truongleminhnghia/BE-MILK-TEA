@@ -66,9 +66,6 @@ namespace Data_Access_Layer.Data
             modelBuilder.Entity<Cart>()
                 .HasIndex(a => a.AccountId)
                 .IsUnique();
-            modelBuilder.Entity<CartItem>()
-                .HasIndex(ci => ci.CartId)
-                .IsUnique();
             modelBuilder.Entity<Category>()
                 .Property(a => a.CategoryStatus)
                 .HasConversion<string>();
@@ -101,7 +98,12 @@ namespace Data_Access_Layer.Data
             modelBuilder.Entity<Ingredient>()
                 .Property(a => a.IngredientType)
                 .HasConversion<string>();
-
+            modelBuilder.Entity<Recipe>()
+                .Property(a => a.RecipeLevel)
+                .HasConversion<string>();
+            modelBuilder.Entity<CartItem>()
+                .Property(a => a.ProductType)
+                .HasConversion<string>();
             modelBuilder.Entity<Ingredient>()
                 .HasMany(i => i.IngredientQuantities)
                 .WithOne(iq => iq.Ingredients)

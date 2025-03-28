@@ -1,7 +1,11 @@
-﻿using System;
+﻿using Business_Logic_Layer.Models.Requests;
+using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Business_Logic_Layer.Models.Responses
@@ -11,12 +15,15 @@ namespace Business_Logic_Layer.Models.Responses
         public Guid Id { get; set; }
         public string RecipeTitle { get; set; }
         public string Content { get; set; }
-        public Guid CategoryId { get; set; }
-        public string? CategoryName { get; set;  }
-        public List<RecipeIngredientResponse> Ingredients { get; set; } = new();
+        public string ImageUrl { get; set; }
+        public RecipeStatusEnum RecipeStatus { get; set; }
+        public RecipeLevelEnum RecipeLevel { get; set; }
+        public CategoryResponse Category { get; set; }
+        public List<IngredientResponse> Ingredients { get; set; } = new();
+        public List<RecipeIngredientResponse> IngredientRecipeResponse { get; set; } = new List<RecipeIngredientResponse>();
     }
 
-    public class RecipeIngredientResponse
+        public class RecipeIngredientResponse
     {
         public Guid Id { get; set; }
         public Guid IngredientId { get; set; }

@@ -17,19 +17,22 @@ namespace Business_Logic_Layer.Services
         public Task<OrderDetail> CreateAsync(OrderDetail orderDetail);
         public Task<List<OrderDetailResponse>> GetAllOrderDetailsAsync(Guid orderId, string? search, string? sortBy, bool isDescending, int page, int pageSize);
         public Task<OrderDetail?> GetByIdAsync(Guid orderDetailId);
-        Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail);
+        public Task<OrderDetail?> UpdateAsync(Guid id, OrderDetail orderDetail);
         public Task<bool> DeleteByIdAsync(Guid orderDetailId);
     }
     public class OrderDetailService : IOrderDetailService
     {
+        private readonly IIngredientRepository _ingredientRepository;
         private readonly IOrderDetailRepository _orderDetailRepository;
-        private readonly IIngredientProductRepository _ingredientProductRepository;
+        private readonly ICartItemRepository _cartItemRepository;
+        //private readonly IIngredientProductRepository _ingredientProductRepository;
         private readonly IMapper _mapper;
-        public OrderDetailService(IOrderDetailRepository orderDetailRepository,IMapper mapper, IIngredientProductRepository ingredientProductRepository)
+        public OrderDetailService(IOrderDetailRepository orderDetailRepository,IMapper mapper, ICartItemRepository cartItemRepository, IIngredientRepository ingredientRepository)
         {
             _orderDetailRepository = orderDetailRepository;
             _mapper = mapper;
-            _ingredientProductRepository = ingredientProductRepository;
+            _cartItemRepository = cartItemRepository;
+            _ingredientRepository = ingredientRepository;
         }
 
         public async Task<bool> DeleteByIdAsync(Guid orderDetailId)
@@ -54,15 +57,16 @@ namespace Business_Logic_Layer.Services
                 }
 
                 // Fetch the ingredient product asynchronously
-                var ingredientProduct = await _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId);
-
+                var cartItem = await _cartItemRepository.GetById(orderDetail.CartItemId);
+                var ingredientProduct = await _ingredientRepository.GetById(cartItem.IngredientId);
+                orderDetail.Quantity = cartItem.Quantity;
+                //orderDetail.Price = cartItem.Price;
                 // Ensure ingredientProduct is not null
                 if (ingredientProduct == null)
                 {
-                    throw new Exception($"không tìm được nguuyen6 liệu với id{orderDetail.IngredientProductId}");
+                    throw new Exception($"không tìm được nguyen liệu với id{cartItem.IngredientId}");
                 }
-                orderDetail.Price = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.TotalPrice;
-                orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
+                //orderDetail.Quantity = _ingredientProductRepository.GetIngredientProductbyId(orderDetail.IngredientProductId).Result.Quantity;
                 return await _orderDetailRepository.CreateAsync(orderDetail);
             }
             catch (Exception ex)
@@ -100,6 +104,12 @@ namespace Business_Logic_Layer.Services
         {
             try
             {
+                var existingOrderDetail = await _orderDetailRepository.GetByIdAsync(id);
+                if (existingOrderDetail == null)
+                {
+                    return null;
+                }
+
                 return await _orderDetailRepository.UpdateAsync(id, orderDetail);
             }
             catch (Exception ex)

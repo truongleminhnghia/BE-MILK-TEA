@@ -14,6 +14,7 @@ namespace Data_Access_Layer.Entities
         [Column("cart_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
+
         [Column("account_id")]
         [Required]
         [ForeignKey("AccountId")]
@@ -22,6 +23,7 @@ namespace Data_Access_Layer.Entities
         public Account Account { get; set; }
 
         public ICollection<CartItem>? CartItems { get; set; }
+
 
         // relationship
         // 1-1 Account
