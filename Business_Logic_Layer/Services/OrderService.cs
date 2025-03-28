@@ -83,6 +83,10 @@ namespace Business_Logic_Layer.Services
                     var cartItem = await _cartItemService.GetById(orderDetail.CartItemId);
                     var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
+                    if (cartItem.isCart == true)
+                    {
+                        throw new Exception($"Cart Item voi id {cartItem.IngredientId} da mua roi ");
+                    }
                     if (ingredientProduct == null)
                     {
                         throw new Exception($"Không tìm thấy ingredientProduct với ID {cartItem.IngredientId}");
@@ -192,17 +196,17 @@ namespace Business_Logic_Layer.Services
 
                 foreach (var orderDetail in orderRequest.orderDetailList)
                 {
-                    bool cartIsUpdated = await _cartItemService.UpdateCartItemStatus(orderDetail.CartItemId, false);
+                    bool cartIsUpdated = await _cartItemService.UpdateCartItemStatus(orderDetail.CartItemId, true);
                     if (!cartIsUpdated)
                     {
                         Console.WriteLine($"Không thể cập nhật trạng thái cho CartItemId: {orderDetail.CartItemId}");
                     }
                 }
 
-                bool isUpdated = await _accountService.UpdateAccountLevel(orderRequest.AccountId, AccountLevelEnum.VIP);
+                bool isUpdated = await _accountService.UpdateAccountLevel(orderRequest.AccountId);
                 if (!isUpdated)
                 {
-                    Console.WriteLine($"Không thể cập nhật account level cho accountId: {orderRequest.AccountId}");
+                    Console.WriteLine($"Không thể cập nhật is purchased cho accountId: {orderRequest.AccountId}");
                 }
                 return returna;
             }

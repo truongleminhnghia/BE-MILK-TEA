@@ -155,11 +155,11 @@ namespace Business_Logic_Layer.Services
             };
         }
 
-        public async Task<bool> UpdateAccountLevel(Guid accountId, AccountLevelEnum newLevel)
+        public async Task<bool> UpdateAccountLevel(Guid accountId)
         {
             try
             {
-                return await _accountRepository.UpdateCustomerAccountLevel(accountId, newLevel);
+                return await _accountRepository.UpdateCustomerAccountLevel(accountId);
             }
             catch (Exception ex)
             {

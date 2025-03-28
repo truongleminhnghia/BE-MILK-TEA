@@ -19,6 +19,6 @@ namespace Business_Logic_Layer.Services
     string? search, AccountStatus? accountStatus, RoleName? roleName,
     string? sortBy, bool isDescending, int page, int pageSize);
 
-        Task<bool> UpdateAccountLevel(Guid accountId, AccountLevelEnum newLevel);
+        Task<bool> UpdateAccountLevel(Guid accountId);
     }
 }
