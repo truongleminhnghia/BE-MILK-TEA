@@ -90,7 +90,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
+        // [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetAllRecipes(
             [FromQuery] Guid userId,
             [FromQuery] string? search,

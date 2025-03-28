@@ -191,7 +191,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("status/{id}")]
+        [HttpDelete("{id}")]
         [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> UpdateStatus(Guid id, bool? status)
         {
