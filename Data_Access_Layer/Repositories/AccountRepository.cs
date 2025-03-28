@@ -127,6 +127,24 @@ namespace Data_Access_Layer.Repositories
                 .Select(o => o.Account)
                 .FirstOrDefaultAsync();
         }
+        public async Task<bool> UpdateCustomerAccountLevel(Guid accountId)
+        {
+            try
+            {
+                var customer = await _context.Customers.FirstOrDefaultAsync(c => c.AccountId == accountId);
+                if (customer == null) return false;
+
+                customer.Purchased = true;
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi cập nhật Purchased tài khoản: {ex.Message}");
+                return false;
+            }
+        }
+
+
 
         public async Task<Account> DeleteAsync(Guid id)
         {
@@ -136,5 +154,6 @@ namespace Data_Access_Layer.Repositories
             await _context.SaveChangesAsync();
             return account;
         }
+
     }
 }
