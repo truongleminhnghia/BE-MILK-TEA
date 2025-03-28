@@ -130,22 +130,23 @@ namespace Data_Access_Layer.Repositories
                 .Select(o => o.Account)
                 .FirstOrDefaultAsync();
         }
-        public async Task<bool> UpdateCustomerAccountLevel(Guid accountId, AccountLevelEnum newLevel)
+        public async Task<bool> UpdateCustomerAccountLevel(Guid accountId)
         {
             try
             {
                 var customer = await _context.Customers.FirstOrDefaultAsync(c => c.AccountId == accountId);
                 if (customer == null) return false;
 
-                customer.AccountLevel = newLevel;
+                customer.Purchased = true;
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi khi cập nhật cấp độ tài khoản: {ex.Message}");
+                Console.WriteLine($"Lỗi khi cập nhật Purchased tài khoản: {ex.Message}");
                 return false;
             }
         }
+
 
     }
 }

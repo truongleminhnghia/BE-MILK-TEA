@@ -68,7 +68,7 @@ namespace Business_Logic_Layer.Services
                 var order = _mapper.Map<Order>(orderRequest);
                 order.OrderCode = "OD" + _source.GenerateRandom8Digits();
                 order.OrderDate = DateTime.Now;
-                order.OrderStatus= OrderStatus.PENDING_CONFIRMATION;
+                order.OrderStatus = OrderStatus.PENDING_CONFIRMATION;
 
                 double totalDiscount = 0;
                 double finalPrice = 0;
@@ -79,10 +79,14 @@ namespace Business_Logic_Layer.Services
                 foreach (OrderDetailRequest orderDetail in orderRequest.orderDetailList)
                 {
                     //xử lý quantity
-    
+
                     var cartItem = await _cartItemService.GetById(orderDetail.CartItemId);
                     var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
+                    if (cartItem.IsCart == true)
+                    {
+                        throw new Exception($"Cart Item voi id {cartItem.IngredientId} da mua roi ");
+                    }
                     if (ingredientProduct == null)
                     {
                         throw new Exception($"Không tìm thấy ingredientProduct với ID {cartItem.IngredientId}");
@@ -150,7 +154,7 @@ namespace Business_Logic_Layer.Services
                     {
                         throw new Exception($"Đơn hàng chưa đạt giá trị tối thiểu để áp dụng khuyến mãi ({promotionDetailValue.MiniValue} VND).");
                     }
-   
+
                     // Tính toán số tiền giảm giá
                     double discountValue = promotionDetailValue.DiscountValue;
                     double maxDiscount = promotionDetailValue.MaxValue;
@@ -180,8 +184,8 @@ namespace Business_Logic_Layer.Services
                 {
                     createdOrder.PriceAffterPromotion = 0;
                 }
-                
-                
+
+
                 createdOrder.OrderDetails = orderDetailList;
                 createdOrder = await Update(createdOrder);
 
@@ -192,17 +196,17 @@ namespace Business_Logic_Layer.Services
 
                 foreach (var orderDetail in orderRequest.orderDetailList)
                 {
-                    bool cartIsUpdated = await _cartItemService.UpdateCartItemStatus(orderDetail.CartItemId, false);
+                    bool cartIsUpdated = await _cartItemService.UpdateCartItemStatus(orderDetail.CartItemId, true);
                     if (!cartIsUpdated)
                     {
                         Console.WriteLine($"Không thể cập nhật trạng thái cho CartItemId: {orderDetail.CartItemId}");
                     }
                 }
 
-                bool isUpdated = await _accountService.UpdateAccountLevel(orderRequest.AccountId, AccountLevelEnum.VIP);
+                bool isUpdated = await _accountService.UpdateAccountLevel(orderRequest.AccountId);
                 if (!isUpdated)
                 {
-                    Console.WriteLine($"Không thể cập nhật account level cho accountId: {orderRequest.AccountId}");
+                    Console.WriteLine($"Không thể cập nhật is purchased cho accountId: {orderRequest.AccountId}");
                 }
                 return returna;
             }
