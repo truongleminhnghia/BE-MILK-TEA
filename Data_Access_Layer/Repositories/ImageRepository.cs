@@ -49,7 +49,7 @@ namespace Data_Access_Layer.Repositories
             return await _context.Images.Where(img => img.IngredientId == ingredientId).ToListAsync();
         }
 
-        public async Task<Image> GetIdAndIngredient(Guid id, Guid ingredientId)
+        public async Task<Image> GetIdAndIngredient(Guid? id, Guid ingredientId)
         {
             return await _context.Images.FirstOrDefaultAsync(img => img.Id.Equals(id) && img.IngredientId.Equals(ingredientId));
         }

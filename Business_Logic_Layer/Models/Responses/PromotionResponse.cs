@@ -20,4 +20,10 @@ namespace Business_Logic_Layer.Models.Responses
         public PromotionType PromotionType { get; set; }
         public PromotionDetailResponse PromotionDetails { get; set; } = new PromotionDetailResponse();
     }
+
+    public class ActivePromotionResponse
+    {
+        public Guid? Id { get; set; }
+        public string? PromotionCode { get; set; }
+    }
 }

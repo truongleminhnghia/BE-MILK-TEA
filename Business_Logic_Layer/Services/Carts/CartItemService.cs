@@ -96,7 +96,7 @@ namespace Business_Logic_Layer.Services.Carts
             {
                 throw new Exception("Cart không tồn tại");
             }
-            var ingre = await _ingredientRepository.GetById(cartItemRequest.IngredientId);
+            var ingre = await _ingredientRepository.GetById(cartItemRequest.IngredientId);  
             if (ingre == null)
             {
                 throw new Exception("Nguyên liệu không tồn tại");

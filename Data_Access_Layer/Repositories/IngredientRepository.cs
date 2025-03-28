@@ -90,7 +90,8 @@ namespace Data_Access_Layer.Repositories
             IngredientStatus? status,
             decimal? minPrice,
             decimal? maxPrice,
-            bool? isSale
+            bool? isSale,
+            IngredientType? ingredientType
         )
         {
             var query = _context
@@ -142,9 +143,52 @@ namespace Data_Access_Layer.Repositories
 
                 query = query.Where(i => i.CreateAt >= adjustedStart && i.CreateAt <= adjustedEnd);
             }
+            if (ingredientType.HasValue)
+            {
+                query = query.Where(i => i.IngredientType == ingredientType.Value);
+            }
 
 
             return query;
+        }
+
+        public async Task<Ingredient> GetByIdOrCode(Guid? id, string? code)
+        {
+            if (id.HasValue && string.IsNullOrEmpty(code))
+            {
+                return await _context
+                    .Ingredients.Include(i => i.Images)
+                    .Include(i => i.Category)
+                    .Include(i => i.IngredientQuantities)
+                    .Include(i => i.IngredientReviews)
+                    .FirstAsync(a => a.Id.Equals(id));
+            }
+            else if (!id.HasValue && code != null)
+            {
+                if (code.Substring(0,1) != "P")
+                {
+                    throw new Exception("Định dạng nguyên liệu bị sai");
+                }
+                return await _context
+                    .Ingredients.Include(i => i.Images)
+                    .Include(i => i.Category)
+                    .Include(i => i.IngredientQuantities)
+                    .Include(i => i.IngredientReviews)
+                    .FirstAsync(a => a.IngredientCode.Equals(code));
+            }
+            else if (!id.HasValue && code != null)
+            {
+                return await _context
+                    .Ingredients.Include(i => i.Images)
+                    .Include(i => i.Category)
+                    .Include(i => i.IngredientQuantities)
+                    .Include(i => i.IngredientReviews)
+                    .FirstAsync(i => i.Id == id && i.IngredientCode == code);
+            }
+            else
+            {
+                return null;
+            }                
         }
 
         public async Task<Ingredient> GetById(Guid id)

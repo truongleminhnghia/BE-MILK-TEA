@@ -72,7 +72,8 @@ namespace Data_Access_Layer.Repositories
             {
                 var cartItem = await _context.CartItems.FirstOrDefaultAsync(c => c.Id == cartItemId);
                 if (cartItem == null) return false;
-
+                cartItem.Price = 0;
+                cartItem.TotalPrice = 0;
                 cartItem.IsCart = isCart;
                 cartItem.Price = 0;
                 cartItem.TotalPrice = 0;

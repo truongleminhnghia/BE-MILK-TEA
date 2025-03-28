@@ -68,35 +68,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetAccountById(Guid id)
-        {
-            try
-            {
-                var account = await _accountService.GetById(id);
-                if (account == null)
-                {
-                    return NotFound(new ApiResponse(
-                        HttpStatusCode.NotFound.GetHashCode(),
-                        false,
-                        "Không tìm thấy tài khoản",
-                        null
-                    ));
-                }
-
-                var accountResponse = _mapper.Map<AccountResponse>(account);
-                return Ok(new ApiResponse(
-                    HttpStatusCode.OK.GetHashCode(),
-                    true,
-                    "Lấy thông tin tài khoản thành công",
-                    accountResponse
-                ));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message));
-            }
-        }
+        
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAccount(Guid id, [FromBody] UpdateAccountRequest request)

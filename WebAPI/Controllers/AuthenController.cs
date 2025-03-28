@@ -104,7 +104,6 @@ namespace WebAPI.Controllers
             {
                 return StatusCode(500, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, ex.Message, null));
             }
-
         }
 
     }
