@@ -188,12 +188,11 @@ namespace WebAPI.Controllers
         [HttpGet("active")]
         public async Task<IActionResult> GetActivePromotion(
             [FromQuery] PromotionType? promotionType,
-            [FromQuery] double? orderTotalPrice,
-            [FromQuery] DateOnly? expiredDate)
+            [FromQuery] double? orderTotalPrice)
         {
             try
             {
-                var promotions = await _promotionService.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, true);
+                var promotions = await _promotionService.GetActivePromotions(promotionType, orderTotalPrice);
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
                     true,
