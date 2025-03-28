@@ -6,7 +6,7 @@ namespace Business_Logic_Layer.Services.VNPayService
 {
     public interface IVNPayService
     {
-        string CreatePaymentUrl(PaymentCreateRequest request, HttpContext httpContext);
+        string CreatePaymentUrl(PaymentCreateRequest request, HttpContext httpContext, double totalPrice);
         PaymentResponse ProcessPaymentCallback(IQueryCollection collections);
     }
 }

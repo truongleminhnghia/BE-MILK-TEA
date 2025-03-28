@@ -25,7 +25,7 @@ namespace Business_Logic_Layer.Services.VNPayService
             _logger = logger;
         }
 
-        public string CreatePaymentUrl(PaymentCreateRequest request, HttpContext httpContext)
+        public string CreatePaymentUrl(PaymentCreateRequest request, HttpContext httpContext, double totalPrice)
         {
             string version = Environment.GetEnvironmentVariable("Version");
             string tmnCode = Environment.GetEnvironmentVariable("TmnCode");
@@ -43,7 +43,7 @@ namespace Business_Logic_Layer.Services.VNPayService
             vnpay.AddRequestData("vnp_Version", version);
             vnpay.AddRequestData("vnp_Command", command);
             vnpay.AddRequestData("vnp_TmnCode", tmnCode);
-            vnpay.AddRequestData("vnp_Amount", (request.TotalPrice * 100).ToString()); // Convert to VND (smallest unit)
+            vnpay.AddRequestData("vnp_Amount", (totalPrice * 100).ToString()); // Convert to VND (smallest unit)
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", currCode);
             vnpay.AddRequestData("vnp_IpAddr", GetIpAddress(httpContext));

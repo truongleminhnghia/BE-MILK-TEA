@@ -120,9 +120,6 @@ namespace Data_Access_Layer.Repositories
             return (accounts, total);
         }
 
-
-
-
         public async Task<Account> GetAccountByOrderIdAsync(Guid orderId)
         {
             return await _context
@@ -145,6 +142,17 @@ namespace Data_Access_Layer.Repositories
                 Console.WriteLine($"Lỗi khi cập nhật Purchased tài khoản: {ex.Message}");
                 return false;
             }
+        }
+
+
+
+        public async Task<Account> DeleteAsync(Guid id)
+        {
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == id);
+            if (account == null) throw new Exception("Account is not found");
+            account.AccountStatus = AccountStatus.NO_ACTIVE;
+            await _context.SaveChangesAsync();
+            return account;
         }
 
     }

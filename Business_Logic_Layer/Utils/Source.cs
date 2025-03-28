@@ -50,12 +50,7 @@ namespace Business_Logic_Layer.Utils
         {
             bool result;
             var accountCurrent = _jwtService.GetAccountId();
-            if (!_id.Equals(accountCurrent))
-            {
-                result = false;
-            }
-            result = true;
-            return result;
+            return _id.Equals(accountCurrent);
         }
 
         // ham nay dung de lay thong tin cua user dang dang nhap

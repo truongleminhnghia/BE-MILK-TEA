@@ -4,6 +4,7 @@ using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.IngredientProductService;
 using Business_Logic_Layer.Services.IngredientService;
 using Data_Access_Layer.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -23,6 +24,7 @@ namespace WebAPI.Controllers
         }
         //CREATE
         [HttpPost]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddIngredientProduct([FromBody] IngredientProductRequest ingredientReq, [FromQuery] bool isCart)
         {
             try
@@ -44,6 +46,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetProductById(Guid id)
         {
             try
@@ -73,6 +76,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] IngredientProductRequest request, [FromQuery] bool isCart)
         {
             try
@@ -101,6 +105,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
             try
@@ -128,6 +133,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("by-ingredient/{ingredientId}")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetByIngredientId(Guid? ingredientId, string? ingredientCode)
         {
             try

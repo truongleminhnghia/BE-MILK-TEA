@@ -80,7 +80,7 @@ namespace Data_Access_Layer.Repositories
         public async Task<(List<Recipe>, int)> GetAllRecipesAsync(
     string? search, string? sortBy, bool isDescending,
     RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
-    DateTime? startDate, DateTime? endDate,
+    DateOnly? startDate, DateOnly? endDate,
     int page, int pageSize)
         {
             var query = _context.Recipes
@@ -112,14 +112,12 @@ namespace Data_Access_Layer.Repositories
                 query = query.Where(r => r.CategoryId == categoryId.Value);
             }
 
-            if (startDate.HasValue)
+            if (startDate.HasValue || endDate.HasValue)
             {
-                query = query.Where(r => r.CreateAt >= startDate.Value);
-            }
+                DateTime adjustedStart = startDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue;
+                DateTime adjustedEnd = endDate?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.MaxValue;
 
-            if (endDate.HasValue)
-            {
-                query = query.Where(r => r.CreateAt <= endDate.Value);
+                query = query.Where(i => i.CreateAt >= adjustedStart && i.CreateAt <= adjustedEnd);
             }
 
             if (recipeLevel.HasValue)
@@ -149,6 +147,77 @@ namespace Data_Access_Layer.Repositories
                 .ToListAsync();
 
             return (recipes, total);
+        }
+
+        public async Task<List<Recipe>> GetFilteredRecipesAsync(
+            string? search, string? sortBy, bool isDescending,
+            RecipeStatusEnum? recipeStatus, Guid? categoryId, RecipeLevelEnum? recipeLevel,
+            DateOnly? startDate, DateOnly? endDate)
+        {
+            var query = _context.Recipes
+                .Include(r => r.Category)
+                .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Category)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.Images)
+                 .Include(r => r.IngredientRecipes)
+                    .ThenInclude(ir => ir.Ingredient)
+                        .ThenInclude(i => i.IngredientQuantities)
+                .AsQueryable();
+
+            // Lọc theo RecipeLevel nếu có truyền vào
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(r => r.RecipeTitle.Contains(search) || r.Content.Contains(search));
+            }
+
+            if (recipeStatus.HasValue)
+            {
+                query = query.Where(r => r.RecipeStatus == recipeStatus.Value);
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(r => r.CategoryId == categoryId.Value);
+            }
+
+            if (startDate.HasValue || endDate.HasValue)
+            {
+                DateTime adjustedStart = startDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue;
+                DateTime adjustedEnd = endDate?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.MaxValue;
+
+                query = query.Where(i => i.CreateAt >= adjustedStart && i.CreateAt <= adjustedEnd);
+            }
+
+
+            if (recipeLevel.HasValue)
+            {
+                query = query.Where(r => r.RecipeLevel == recipeLevel.Value);
+            }
+
+            // Sorting
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                query = isDescending
+                    ? query.OrderByDescending(r => EF.Property<object>(r, sortBy))
+                    : query.OrderBy(r => EF.Property<object>(r, sortBy));
+            }
+            else
+            {
+                query = query.OrderByDescending(r => r.CreateAt); // Default sort by latest created
+            }
+            if (startDate.HasValue || endDate.HasValue)
+            {
+                DateTime adjustedStart = startDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue;
+                DateTime adjustedEnd = endDate?.ToDateTime(TimeOnly.MaxValue) ?? DateTime.MaxValue;
+
+                query = query.Where(i => i.CreateAt >= adjustedStart && i.CreateAt <= adjustedEnd);
+            }
+
+            // Trả về danh sách chưa phân trang
+            return await query.ToListAsync();
         }
 
 
