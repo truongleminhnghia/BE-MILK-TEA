@@ -90,9 +90,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_ADMIN")]
-        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetAllRecipes(
             [FromQuery] Guid userId,
             [FromQuery] string? search,
@@ -125,9 +123,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_ADMIN")]
-        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> DeleteRecipeStatus(Guid id, RecipeStatusEnum requestStatus)
         {
             try

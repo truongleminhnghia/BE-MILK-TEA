@@ -23,9 +23,7 @@ namespace WebAPI.Controllers
         }
         // GET: Lấy danh sách hoặc chi tiết promotion detail theo ID
         [HttpGet]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_ADMIN")]
-        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotionDetails(
             [FromQuery] Guid? promotionId,
             [FromQuery] Guid? promotionDetailId)

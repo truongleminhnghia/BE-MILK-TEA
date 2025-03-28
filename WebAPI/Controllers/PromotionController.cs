@@ -29,7 +29,7 @@ namespace WebAPI.Controllers
 
         //Get all
         [HttpGet]
-        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotion(
     [FromQuery] bool? isActive = null,
     [FromQuery] string? promotionCode = null,

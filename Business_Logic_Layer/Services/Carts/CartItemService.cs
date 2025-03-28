@@ -116,7 +116,8 @@ namespace Business_Logic_Layer.Services.Carts
 
             // **Tìm CartItem có cùng IngredientId trong giỏ hàng**
             var existingCartItem = cartExisting.CartItems
-                .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId);
+     .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId
+                        && ci.ProductType == cartItemRequest.ProductType);
 
             // **Nếu IsCart == true và đã có nguyên liệu trong giỏ hàng => Báo lỗi**
             if (cartItemRequest.IsCart && existingCartItem != null)
