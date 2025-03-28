@@ -165,6 +165,8 @@ namespace Business_Logic_Layer.Services
             {
                 Console.WriteLine($"Lỗi trong quá trình cập nhật Account Level: {ex.Message}");
                 return false;
+            }
+        }
 
         public async Task<AccountResponse> DeleteAccount(Guid id)
         {
