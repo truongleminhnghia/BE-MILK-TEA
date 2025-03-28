@@ -105,9 +105,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_ADMIN")]
-        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
             try

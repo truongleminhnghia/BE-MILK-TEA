@@ -29,9 +29,7 @@ namespace WebAPI.Controllers
 
         //Get all
         [HttpGet]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_MANAGER")]
-        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotion(
             [FromQuery] Guid userId,
     [FromQuery] bool? isActive = null,

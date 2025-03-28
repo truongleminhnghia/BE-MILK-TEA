@@ -70,9 +70,6 @@ namespace WebAPI.Controllers
         // }
         
         [HttpGet]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_ADMIN")]
-        [Authorize(Roles = "ROLE_MANAGER")]
         public async Task<IActionResult> SearchIngredients(
                         [FromQuery] string? search,
                         [FromQuery] string? categorySearch,
@@ -195,9 +192,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("status/{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
-        [Authorize(Roles = "ROLE_ADMIN")]
-        [Authorize(Roles = "ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> UpdateStatus(Guid id, bool? status)
         {
             try
