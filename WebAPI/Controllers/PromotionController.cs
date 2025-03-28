@@ -78,11 +78,11 @@ namespace WebAPI.Controllers
 
 
         ////Get by id
-        [HttpGet("{promotionId}")]
+        [HttpGet("get-by-id-or-code")]
         [Authorize(Roles = "ROLE_STAFF,ROLE_ADMIN,ROLE_MANAGER")]
-        public async Task<IActionResult> GetByIdOrCode(Guid promotionId)
+        public async Task<IActionResult> GetByIdOrCode([FromQuery] Guid? promotionId, [FromQuery] string? promoCode)
         {
-            PromotionResponse promotions = await _promotionService.GetByIdAsync(promotionId);
+            PromotionResponse? promotions = await _promotionService.GetByIdOrCode(promotionId,promoCode);
             if (promotions == null)
             {
                 return Ok(new ApiResponse(
@@ -203,7 +203,7 @@ namespace WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi khi lấy danh sách Promotion: {ex.Message}");
+                Console.WriteLine($"Lỗi khi lấy danh sách Active Promotion: {ex.Message}");
                 return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(
                     (int)HttpStatusCode.InternalServerError,
                     false,
