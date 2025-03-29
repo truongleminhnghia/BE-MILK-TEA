@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using AutoMapper;
@@ -12,6 +13,7 @@ using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 
 namespace WebAPI.Controllers
 {
@@ -21,11 +23,15 @@ namespace WebAPI.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IMapper _mapper;
+        private readonly IRedisService _redisCacheService;
+        private const string OrderCacheKey = "order_cache";
+        private const int CacheExpirationMinutes = 10;
 
-        public OrderController(IOrderService orderService, IMapper mapper)
+        public OrderController(IOrderService orderService, IMapper mapper, IRedisService redisCacheService)
         {
             _orderService = orderService;
             _mapper = mapper;
+            _redisCacheService = redisCacheService;
         }
 
         [HttpGet("search")]
@@ -40,8 +46,16 @@ namespace WebAPI.Controllers
             [FromQuery] bool isDescending = false,
             [FromQuery] DateTime? orderDate = null)
         {
+            // Generate a unique cache key based on all parameters
+            var cacheKey = $"{OrderCacheKey}:{accountId}:{orderStatus}:{page}:{pageSize}:{search}:{sortBy}:{isDescending}:{orderDate}";
+            // Try to get data from cache first
+            var cachedData = await _redisCacheService.GetAsync<List<OrderResponse>>(cacheKey);
+            if (cachedData != null)
+            {
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+            }
             var orders = await _orderService.GetAllAsync(accountId, search, sortBy, isDescending, orderStatus, orderDate, page, pageSize);
-
+            await _redisCacheService.SetAsync(cacheKey, orders, TimeSpan.FromMinutes(CacheExpirationMinutes));
             return Ok(new ApiResponse(
                 (int)HttpStatusCode.OK,
                 true,
@@ -57,6 +71,14 @@ namespace WebAPI.Controllers
             [FromQuery] Guid? orderId,
             [FromQuery] string? orderCode)
         {
+            // Generate a unique cache key based on all parameters
+            var cacheKey = $"{OrderCacheKey}:{orderId}:{orderCode}";
+            // Try to get data from cache first
+            var cachedData = await _redisCacheService.GetAsync<OrderResponse>(cacheKey);
+            if (cachedData != null)
+            {
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+            }
             // Kiểm tra chỉ được nhập một trong hai giá trị
             if ((orderId.HasValue && !string.IsNullOrEmpty(orderCode)) || (!orderId.HasValue && string.IsNullOrEmpty(orderCode)))
             {
@@ -88,7 +110,7 @@ namespace WebAPI.Controllers
                     null
                 ));
             }
-
+            await _redisCacheService.SetAsync(cacheKey, orders, TimeSpan.FromMinutes(CacheExpirationMinutes));
             return Ok(new ApiResponse(
                 (int)HttpStatusCode.OK,
                 true,
@@ -112,6 +134,7 @@ namespace WebAPI.Controllers
             }
 
             var createdOrder = await _orderService.CreateAsync(order);
+            await _redisCacheService.RemoveByPrefixAsync(OrderCacheKey);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
@@ -148,7 +171,8 @@ namespace WebAPI.Controllers
                     new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
                 );
             }
-
+            await _redisCacheService.RemoveAsync($"{OrderCacheKey}:{orderId}");
+            await _redisCacheService.RemoveByPrefixAsync(OrderCacheKey);
             return Ok(
                 new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Cập nhật thành công")
             );

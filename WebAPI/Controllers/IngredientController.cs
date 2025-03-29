@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
@@ -24,16 +25,20 @@ namespace WebAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
         private readonly ICategoryService _categoryService;
+        private readonly IRedisService _redisCacheService;
+        private const string IngredientCacheKey = "ingredient_cache";
+        private const int CacheExpirationMinutes = 10;
 
         public IngredientController(IImageService imageService, IIngredientService ingredientService, IMapper mapper, ICategoryService categoryService
-        )
+, IRedisService redisCacheService)
         {
             _imageService = imageService;
             _ingredientService = ingredientService;
             _mapper = mapper;
             _categoryService = categoryService;
+            _redisCacheService = redisCacheService;
         }
-        
+
         [HttpGet("search")]
         //[Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
         public async Task<IActionResult> SearchIngredients(
@@ -53,6 +58,14 @@ namespace WebAPI.Controllers
                         [FromQuery] int pageSize = 10
                         )
         {
+            // Generate a unique cache key based on all parameters
+            var cacheKey = $"{IngredientCacheKey}:{search}:{categorySearch}:{categoryId}:{sortBy}:{startDate}:{endDate}:{status}:{ingredientType}:{minPrice}:{maxPrice}:{isSale}:{isDescending}:{pageCurrent}:{pageSize}";
+            // Try to get data from cache first
+            var cachedData = await _redisCacheService.GetAsync<PageResult<IngredientResponse>>(cacheKey);
+            if (cachedData != null)
+            {
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+            }
             var result = await _ingredientService.GetAllAsync(
                 search, categorySearch, categoryId, sortBy, isDescending,
                 pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale, ingredientType
@@ -63,6 +76,7 @@ namespace WebAPI.Controllers
                         new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
                     );
             }
+            await _redisCacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(CacheExpirationMinutes));
             return Ok(
                     new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", result)
                 );
@@ -74,6 +88,14 @@ namespace WebAPI.Controllers
         {
             try
             {
+                // Generate a unique cache key based on all parameters
+                var cacheKey = $"{IngredientCacheKey}:{id}:{code}";
+                // Try to get data from cache first
+                var cachedData = await _redisCacheService.GetAsync<IngredientResponse>(cacheKey);
+                if (cachedData != null)
+                {
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+                }
                 var ingreReponse = await _ingredientService.GetByIdOrCode(id, code);
                 if (ingreReponse == null)
                 {
@@ -81,6 +103,7 @@ namespace WebAPI.Controllers
                         new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
                     );
                 }
+                await _redisCacheService.SetAsync(cacheKey, ingreReponse, TimeSpan.FromMinutes(CacheExpirationMinutes));
                 return Ok(
                     new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", ingreReponse)
                 );
@@ -121,6 +144,7 @@ namespace WebAPI.Controllers
                         )
                     );
                 }
+                await _redisCacheService.RemoveByPrefixAsync(IngredientCacheKey);
                 return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Tạo thành công", ingredient));
             }
             catch (Exception ex)
@@ -148,6 +172,8 @@ namespace WebAPI.Controllers
                 {
                     return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Cập nhật nguyên liệu thất bại", null));
                 }
+                await _redisCacheService.RemoveByPrefixAsync(IngredientCacheKey);
+                await _redisCacheService.RemoveAsync($"{IngredientCacheKey}:{id}");
                 return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Cập nhật nguyên liệu thành công", ingredientResponse));
             }
             else
@@ -172,6 +198,8 @@ namespace WebAPI.Controllers
                 {
                     return BadRequest(new ApiResponse(HttpStatusCode.BadRequest.GetHashCode(), false, "Thay đổi trạng thái thất bại", null));
                 }
+                await _redisCacheService.RemoveByPrefixAsync(IngredientCacheKey);
+                await _redisCacheService.RemoveAsync($"{IngredientCacheKey}:{id}");
                 return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thay đổi trạng thái thành công", null));
             }
             catch(Exception ex)

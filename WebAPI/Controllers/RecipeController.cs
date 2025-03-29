@@ -5,6 +5,7 @@ using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Net;
 
 namespace WebAPI.Controllers
@@ -16,10 +17,14 @@ namespace WebAPI.Controllers
     public class RecipeController : ControllerBase
     {
         private readonly IRecipeService _recipeService;
+        private readonly IRedisService _redisCacheService;
+        private const string RecipeCacheKey = "recipe_cache";
+        private const int CacheExpirationMinutes = 10;
 
-        public RecipeController(IRecipeService recipeService)
+        public RecipeController(IRecipeService recipeService, IRedisService redisCacheService)
         {
             _recipeService = recipeService;
+            _redisCacheService = redisCacheService;
         }
 
         [HttpPost]
@@ -29,6 +34,8 @@ namespace WebAPI.Controllers
             try
             {
                 var recipe = await _recipeService.CreateRecipe(request);
+                await _redisCacheService.RemoveByPrefixAsync(RecipeCacheKey);
+
                 return Ok(new ApiResponse(
                         HttpStatusCode.OK.GetHashCode(),
                         true,
@@ -49,9 +56,17 @@ namespace WebAPI.Controllers
         {
             try
             {
+                // Generate a unique cache key based on all parameters
+                var cacheKey = $"{RecipeCacheKey}:{id}";
+                // Try to get data from cache first
+                var cachedData = await _redisCacheService.GetAsync<RecipeResponse>(cacheKey);
+                if (cachedData != null)
+                {
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+                }
                 var recipe = await _recipeService.GetRecipeById(id);
                 if (recipe == null) return NotFound();
-
+                await _redisCacheService.SetAsync(cacheKey, recipe, TimeSpan.FromMinutes(CacheExpirationMinutes));
                 return Ok(new ApiResponse(
                             HttpStatusCode.OK.GetHashCode(),
                             true,
@@ -75,7 +90,7 @@ namespace WebAPI.Controllers
                 if (isUpdated == null)
                     return NotFound(new { success = false, message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
 
-
+                await _redisCacheService.RemoveByPrefixAsync(RecipeCacheKey);
                 return Ok(new ApiResponse(
                                 HttpStatusCode.OK.GetHashCode(),
                                 true,
@@ -104,11 +119,19 @@ namespace WebAPI.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
+            // Generate a unique cache key based on all parameters
+            var cacheKey = $"{RecipeCacheKey}:{userId}:{search}:{sortBy}:{recipeStatus}:{isDescending}:{categoryId}:{recipeLevel}:{startDate}:{endDate}:{page}:{pageSize}";
+            // Try to get data from cache first
+            var cachedData = await _redisCacheService.GetAsync<PageResult<RecipeResponse>>(cacheKey);
+            if (cachedData != null)
+            {
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+            }
             try
             {
                 var recipes = await _recipeService.GetAllRecipesAsync(
              search, sortBy, isDescending, recipeStatus, categoryId, recipeLevel, startDate, endDate, page, pageSize, userId);
-
+                await _redisCacheService.SetAsync(cacheKey, recipes, TimeSpan.FromMinutes(CacheExpirationMinutes));
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
@@ -132,7 +155,7 @@ namespace WebAPI.Controllers
                 if (isUpdated == null)
                     return NotFound(new { success = false, message = "Không tìm thấy công thức hoặc cập nhật thất bại!" });
 
-
+                await _redisCacheService.RemoveByPrefixAsync(RecipeCacheKey);
                 return Ok(new ApiResponse(
                                 HttpStatusCode.OK.GetHashCode(),
                                 true,
