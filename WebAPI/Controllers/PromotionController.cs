@@ -29,7 +29,7 @@ namespace WebAPI.Controllers
 
         //Get all
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
+        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetPromotion(
     [FromQuery] bool? isActive = null,
     [FromQuery] string? promotionName = null,
@@ -79,7 +79,7 @@ namespace WebAPI.Controllers
 
         ////Get by id
         [HttpGet("get-by-id-or-code")]
-        [Authorize(Roles = "ROLE_STAFF,ROLE_ADMIN,ROLE_MANAGER")]
+        //[Authorize(Roles = "ROLE_STAFF,ROLE_ADMIN,ROLE_MANAGER")]
         public async Task<IActionResult> GetByIdOrCode([FromQuery] Guid? promotionId, [FromQuery] string? promoCode)
         {
             PromotionResponse? promotions = await _promotionService.GetByIdOrCode(promotionId,promoCode);
