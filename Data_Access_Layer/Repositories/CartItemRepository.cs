@@ -75,6 +75,8 @@ namespace Data_Access_Layer.Repositories
                 cartItem.Price = 0;
                 cartItem.TotalPrice = 0;
                 cartItem.IsCart = isCart;
+                cartItem.Price = 0;
+                cartItem.TotalPrice = 0;
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception ex)

@@ -68,7 +68,7 @@ namespace Business_Logic_Layer.Services
                 var order = _mapper.Map<Order>(orderRequest);
                 order.OrderCode = "OD" + _source.GenerateRandom8Digits();
                 order.OrderDate = DateTime.Now;
-                order.OrderStatus= OrderStatus.PENDING_CONFIRMATION;
+                order.OrderStatus = OrderStatus.PENDING_CONFIRMATION;
 
                 double totalDiscount = 0;
                 double finalPrice = 0;
@@ -79,11 +79,13 @@ namespace Business_Logic_Layer.Services
                 foreach (OrderDetailRequest orderDetail in orderRequest.orderDetailList)
                 {
                     //xử lý quantity
-    
+
                     var cartItem = await _cartItemService.GetById(orderDetail.CartItemId);
                     var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
+
                     if (cartItem.isCart == true)
+
                     {
                         throw new Exception($"Cart Item voi id {cartItem.IngredientId} da mua roi ");
                     }
@@ -154,7 +156,7 @@ namespace Business_Logic_Layer.Services
                     {
                         throw new Exception($"Đơn hàng chưa đạt giá trị tối thiểu để áp dụng khuyến mãi ({promotionDetailValue.MiniValue} VND).");
                     }
-   
+
                     // Tính toán số tiền giảm giá
                     double discountValue = promotionDetailValue.DiscountValue;
                     double maxDiscount = promotionDetailValue.MaxValue;
@@ -184,8 +186,8 @@ namespace Business_Logic_Layer.Services
                 {
                     createdOrder.PriceAffterPromotion = 0;
                 }
-                
-                
+
+
                 createdOrder.OrderDetails = orderDetailList;
                 createdOrder = await Update(createdOrder);
 
