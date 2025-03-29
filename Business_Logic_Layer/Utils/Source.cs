@@ -111,5 +111,15 @@ namespace Business_Logic_Layer.Utils
                 return 0;
             }
         }
+
+        public Guid GetCurrentAccountId()
+        {
+            var accountId = _jwtService.GetAccountId();
+            if (string.IsNullOrEmpty(accountId) || !Guid.TryParse(accountId, out var userId))
+            {
+                throw new UnauthorizedAccessException("Người dùng chưa đăng nhập hoặc token không hợp lệ.");
+            }
+            return userId;
+        }
     }
 }
