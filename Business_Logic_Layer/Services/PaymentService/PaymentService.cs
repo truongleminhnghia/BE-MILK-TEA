@@ -49,11 +49,10 @@ namespace Business_Logic_Layer.Services.PaymentService
             try
             {
                 _logger.LogInformation(
-                    "Tạo thanh toán cho OrderId: {OrderId}, Amount: {Amount}",
-                    request.OrderId,
-                    request.TotalPrice
+                    "Tạo thanh toán cho OrderId: {OrderId}",
+                    request.OrderId
                 );
-
+                var order = await _orderRepository.GetByIdAsync( request.OrderId );
                 // Create payment record in pending status
                 var payment = new Payment
                 {
@@ -61,9 +60,9 @@ namespace Business_Logic_Layer.Services.PaymentService
                     PaymentMethod = PaymentMethod.VNPAY,
                     PaymentDate = DateTime.Now,
                     PaymentStatus = PaymentStatus.Pending,
-                    TotlaPrice = request.TotalPrice,
+                    TotlaPrice = order.TotalPrice,
                     AmountPaid = 0,
-                    RemainingAmount = request.TotalPrice,
+                    RemainingAmount = order.TotalPrice,
                 };
 
                 await _paymentRepository.CreateAsync(payment);
@@ -73,7 +72,7 @@ namespace Business_Logic_Layer.Services.PaymentService
                 );
 
                 // Generate payment URL
-                string paymentUrl = _vnPayService.CreatePaymentUrl(request, httpContext);
+                string paymentUrl = _vnPayService.CreatePaymentUrl(request, httpContext, order.TotalPrice);
                 _logger.LogInformation("URL thanh toán được tạo: {PaymentUrl}", paymentUrl);
 
                 return new PaymentResponse
@@ -104,9 +103,9 @@ namespace Business_Logic_Layer.Services.PaymentService
                 PaymentMethod = PaymentMethod.COD,
                 PaymentDate = DateTime.Now,
                 PaymentStatus = PaymentStatus.Success,
-                TotlaPrice = request.TotalPrice,
+                TotlaPrice = order.TotalPrice,
                 AmountPaid = 0,
-                RemainingAmount = request.TotalPrice,
+                RemainingAmount = order.TotalPrice,
             };
 
             await _paymentRepository.CreateAsync(payment);
@@ -123,7 +122,7 @@ namespace Business_Logic_Layer.Services.PaymentService
                 Success = true,
                 PaymentMethod = PaymentMethod.COD,
                 PaymentDate = DateTime.Now,
-                Amount = request.TotalPrice,
+                Amount = order.TotalPrice,
                 Message = "Tạo đơn hàng COD thành công"
             };
         }

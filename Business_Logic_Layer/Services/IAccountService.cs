@@ -20,5 +20,7 @@ namespace Business_Logic_Layer.Services
     string? sortBy, bool isDescending, int page, int pageSize);
 
         Task<bool> UpdateAccountLevel(Guid accountId);
+        Task<AccountResponse> DeleteAccount(Guid id);
+
     }
 }

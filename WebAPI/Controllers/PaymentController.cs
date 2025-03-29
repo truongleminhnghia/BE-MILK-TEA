@@ -6,6 +6,7 @@ using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.NotificationService;
 using Business_Logic_Layer.Services.PaymentService;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -35,78 +36,83 @@ namespace WebAPI.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreatePayment([FromBody] PaymentCreateRequest request)
         {
-            try
+            if (request.PaymentMethod == PaymentMethod.VNPAY)
             {
-                _logger.LogInformation(
-                    $"CreatePayment endpoint called with OrderId: {request.OrderId}"
-                );
-
-                if (!ModelState.IsValid)
+                try
                 {
-                    var errorMessages = string.Join(
-                        ", ",
-                        ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                    _logger.LogInformation(
+                        $"CreatePayment endpoint called with OrderId: {request.OrderId}"
                     );
-                    _logger.LogWarning($"Invalid model state: {errorMessages}");
-                    return BadRequest(
+
+                    if (!ModelState.IsValid)
+                    {
+                        var errorMessages = string.Join(
+                            ", ",
+                            ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                        );
+                        _logger.LogWarning($"Invalid model state: {errorMessages}");
+                        return BadRequest(
+                            new ApiResponse(
+                                HttpStatusCode.BadRequest.GetHashCode(),
+                                false,
+                                "Invalid model state",
+                                errorMessages
+                            )
+                        );
+                    }
+
+                    var result = await _paymentService.CreatePaymentAsync(request, HttpContext);
+                    _logger.LogInformation(
+                        $"Payment created successfully with PaymentId: {result.PaymentId}"
+                    );
+
+                    return Ok(
                         new ApiResponse(
-                            HttpStatusCode.BadRequest.GetHashCode(),
-                            false,
-                            "Invalid model state",
-                            errorMessages
+                            HttpStatusCode.OK.GetHashCode(),
+                            true,
+                            "Payment created successfully",
+                            result
                         )
                     );
                 }
-
-                var result = await _paymentService.CreatePaymentAsync(request, HttpContext);
-                _logger.LogInformation(
-                    $"Payment created successfully with PaymentId: {result.PaymentId}"
-                );
-
-                return Ok(
-                    new ApiResponse(
-                        HttpStatusCode.OK.GetHashCode(),
-                        true,
-                        "Payment created successfully",
-                        result
-                    )
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in CreatePayment: {ex.Message}");
-                return StatusCode(
-                    500,
-                    new ApiResponse(
-                        HttpStatusCode.InternalServerError.GetHashCode(),
-                        false,
-                        ex.Message,
-                        null
-                    )
-                );
-            }
-        }
-
-        [HttpPost("createCod")]
-        public async Task<IActionResult> ProcessCODPayment([FromBody] PaymentCreateRequest request)
-        {
-            var result = await _paymentService.ProcessCODPaymentAsync(request);
-            if (result == null )
-            {
-                return BadRequest(
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error in CreatePayment: {ex.Message}");
+                    return StatusCode(
+                        500,
                         new ApiResponse(
-                            HttpStatusCode.BadRequest.GetHashCode(),
+                            HttpStatusCode.InternalServerError.GetHashCode(),
                             false,
-                            "Something went wrong"
-                        ));
+                            ex.Message,
+                            null
+                        )
+                    );
+                }
+            } else if (request.PaymentMethod == PaymentMethod.COD) {
+                var result = await _paymentService.ProcessCODPaymentAsync(request);
+                if (result == null)
+                {
+                    return BadRequest(
+                            new ApiResponse(
+                                HttpStatusCode.BadRequest.GetHashCode(),
+                                false,
+                                "Something went wrong"
+                            ));
+                }
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Success",
+                    result));
             }
-            return Ok(new ApiResponse(
-                HttpStatusCode.OK.GetHashCode(),
-                true,
-                "Success",
-                result));
-
+            return BadRequest(
+                             new ApiResponse(
+                                 HttpStatusCode.BadRequest.GetHashCode(),
+                                 false,
+                                 "Something went wrong"
+                             ));
         }
+
 
         [HttpGet("orderId")]
         public async Task<IActionResult> GetPaymentsByOrder(Guid orderId)

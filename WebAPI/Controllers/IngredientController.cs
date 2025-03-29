@@ -33,43 +33,9 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _categoryService = categoryService;
         }
-
-        // [HttpGet]
-        // public async Task<IActionResult> GetAll(
-        //     [FromQuery] string? search,
-        //     [FromQuery] Guid? categoryId,
-        //     [FromQuery] IngredientStatus? status,
-        //     [FromQuery] string? sortBy,
-        //     [FromQuery] bool isDescending = false,
-        //     [FromQuery] int page = 1,
-        //     [FromQuery] int pageSize = 10,
-        //     [FromQuery] DateTime? startDate = null,
-        //     [FromQuery] DateTime? endDate = null
-        // )
-        // {
-        //     var ingredients = await _ingredientService.GetAllIngredientsAsync(
-        //         search,
-        //         categoryId,
-        //         sortBy,
-        //         isDescending,
-        //         page,
-        //         pageSize,
-        //         startDate,
-        //         endDate,
-        //         status
-        //     );
-        //     var ingredientResponses = _mapper.Map<List<IngredientResponse>>(ingredients);
-        //     return Ok(
-        //         new ApiResponse(
-        //             HttpStatusCode.OK.GetHashCode(),
-        //             true,
-        //             "Thành công",
-        //             ingredientResponses
-        //         )
-        //     );
-        // }
         
-        [HttpGet]
+        [HttpGet("search")]
+        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
         public async Task<IActionResult> SearchIngredients(
                         [FromQuery] string? search,
                         [FromQuery] string? categorySearch,
@@ -78,16 +44,18 @@ namespace WebAPI.Controllers
                         [FromQuery] DateOnly? startDate,
                         [FromQuery] DateOnly? endDate,
                         [FromQuery] IngredientStatus? status,
+                        [FromQuery] IngredientType? ingredientType,
                         [FromQuery] decimal? minPrice,
                         [FromQuery] decimal? maxPrice,
                         [FromQuery] bool? isSale,
                         [FromQuery] bool isDescending = false,
                         [FromQuery] int pageCurrent = 1,
-                        [FromQuery] int pageSize = 10)
+                        [FromQuery] int pageSize = 10
+                        )
         {
             var result = await _ingredientService.GetAllAsync(
                 search, categorySearch, categoryId, sortBy, isDescending,
-                pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale
+                pageCurrent, pageSize, startDate, endDate, status, minPrice, maxPrice, isSale, ingredientType
             );
             if (result == null || !result.Data.Any())
             {
@@ -100,12 +68,13 @@ namespace WebAPI.Controllers
                 );
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet]
+        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
+        public async Task<IActionResult> GetById( [FromQuery] Guid? id, [FromQuery] string? code)
         {
             try
             {
-                var ingreReponse = await _ingredientService.GetById(id);
+                var ingreReponse = await _ingredientService.GetByIdOrCode(id, code);
                 if (ingreReponse == null)
                 {
                     return NotFound(
@@ -125,6 +94,7 @@ namespace WebAPI.Controllers
 
         //[Authorize(Roles = "ROLE_STAFF")]
         [HttpPost]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> Add([FromBody] IngredientRequest ingredientRequest)
         {
             try
@@ -168,6 +138,7 @@ namespace WebAPI.Controllers
 
         [HttpPut("{id}")]
         //[Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngredientRequest request)
         {
             if (id != null && request != null)
@@ -186,7 +157,8 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("status/{id}")]
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> UpdateStatus(Guid id, bool? status)
         {
             try

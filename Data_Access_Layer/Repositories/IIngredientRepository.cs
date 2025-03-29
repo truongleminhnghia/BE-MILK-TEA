@@ -19,8 +19,9 @@ namespace Data_Access_Layer.Repositories
         IngredientStatus? status,
         decimal? minPrice,
         decimal? maxPrice,
-        bool? isSale);
+        bool? isSale, IngredientType? ingredientType);
         Task<Ingredient> GetById(Guid id);
+        Task<Ingredient> GetByIdOrCode(Guid? id, string? code);
         Task<Ingredient> CreateAsync(Ingredient ingredient);
         Task<Ingredient> UpdateAsync(Guid id, Ingredient ingredient);
         Task<bool> CheckCode(string code);
