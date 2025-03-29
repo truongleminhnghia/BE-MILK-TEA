@@ -27,6 +27,7 @@ using Business_Logic_Layer.Services.PromotionDetailService;
 using Business_Logic_Layer.Services.DashboardService;
 using Business_Logic_Layer.Services.Carts;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,10 @@ var _sslMode = Environment.GetEnvironmentVariable("SSLMODE");
 
 var connectionString =
     $"Server={_server};Port={_port};User Id={_user};Password={_password};Database={_databaseName};SslMode={_sslMode};";
+//Đọc cấu hình Redis từ appsetting
+var redisConfig = builder.Configuration.GetSection("Redis");
+string redisConnectionString = $"{redisConfig["Host"]}:{redisConfig["Port"]},password={redisConfig["Password"]}";
+
 
 
 if (string.IsNullOrEmpty(connectionString))
@@ -98,6 +103,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             )
     );
 });
+// Đăng ký Redis vào DI container
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
+builder.Services.AddScoped<RedisService>();
 
 // lấy biến JWT từ môi trường
 var _secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
@@ -217,6 +225,7 @@ builder.Services.AddScoped<IPromotionDetailService, PromotionDetailService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
 builder.Services.AddScoped<IPromotionDetailRepository, PromotionDetailRepository>();
+builder.Services.AddScoped<IRedisService, RedisService>(); // Add Redis Service 
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartService, CartService>();

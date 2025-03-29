@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using XAct.Messages;
 
 namespace WebAPI.Controllers
 {
@@ -21,17 +22,20 @@ namespace WebAPI.Controllers
         private readonly IJwtService _jwtService;
         private readonly IMapper _mapper;
         private readonly Source _source;
+        private readonly IRedisService _redisCacheService;
+        private const string AccountsCachePrefix = "accounts_cache";
 
-        public AccountController(IAccountService accountService, IJwtService jwtService, IMapper mapper, Source source, ICustomerService customerService)
+        public AccountController(IAccountService accountService, IJwtService jwtService, IMapper mapper, Source source, ICustomerService customerService, IRedisService redisCacheService)
         {
             _accountService = accountService;
             _jwtService = jwtService;
             _mapper = mapper;
             _source = source;
             _customerService = customerService;
-        }       
+            _redisCacheService = redisCacheService;
+        }
 
-        
+
         [HttpGet]
         [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetAllAccounts(
@@ -45,6 +49,19 @@ namespace WebAPI.Controllers
         {
             try
             {
+                var cacheKey = $"{AccountsCachePrefix}:{search}:{accountStatus}:{roleName}:{sortBy}:{isDescending}:{page}:{pageSize}";
+                // Try to get from cache first
+                var cachedAccounts = await _redisCacheService.GetAsync<PagedResponse<AccountResponse>>(cacheKey);
+                if (cachedAccounts != null)
+                {
+                    return Ok(new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Lấy danh sách tài khoản thành công (from cache)",
+                        cachedAccounts
+                    ));
+                }
+
                 var accounts = await _accountService.GetAllAccountsAsync(
                             search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
                 if(accounts == null) {
@@ -55,6 +72,8 @@ namespace WebAPI.Controllers
                     accounts
                 ));
                 }
+                await _redisCacheService.SetAsync(cacheKey, accounts, TimeSpan.FromMinutes(10));
+
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
@@ -76,6 +95,7 @@ namespace WebAPI.Controllers
         {
             try
             {
+                
                 var updatedAccount = await _accountService.UpdateAccount(id, request);
                 if (updatedAccount == null)
                 {
@@ -87,6 +107,11 @@ namespace WebAPI.Controllers
                 }
 
                 var accountRes = _mapper.Map<AccountResponse>(updatedAccount);
+                // Invalidate cache for this account
+                await _redisCacheService.RemoveAsync($"{AccountsCachePrefix}:{id}");
+
+                // Invalidate all accounts list cache
+                await _redisCacheService.RemoveByPrefixAsync(AccountsCachePrefix);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,

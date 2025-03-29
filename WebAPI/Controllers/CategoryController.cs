@@ -10,6 +10,7 @@ using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using XAct.Messages;
 
 namespace WebAPI.Controllers
 {
@@ -19,16 +20,21 @@ namespace WebAPI.Controllers
     {
         private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
+        private readonly IRedisService _redisCacheService;
+        private const string CategoriesCacheKey = "categories_cache";
+        private const int CacheExpirationMinutes = 10;
 
-        public CategoryController(ICategoryService categorySrvice, IMapper mapper)
+        public CategoryController(ICategoryService categorySrvice, IMapper mapper, IRedisService redisCacheService)
         {
             _categoryService = categorySrvice;
             _mapper = mapper;
+            _redisCacheService = redisCacheService;
         }
 
-        //GET ALL
+        //GET ALL (with Redis cache)
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]        
+        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]        
+
         public async Task<IActionResult> GetAll(
             [FromQuery] CategoryStatus? categoryStatus,
             [FromQuery] CategoryType? categoryType,
@@ -42,8 +48,20 @@ namespace WebAPI.Controllers
             [FromQuery] string? _field = null
         )
         {
+            
+
             if (string.IsNullOrEmpty(_field))
             {
+                // Generate a unique cache key based on all parameters
+                var cacheKey = $"{CategoriesCacheKey}:{categoryStatus}:{categoryType}:{page}:{pageSize}:{search}:{sortBy}:{isDescending}:{startDate}:{endDate}";
+                // Try to get data from cache first
+                var cachedData = await _redisCacheService.GetAsync<PagedResponse<CategoryResponse>>(cacheKey);
+                if (cachedData != null)
+                {
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+                }
+
+                // If not in cache, get from database
                 var categories = await _categoryService.GetAllCategoriesAsync(
                                 search,
                                 sortBy,
@@ -60,16 +78,50 @@ namespace WebAPI.Controllers
                     return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
                 }
                 // var categoryRes = _mapper.Map<List<CategoryResponse>>(categories);
+                // Cache the data for future requests
+                await _redisCacheService.SetAsync(cacheKey, categories, TimeSpan.FromMinutes(CacheExpirationMinutes));
                 return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categories));
             }
             else
             {
-                var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE);
+                // Generate cache key with all relevant parameters
+                var cacheKey = $"{CategoriesCacheKey}:fields:{_field.ToLower()}:{CategoryStatus.ACTIVE}:{categoryType}";
+
+                // Try to get from cache first
+                var cachedCategories = await _redisCacheService.GetAsync<List<object>>(cacheKey);
+                if (cachedCategories != null)
+                {
+                    return Ok(new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Thành công (from cache)",
+                        cachedCategories
+                    ));
+                }
+
+                // If not in cache, get from database
+                var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE, categoryType);
                 if (categories == null || !categories.Any())
                 {
-                    return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
+                    return NotFound(new ApiResponse(  // Changed from BadRequest to NotFound
+                        HttpStatusCode.NotFound.GetHashCode(),
+                        false,
+                        "Không tìm thấy dữ liệu"
+                    ));
                 }
-                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categories));
+
+                // Store in cache for future requests
+                await _redisCacheService.SetAsync(
+                    cacheKey,
+                    categories,
+                    TimeSpan.FromMinutes(CacheExpirationMinutes));
+
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Thành công",
+                    categories
+                ));
             }
         }
 
@@ -78,8 +130,17 @@ namespace WebAPI.Controllers
         [Authorize(Roles = "ROLE_STAFF, ROLE_ADMIN, ROLE_MANAGER")]
         public async Task<IActionResult> GetById(Guid id)
         {
+            var cacheKey = $"{CategoriesCacheKey}:{id}";
+            var cachedCategory = await _redisCacheService.GetAsync<CategoryResponse>(cacheKey);
+
+            if (cachedCategory != null)
+            {
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedCategory));
+            }
             var category = await _categoryService.GetByIdAsync(id);
             var categoryRes = _mapper.Map<CategoryResponse>(category);
+            // Cache the individual category
+            await _redisCacheService.SetAsync(cacheKey, categoryRes, TimeSpan.FromMinutes(CacheExpirationMinutes));
             if (category == null)
                 return NotFound(
                     new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
@@ -124,12 +185,14 @@ namespace WebAPI.Controllers
             var createdCategory = await _categoryService.CreateAsync(
                 _mapper.Map<Category>(category)
             );
+            // Invalidate the cache for all categories since we've added a new one
+            await _redisCacheService.RemoveByPrefixAsync(CategoriesCacheKey);
             return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Tạo thành công"));
         }
 
         //UPDATE
         [HttpPut("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryUpdateRequest categoryRequest
@@ -155,7 +218,8 @@ namespace WebAPI.Controllers
                     new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
                 );
             }
-
+            await _redisCacheService.RemoveAsync($"{CategoriesCacheKey}:{id}");
+            await _redisCacheService.RemoveByPrefixAsync(CategoriesCacheKey);
             return Ok(
                 new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Cập nhật thành công")
             );
