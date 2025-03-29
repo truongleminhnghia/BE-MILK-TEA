@@ -33,11 +33,8 @@ namespace WebAPI.Controllers
 
         //GET ALL (with Redis cache)
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]        
-        
-        
-        
-        
+        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]        
+
         public async Task<IActionResult> GetAll(
             [FromQuery] CategoryStatus? categoryStatus,
             [FromQuery] CategoryType? categoryType,
@@ -87,7 +84,8 @@ namespace WebAPI.Controllers
             }
             else
             {
-                var cacheKey = $"{CategoriesCacheKey}:fields:{_field.ToLower()}:{CategoryStatus.ACTIVE}";
+                // Generate cache key with all relevant parameters
+                var cacheKey = $"{CategoriesCacheKey}:fields:{_field.ToLower()}:{CategoryStatus.ACTIVE}:{categoryType}";
 
                 // Try to get from cache first
                 var cachedCategories = await _redisCacheService.GetAsync<List<object>>(cacheKey);
@@ -100,8 +98,9 @@ namespace WebAPI.Controllers
                         cachedCategories
                     ));
                 }
+
                 // If not in cache, get from database
-                var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE);
+                var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE, categoryType);
                 if (categories == null || !categories.Any())
                 {
                     return NotFound(new ApiResponse(  // Changed from BadRequest to NotFound
@@ -110,6 +109,7 @@ namespace WebAPI.Controllers
                         "Không tìm thấy dữ liệu"
                     ));
                 }
+
                 // Store in cache for future requests
                 await _redisCacheService.SetAsync(
                     cacheKey,
@@ -192,7 +192,7 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryUpdateRequest categoryRequest

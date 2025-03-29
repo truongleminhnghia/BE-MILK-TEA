@@ -57,12 +57,12 @@ namespace Business_Logic_Layer.Services.CategoryService
             return await _categoryRepository.DeleteAsync(id);
         }
 
-        public async Task<List<Dictionary<string, object>>> GetField(string fieldQuery, CategoryStatus status)
+        public async Task<List<Dictionary<string, object>>> GetField(string fieldQuery, CategoryStatus status, CategoryType? type = null)
         {
             try
             {
                 var fields = fieldQuery?.Split(',').Select(f => f.Trim()).ToList() ?? new List<string> { "Id", "CategoryName" };
-                var result = await _categoryRepository.GetBySomeField(fields, status);
+                var result = await _categoryRepository.GetBySomeField(fields, status, type);
                 if (result == null)
                 {
                     throw new Exception("Không có dữ liệu");
