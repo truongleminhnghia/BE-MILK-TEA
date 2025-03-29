@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data_Access_Layer.Repositories
@@ -72,16 +73,29 @@ namespace Data_Access_Layer.Repositories
             {
                 var cartItem = await _context.CartItems.FirstOrDefaultAsync(c => c.Id == cartItemId);
                 if (cartItem == null) return false;
-                cartItem.Price = 0;
-                cartItem.TotalPrice = 0;
+
+                var chosenIngredient = await _context.Ingredients.FirstOrDefaultAsync(i => i.Id == cartItem.IngredientId);
+                if (chosenIngredient == null) return false;
+
+                double finalPrice = chosenIngredient.PricePromotion > 0
+                    ? chosenIngredient.PricePromotion
+                    : chosenIngredient.PriceOrigin;
+
+                double calculatedQuantity = cartItem.Quantity;
+                if (cartItem.ProductType != ProductType.BAG)
+                {
+                    calculatedQuantity = cartItem.Quantity * chosenIngredient.QuantityPerCarton;
+                }
                 cartItem.IsCart = isCart;
-                cartItem.Price = 0;
-                cartItem.TotalPrice = 0;
+                cartItem.Price = finalPrice;
+                cartItem.TotalPrice = finalPrice * calculatedQuantity; 
+
                 return await _context.SaveChangesAsync() > 0;
+
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠ Lỗi khi cập nhật trạng thái CartItem: {ex.Message}");
+                Console.WriteLine($"Lỗi khi cập nhật trạng thái CartItem: {ex.Message}");
                 return false;
             }
         }
