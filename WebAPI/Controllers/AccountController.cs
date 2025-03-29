@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using XAct.Messages;
 
 namespace WebAPI.Controllers
 {
@@ -51,7 +50,7 @@ namespace WebAPI.Controllers
             {
                 var cacheKey = $"{AccountsCachePrefix}:{search}:{accountStatus}:{roleName}:{sortBy}:{isDescending}:{page}:{pageSize}";
                 // Try to get from cache first
-                var cachedAccounts = await _redisCacheService.GetAsync<PagedResponse<AccountResponse>>(cacheKey);
+                var cachedAccounts = await _redisCacheService.GetAsync<PageResult<AccountResponse>>(cacheKey);
                 if (cachedAccounts != null)
                 {
                     return Ok(new ApiResponse(

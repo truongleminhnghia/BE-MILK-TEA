@@ -10,7 +10,6 @@ using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using XAct.Messages;
 
 namespace WebAPI.Controllers
 {
@@ -55,7 +54,7 @@ namespace WebAPI.Controllers
                 // Generate a unique cache key based on all parameters
                 var cacheKey = $"{CategoriesCacheKey}:{categoryStatus}:{categoryType}:{page}:{pageSize}:{search}:{sortBy}:{isDescending}:{startDate}:{endDate}";
                 // Try to get data from cache first
-                var cachedData = await _redisCacheService.GetAsync<PagedResponse<CategoryResponse>>(cacheKey);
+                var cachedData = await _redisCacheService.GetAsync<PageResult<CategoryResponse>>(cacheKey);
                 if (cachedData != null)
                 {
                     return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
@@ -127,7 +126,7 @@ namespace WebAPI.Controllers
 
         //GET BY ID
         [HttpGet("{id}")]
-        [Authorize(Roles = "ROLE_STAFF, ROLE_ADMIN, ROLE_MANAGER")]
+        //[Authorize(Roles = "ROLE_STAFF, ROLE_ADMIN, ROLE_MANAGER")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var cacheKey = $"{CategoriesCacheKey}:{id}";
