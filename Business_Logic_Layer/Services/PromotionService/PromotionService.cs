@@ -355,6 +355,10 @@ namespace Business_Logic_Layer.Services.PromotionService
             var expiredDate = DateOnly.FromDateTime(DateTime.UtcNow);
             
             var promotions = await _promotionRepository.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, true);
+            if (promotions == null)
+            {
+                throw new Exception("Không tìm thấy danh sách khuyến mãi nào");
+            }
             return _mapper.Map<List<ActivePromotionResponse>>(promotions);
         }
     }
