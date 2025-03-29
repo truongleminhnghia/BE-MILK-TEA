@@ -224,7 +224,7 @@ namespace Business_Logic_Layer.Services
 
                 var returna = _mapper.Map<OrderResponse>(createdOrder);
                 returna.TotalPrice = createdOrder.TotalPrice; // Giá gốc
-                returna.PriceAffterPromotion = createdOrder.PriceAffterPromotion;
+                returna.PriceAfterPromotion = createdOrder.PriceAffterPromotion;
                 returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);
 
                 foreach (var orderDetail in orderRequest.orderDetailList)
