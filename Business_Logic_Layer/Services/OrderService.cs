@@ -106,10 +106,10 @@ namespace Business_Logic_Layer.Services
                     var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
 
-                    if (cartItem.IsCart == false)
-                    {
-                        throw new Exception($"Cart Item voi id {cartItem.IngredientId} da mua roi ");
-                    }
+                    //if (cartItem.IsCart == false)
+                    //{
+                    //    throw new Exception($"Cart Item voi id {cartItem.IngredientId} da mua roi ");
+                    //}
                     if (ingredientProduct == null)
                     {
                         throw new Exception($"Không tìm thấy ingredientProduct với ID {cartItem.IngredientId}");
