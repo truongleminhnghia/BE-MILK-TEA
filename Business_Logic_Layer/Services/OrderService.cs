@@ -84,7 +84,7 @@ namespace Business_Logic_Layer.Services
                     var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
 
-                    if (cartItem.isCart == true)
+                    if (cartItem.IsCart == true)
 
                     {
                         throw new Exception($"Cart Item voi id {cartItem.IngredientId} da mua roi ");

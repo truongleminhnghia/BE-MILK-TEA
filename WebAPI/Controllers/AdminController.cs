@@ -72,7 +72,6 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> DeleteAccount(Guid id)
         {
             try

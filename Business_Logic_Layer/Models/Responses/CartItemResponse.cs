@@ -18,7 +18,6 @@ namespace Business_Logic_Layer.Models.Responses
         public double TotalPrice { get; set; }
         public bool IsCart { get; set; }
         public double Price { get; set; }
-        public bool isCart { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
     }
