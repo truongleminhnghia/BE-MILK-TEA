@@ -120,7 +120,7 @@ namespace Business_Logic_Layer.Services.Carts
                                         && ci.ProductType == cartItemRequest.ProductType);
 
             // **Nếu IsCart == true và đã có nguyên liệu trong giỏ hàng => Báo lỗi**
-            if (cartItemRequest.IsCart==false && existingCartItem != null)
+            if (cartItemRequest.IsCart==true && existingCartItem != null)
             {
                 throw new Exception("Đã có item trong giỏ hàng rồi");
             }
