@@ -13,5 +13,6 @@ namespace Data_Access_Layer.Repositories
         Task<CartItem> GetById(Guid id);
         Task<bool> UpdateCartItem(CartItem cartItem);
         Task<bool> DeleteCartItem(CartItem cartItem);
+        Task<bool> UpdateCartItemStatus(Guid cartItemId, bool isCart);
     }
 }

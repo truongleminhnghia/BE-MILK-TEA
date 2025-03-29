@@ -19,6 +19,10 @@ namespace Data_Access_Layer.Repositories
         Task<(IEnumerable<Account>, int TotalCount)> GetAllAccountsAsync(
     string? search, AccountStatus? accountStatus, RoleName? roleName,
     string? sortBy, bool isDescending, int page, int pageSize);
+        Task<bool> UpdateCustomerAccountLevel(Guid accountId);
+
         Task<Account> DeleteAsync(Guid id);
+
     }
 }
+

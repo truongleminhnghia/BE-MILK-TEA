@@ -84,6 +84,7 @@ var redisConfig = builder.Configuration.GetSection("Redis");
 string redisConnectionString = $"{redisConfig["Host"]}:{redisConfig["Port"]},password={redisConfig["Password"]}";
 
 
+
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new Exception("DATABASE_CONNECTION is not set!");

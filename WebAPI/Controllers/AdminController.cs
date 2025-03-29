@@ -72,7 +72,6 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> DeleteAccount(Guid id)
         {
             try
@@ -87,7 +86,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN")]
+        //[Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllAccounts(
             [FromQuery] string? search = null,
             [FromQuery] AccountStatus? accountStatus = null,

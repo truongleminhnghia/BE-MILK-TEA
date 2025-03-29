@@ -37,7 +37,7 @@ namespace WebAPI.Controllers
 
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetAllAccounts(
             [FromQuery] string? search = null,
             [FromQuery] AccountStatus? accountStatus = null,
@@ -90,6 +90,7 @@ namespace WebAPI.Controllers
         
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_CUSTOMER)")]
         public async Task<IActionResult> UpdateAccount(Guid id, [FromBody] UpdateAccountRequest request)
         {
             try

@@ -29,7 +29,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{accountId?}")]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
+        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetOrder(
             [FromRoute] Guid accountId,
             [FromQuery] OrderStatus? orderStatus,
@@ -52,7 +52,7 @@ namespace WebAPI.Controllers
 
         // Get order by ID or Order Code
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
         public async Task<IActionResult> GetById(
             [FromQuery] Guid? orderId,
             [FromQuery] string? orderCode)
@@ -99,7 +99,7 @@ namespace WebAPI.Controllers
 
         //Create
         [HttpPost]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF, ROLE_CUSTOMER")]
         public async Task<IActionResult> AddOrder([FromBody] OrderRequest order)
         {
             if (order == null || order.orderDetailList == null || !order.orderDetailList.Any())
