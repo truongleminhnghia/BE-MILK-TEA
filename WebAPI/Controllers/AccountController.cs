@@ -79,9 +79,9 @@ namespace WebAPI.Controllers
                 var updatedAccount = await _accountService.UpdateAccount(id, request);
                 if (updatedAccount == null)
                 {
-                    return NotFound(new ApiResponse(
-                        HttpStatusCode.NotFound.GetHashCode(),
-                        false,
+                    return BadRequest(new ApiResponse(
+                        HttpStatusCode.BadRequest.GetHashCode(),
+                        true,
                         "Không tìm thấy tài khoản"
                     ));
                 }
@@ -100,7 +100,33 @@ namespace WebAPI.Controllers
             }
         }
 
-
+        [HttpGet("current")]
+        public async Task<IActionResult> GetCurrentAccount()
+        {
+            try
+            {
+                var account = await _accountService.GetCurrentAccount();
+                if (account == null)
+                {
+                    return BadRequest(new ApiResponse(
+                        HttpStatusCode.BadRequest.GetHashCode(),
+                        true,
+                        "Không tìm thấy tài khoản"
+                    ));
+                }
+                var accountRes = _mapper.Map<AccountResponse>(account);
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Lấy thông tin tài khoản thành công",
+                    accountRes
+                ));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse(HttpStatusCode.InternalServerError.GetHashCode(), false, "Lỗi:" + ex.Message));
+            }
+        }
 
     }
 }
