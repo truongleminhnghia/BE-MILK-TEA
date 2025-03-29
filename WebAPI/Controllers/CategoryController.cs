@@ -243,7 +243,8 @@ namespace WebAPI.Controllers
                         )
                     );
                 }
-
+                await _redisCacheService.RemoveAsync($"{CategoriesCacheKey}:{id}");
+                await _redisCacheService.RemoveByPrefixAsync(CategoriesCacheKey);
                 return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Tắt thành công"));
             }
             catch (KeyNotFoundException ex)
