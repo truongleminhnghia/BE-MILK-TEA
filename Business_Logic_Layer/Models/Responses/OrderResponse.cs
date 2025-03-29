@@ -19,10 +19,11 @@ namespace Business_Logic_Layer.Models.Responses
         public String? PhoneShipping { get; set; }
         public String? EmailShipping { get; set; }
         public String? NoteShipping { get; set; }
+        public String? RefCode { get; set; }
         public int Quantity { get; set; }
         public double TotalPrice { get; set; }
         public double? PriceAfterPromotion { get; set; }
-
+        public OrderStatus OrderStatus { get; set; }
         public String AddressShipping { get; set; }
         public List<OrderDetailResponse> orderDetailResponses { get; set; }
         public void ConvertToOrderDetailResponse(List<OrderDetail> details, IMapper mapper)

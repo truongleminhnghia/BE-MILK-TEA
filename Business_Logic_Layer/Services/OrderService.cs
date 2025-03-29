@@ -44,10 +44,13 @@ namespace Business_Logic_Layer.Services
         private readonly IPromotionDetailService _promotionDetailService;
         private readonly IIngredientQuantityService _ingredientQuantityService;
         private readonly ICartItemService _cartItemService;
+        private readonly ICartService _cartService;
         private readonly IMapper _mapper;
         private readonly Source _source;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source, IIngredientQuantityService ingredientQuantityService, ICartItemService cartItemService , IIngredientService ingredientService, IPromotionDetailService promotionDetailService, IPromotionService promotionService, IAccountService accountService )
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IOrderDetailService orderDetailService, Source source, 
+            IIngredientQuantityService ingredientQuantityService, ICartItemService cartItemService, IIngredientService ingredientService, 
+            IPromotionDetailService promotionDetailService, IPromotionService promotionService, IAccountService accountService, ICartService cartService)
         {
             _accountService = accountService;
             _promotionDetailService = promotionDetailService;
@@ -59,12 +62,31 @@ namespace Business_Logic_Layer.Services
             _ingredientService = ingredientService;
             _ingredientQuantityService = ingredientQuantityService;
             _cartItemService = cartItemService;
+            _cartService = cartService;
             //_ingredientProductService = ingredientProductService;
         }
         public async Task<OrderResponse> CreateAsync(OrderRequest orderRequest)
         {
             try
             {
+                // Kiểm tra CartItem có thuộc về Account không
+                var cart = await _cartService.GetByAccount(orderRequest.AccountId);
+                if (cart == null)
+                {
+                    throw new Exception("Không tìm thấy giỏ hàng của tài khoản này.");
+                }
+
+                foreach (OrderDetailRequest orderDetail in orderRequest.orderDetailList)
+                {
+                    var cartItem = await _cartItemService.GetById(orderDetail.CartItemId);
+
+                    if (cartItem == null || cartItem.CartId != cart.Id)
+                    {
+                        throw new Exception($"CartItem ID {orderDetail.CartItemId} không thuộc về tài khoản này.");
+                    }
+                    // Tiếp tục xử lý đơn hàng như bình thường...
+                }
+
                 var order = _mapper.Map<Order>(orderRequest);
                 order.OrderCode = "OD" + _source.GenerateRandom8Digits();
                 order.OrderDate = DateTime.Now;
@@ -83,7 +105,7 @@ namespace Business_Logic_Layer.Services
                     var cartItem = await _cartItemService.GetById(orderDetail.CartItemId);
                     var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
-                    if (cartItem.IsCart == true)
+                    if (cartItem.IsCart == false)
                     {
                         throw new Exception($"Cart Item voi id {cartItem.IngredientId} da mua roi ");
                     }
@@ -111,14 +133,24 @@ namespace Business_Logic_Layer.Services
                     await _ingredientQuantityService.UpdateAsync(ingredientQuantityProduct.Id, ingredientQuantityRequest);
 
                     //tạo orderdetail
+                    finalPrice = ingredientProduct.PricePromotion > 0 ? ingredientProduct.PricePromotion : ingredientProduct.PriceOrigin;
+                    double adjustedQuantity = cartItem.Quantity;
 
+                    if (cartItem.ProductType != ProductType.BAG)
+                    {
+                        adjustedQuantity *= ingredientProduct.QuantityPerCarton; // Nếu không phải túi, nhân lên theo số lượng trên mỗi hộp
+                        finalPrice *= ingredientProduct.QuantityPerCarton; // Giá cũng phải nhân lên để phản ánh giá của toàn bộ hộp
+                    }
+
+                    // Tạo OrderDetail với giá đã điều chỉnh
                     var orderDetails = new OrderDetail
                     {
                         OrderId = createdOrder.Id,
                         CartItemId = orderDetail.CartItemId,
-                        Quantity = cartItem.Quantity,
-                        Price = ingredientProduct.PriceOrigin
+                        Quantity = cartItem.Quantity, // Giữ nguyên số lượng thực tế của CartItem
+                        Price = finalPrice // Giá đã được tính toán lại
                     };
+
                     var createdOrderDetail = await _orderDetailService.CreateAsync(orderDetails);
                     orderDetailList.Add(createdOrderDetail);
 
@@ -196,7 +228,7 @@ namespace Business_Logic_Layer.Services
 
                 foreach (var orderDetail in orderRequest.orderDetailList)
                 {
-                    bool cartIsUpdated = await _cartItemService.UpdateCartItemStatus(orderDetail.CartItemId, true);
+                    bool cartIsUpdated = await _cartItemService.UpdateCartItemStatus(orderDetail.CartItemId, false);
                     if (!cartIsUpdated)
                     {
                         Console.WriteLine($"Không thể cập nhật trạng thái cho CartItemId: {orderDetail.CartItemId}");
