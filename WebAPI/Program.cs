@@ -85,6 +85,7 @@ string redisConnectionString = $"{redisConfig["Host"]}:{redisConfig["Port"]},pas
 
 
 
+
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new Exception("DATABASE_CONNECTION is not set!");
