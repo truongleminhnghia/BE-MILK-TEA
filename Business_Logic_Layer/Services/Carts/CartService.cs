@@ -27,7 +27,7 @@ namespace Business_Logic_Layer.Services.Carts
             var accountExisting = await _accountRepository.GetById(accountId);
             if (accountExisting == null)
             {
-                throw new Exception("Tài khoảng không tồn tại");
+                throw new Exception("Tài khoản không tồn tại");
             }
             Cart newCart = await CreateNewCart(accountExisting);
             try

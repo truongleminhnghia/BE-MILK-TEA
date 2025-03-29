@@ -23,7 +23,7 @@ namespace Business_Logic_Layer.Models.Responses
         public OrderStatus OrderStatus { get; set; }
         public int Quantity { get; set; }
         public double TotalPrice { get; set; }
-        public double? PriceAffterPromotion { get; set; }
+        public double? PriceAfterPromotion { get; set; }
         public string RefCode { get; set; } = string.Empty;
         public string? ReasonCancel { get; set; }
         public Guid AccountId { get; set; }
