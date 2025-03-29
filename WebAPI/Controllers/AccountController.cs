@@ -100,7 +100,7 @@ namespace WebAPI.Controllers
                 {
                     return BadRequest(new ApiResponse(
                         HttpStatusCode.BadRequest.GetHashCode(),
-                        true,
+                        false,
                         "Không tìm thấy tài khoản"
                     ));
                 }
