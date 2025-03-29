@@ -105,6 +105,7 @@ namespace Business_Logic_Layer.Services
                     var cartItem = await _cartItemService.GetById(orderDetail.CartItemId);
                     var ingredientProduct = await _ingredientService.GetById(cartItem.IngredientId);
 
+
                     if (cartItem.IsCart == false)
                     {
                         throw new Exception($"Cart Item voi id {cartItem.IngredientId} da mua roi ");
@@ -223,7 +224,7 @@ namespace Business_Logic_Layer.Services
 
                 var returna = _mapper.Map<OrderResponse>(createdOrder);
                 returna.TotalPrice = createdOrder.TotalPrice; // Giá gốc
-                returna.PriceAfterPromotion = createdOrder.PriceAffterPromotion;
+                returna.PriceAffterPromotion = createdOrder.PriceAffterPromotion;
                 returna.ConvertToOrderDetailResponse(orderDetailList, _mapper);
 
                 foreach (var orderDetail in orderRequest.orderDetailList)

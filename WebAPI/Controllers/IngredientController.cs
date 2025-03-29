@@ -35,7 +35,7 @@ namespace WebAPI.Controllers
         }
         
         [HttpGet("search")]
-        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
+        //[Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
         public async Task<IActionResult> SearchIngredients(
                         [FromQuery] string? search,
                         [FromQuery] string? categorySearch,
@@ -69,7 +69,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
+        //[Authorize(Roles = "ROLE_STAFF,ROLE_MANAGER,ROLE_ADMIN")]
         public async Task<IActionResult> GetById( [FromQuery] Guid? id, [FromQuery] string? code)
         {
             try

@@ -46,7 +46,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetProductById(Guid id)
         {
             try
@@ -133,7 +133,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("by-ingredient/{ingredientId}")]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetByIngredientId(Guid? ingredientId, string? ingredientCode)
         {
             try

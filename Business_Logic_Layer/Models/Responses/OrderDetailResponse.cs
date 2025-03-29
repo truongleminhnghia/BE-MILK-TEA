@@ -11,7 +11,10 @@ namespace Business_Logic_Layer.Models.Responses
         public Guid Id { get; set; }
         public int Quantity { get; set; }
         public double Price { get; set; }
+        public Guid OrderId { get; set; }
         public Guid CartItemId { get; set; }
+
+        public CartItemResponse CartItem { get; set; }
 
         //public string ingredientName { get; set; }
         //public string imgURL { get; set; }
