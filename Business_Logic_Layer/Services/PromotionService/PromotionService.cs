@@ -44,6 +44,8 @@ namespace Business_Logic_Layer.Services.PromotionService
         Task<PromotionResponse> DeleteAsync(Guid id);
         Task<List<ActivePromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice);
         Task<PromotionResponse?> GetByIdOrCode(Guid? promoId, string? promoCode);
+        Task CreateIngredientPromotionAsync(Guid? promoId, string? promoCode, double discountValue, double minPriceThreshold, double maxPriceThreshold);
+        Task<List<IngredientPromotion>> GetIngredientPromotions(Guid promotionId, Guid ingredientId);
     }
     public class PromotionService : IPromotionService
     {
@@ -267,10 +269,10 @@ namespace Business_Logic_Layer.Services.PromotionService
         {
             List<Promotion> promotions;
 
-            
-                promotions = await _promotionRepository.GetFilteredPromotionsAsync(
-                    search, sortBy, isDescending, promotionType, promotionName, startDate, endDate, isActive);
-            
+
+            promotions = await _promotionRepository.GetFilteredPromotionsAsync(
+                search, sortBy, isDescending, promotionType, promotionName, startDate, endDate, isActive);
+
 
             // Sắp xếp lại danh sách
             if (!string.IsNullOrEmpty(sortBy))
@@ -319,24 +321,53 @@ namespace Business_Logic_Layer.Services.PromotionService
 
             return createdOrderPromotion;
         }
-        private async Task CreateIngredientPromotionAsync(Guid promotionId, double discountValue, double minPriceThreshold, double maxPriceThreshold)
+        public async Task CreateIngredientPromotionAsync(Guid? promoId, string? promoCode, double discountValue, double minPriceThreshold, double maxPriceThreshold)
         {
-            var ingredients = await _ingredientRepository.GetIngredientsByPriceRangeAsync(minPriceThreshold, maxPriceThreshold);
+            if (discountValue < 1 || discountValue > 100)
+                throw new ArgumentException("DiscountValue không hợp lệ (phải trong khoảng 1-100%).");
 
-            var ingredientPromotions = new List<IngredientPromotion>();
+            if (minPriceThreshold < 0)
+                throw new ArgumentException("MinPriceThreshold không hợp lệ (phải lớn hơn hoặc bằng 0).");
 
-            foreach (var ingredient in ingredients)
+            if (maxPriceThreshold < 0)
+                throw new ArgumentException("MaxPriceThreshold không hợp lệ (phải lớn hơn hoặc bằng 0).");
+
+            if (maxPriceThreshold < minPriceThreshold)
+                throw new ArgumentException("MaxPriceThreshold phải lớn hơn hoặc bằng MinPriceThreshold.");
+
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
-                ingredient.PricePromotion = ingredient.PriceOrigin * (1 - (discountValue / 100));
-
-                ingredientPromotions.Add(new IngredientPromotion
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    PromotionId = promotionId,
-                    IngredientId = ingredient.Id
-                });
-            }
+                    var promotion = _mapper.Map<Promotion>(await GetByIdOrCode(promoId, promoCode));                    
+                    if (promotion == null) throw new Exception("Không tìm thấy thông tin promotion");                    
 
-            await _promotionRepository.CreateProductPromotionsBulkAsync(ingredientPromotions);
+                    var ingredients = await _ingredientRepository.GetIngredientsByPriceRangeAsync(minPriceThreshold, maxPriceThreshold);
+
+                    var ingredientPromotions = new List<IngredientPromotion>();
+
+                    foreach (var ingredient in ingredients)
+                    {
+                        ingredient.PricePromotion = ingredient.PriceOrigin * (1 - (discountValue / 100));
+
+                        ingredientPromotions.Add(new IngredientPromotion
+                        {
+                            PromotionId = promotion.Id,
+                            IngredientId = ingredient.Id
+                        });
+                    }
+
+                    await _promotionRepository.CreateProductPromotionsBulkAsync(ingredientPromotions);
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception("Không thể tạo ingredient promotion:", ex);
+                }
+            });
         }
 
         public async Task<PromotionResponse> DeleteAsync(Guid id)
@@ -353,13 +384,34 @@ namespace Business_Logic_Layer.Services.PromotionService
         public async Task<List<ActivePromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice)
         {
             var expiredDate = DateOnly.FromDateTime(DateTime.UtcNow);
-            
+
             var promotions = await _promotionRepository.GetActivePromotions(promotionType, orderTotalPrice, expiredDate, true);
             if (promotions == null)
             {
                 throw new Exception("Không tìm thấy danh sách khuyến mãi nào");
             }
             return _mapper.Map<List<ActivePromotionResponse>>(promotions);
+        }
+
+        public async Task<List<IngredientPromotion>> GetIngredientPromotions(Guid promotionId, Guid ingredientId)
+        {
+            try
+            {
+                if (promotionId == Guid.Empty || ingredientId == Guid.Empty)
+                {
+                    throw new ArgumentException("PromotionId hoặc IngredientId không hợp lệ");
+                }
+                var ingredientPromotions = await _promotionRepository.GetAllIngrePromo(promotionId, ingredientId);
+                if (ingredientPromotions == null)
+                {
+                    throw new Exception("Không tìm thấy danh sách");
+                }
+                return ingredientPromotions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy danh sach ingredient promotion", ex);
+            }
         }
     }
 }

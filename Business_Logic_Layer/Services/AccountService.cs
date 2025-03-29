@@ -184,6 +184,29 @@ namespace Business_Logic_Layer.Services
 
             }
         }
+
+        public async Task<AccountResponse> GetCurrentAccount()
+        {
+            try
+            {
+                var currentAccountId = _source.GetCurrentAccountId();
+                if (currentAccountId == Guid.Empty)
+                {
+                    throw new Exception("Lấy thông tin thất bại.");
+                }
+                var currentAccount = await _accountRepository.GetById(currentAccountId);
+                if (currentAccount == null)
+                {
+                    throw new Exception("Tài khoản không tồn tại");
+                }
+                return MapToAccountResponse.ComplexAccountResponse(currentAccount);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: " + ex.Message);
+                throw;
+            }
+        }
     }
 }
 

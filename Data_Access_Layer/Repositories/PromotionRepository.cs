@@ -41,6 +41,7 @@ namespace Data_Access_Layer.Repositories
         Task<Promotion> DeleteAsync(Guid id);
         Task<List<Promotion>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
         Task<Promotion?> GetByIdAndCode(Guid? id, string? code);
+        Task<List<IngredientPromotion>> GetAllIngrePromo(Guid promoId, Guid ingreId);
     }
 }
 
@@ -431,5 +432,11 @@ namespace Data_Access_Layer.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id && p.PromotionCode == code);
         }
 
+        public async Task<List<IngredientPromotion>> GetAllIngrePromo (Guid promoId, Guid ingreId)
+        {
+            return await _context.IngredientPromotions
+                .Where(ip => ip.IngredientId == ingreId && ip.PromotionId == promoId)
+                .ToListAsync();
+        }
     }
 }
