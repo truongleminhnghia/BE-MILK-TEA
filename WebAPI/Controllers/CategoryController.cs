@@ -83,19 +83,41 @@ namespace WebAPI.Controllers
             }
             else
             {
-                var cacheKey = $"{CategoriesCacheKey}:fields:{_field}:{CategoryStatus.ACTIVE}";
-                var cachedFields = await _redisCacheService.GetAsync<List<string>>(cacheKey);
-                if (cachedFields != null)
+                var cacheKey = $"{CategoriesCacheKey}:fields:{_field.ToLower()}:{CategoryStatus.ACTIVE}";
+
+                // Try to get from cache first
+                var cachedCategories = await _redisCacheService.GetAsync<List<object>>(cacheKey);
+                if (cachedCategories != null)
                 {
-                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedFields));
+                    return Ok(new ApiResponse(
+                        HttpStatusCode.OK.GetHashCode(),
+                        true,
+                        "Thành công (from cache)",
+                        cachedCategories
+                    ));
                 }
+                // If not in cache, get from database
                 var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE);
                 if (categories == null || !categories.Any())
                 {
-                    return BadRequest(new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy"));
+                    return NotFound(new ApiResponse(  // Changed from BadRequest to NotFound
+                        HttpStatusCode.NotFound.GetHashCode(),
+                        false,
+                        "Không tìm thấy dữ liệu"
+                    ));
                 }
-                await _redisCacheService.SetAsync(cacheKey, categories, TimeSpan.FromMinutes(CacheExpirationMinutes));
-                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công", categories));
+                // Store in cache for future requests
+                await _redisCacheService.SetAsync(
+                    cacheKey,
+                    categories,
+                    TimeSpan.FromMinutes(CacheExpirationMinutes));
+
+                return Ok(new ApiResponse(
+                    HttpStatusCode.OK.GetHashCode(),
+                    true,
+                    "Thành công",
+                    categories
+                ));
             }
         }
 
@@ -166,7 +188,7 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        //[Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryUpdateRequest categoryRequest
