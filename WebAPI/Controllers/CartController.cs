@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using AutoMapper;
 using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
@@ -6,6 +7,7 @@ using Business_Logic_Layer.Services;
 using Business_Logic_Layer.Services.Carts;
 using Data_Access_Layer.Data;
 using Data_Access_Layer.Entities;
+using Data_Access_Layer.Enum;
 using Data_Access_Layer.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,9 +23,13 @@ namespace WebAPI.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
-        public CartController(ICartService cartService)
+        private readonly IRedisService _redisCacheService;
+        private const string CartCacheKey = "cart_cache";
+        private const int CacheExpirationMinutes = 10;
+        public CartController(ICartService cartService, IRedisService redisCacheService)
         {
             _cartService = cartService;
+            _redisCacheService = redisCacheService;
         }
 
         [HttpPost("{accountId}")]
@@ -33,6 +39,7 @@ namespace WebAPI.Controllers
             try
             {
                 var cart = await _cartService.CreateCart(accountId);
+                await _redisCacheService.RemoveByPrefixAsync(CartCacheKey);
                 return Ok(new ApiResponse(201, true, "Tạo giỏ hàng thành công", cart));
             }
             catch (KeyNotFoundException ex)
@@ -77,7 +84,16 @@ namespace WebAPI.Controllers
         {
             try
             {
+                // Generate a unique cache key based on all parameters
+                var cacheKey = $"{CartCacheKey}:{accountId}";
+                // Try to get data from cache first
+                var cachedData = await _redisCacheService.GetAsync<CartResponse>(cacheKey);
+                if (cachedData != null)
+                {
+                    return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+                }
                 var cart = await _cartService.GetByAccount(accountId);
+                await _redisCacheService.SetAsync(cacheKey, cart, TimeSpan.FromMinutes(CacheExpirationMinutes));
                 return Ok(new ApiResponse(200, true, "Lấy giỏ hàng thành công", cart));
             }
             catch (KeyNotFoundException ex)

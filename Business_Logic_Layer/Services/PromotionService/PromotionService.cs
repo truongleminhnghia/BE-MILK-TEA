@@ -44,8 +44,9 @@ namespace Business_Logic_Layer.Services.PromotionService
         Task<PromotionResponse> DeleteAsync(Guid id);
         Task<List<ActivePromotionResponse>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice);
         Task<PromotionResponse?> GetByIdOrCode(Guid? promoId, string? promoCode);
-        Task CreateIngredientPromotionAsync(Guid? promoId, string? promoCode, double discountValue, double minPriceThreshold, double maxPriceThreshold);
+        Task CreateIngredientPromotionAsync(Guid? promoId, string? promoCode, double minPriceThreshold, double maxPriceThreshold);
         Task<List<IngredientPromotion>> GetIngredientPromotions(Guid promotionId, Guid ingredientId);
+        Task ResetPriceAndDeleteExpiredPromotions();
     }
     public class PromotionService : IPromotionService
     {
@@ -321,10 +322,8 @@ namespace Business_Logic_Layer.Services.PromotionService
 
             return createdOrderPromotion;
         }
-        public async Task CreateIngredientPromotionAsync(Guid? promoId, string? promoCode, double discountValue, double minPriceThreshold, double maxPriceThreshold)
+        public async Task CreateIngredientPromotionAsync(Guid? promoId, string? promoCode, double minPriceThreshold, double maxPriceThreshold)
         {
-            if (discountValue < 1 || discountValue > 100)
-                throw new ArgumentException("DiscountValue không hợp lệ (phải trong khoảng 1-100%).");
 
             if (minPriceThreshold < 0)
                 throw new ArgumentException("MinPriceThreshold không hợp lệ (phải lớn hơn hoặc bằng 0).");
@@ -341,8 +340,8 @@ namespace Business_Logic_Layer.Services.PromotionService
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-                    var promotion = _mapper.Map<Promotion>(await GetByIdOrCode(promoId, promoCode));                    
-                    if (promotion == null) throw new Exception("Không tìm thấy thông tin promotion");                    
+                    var promotion = _mapper.Map<Promotion>(await GetByIdOrCode(promoId, promoCode));
+                    if (promotion == null) throw new Exception("Không tìm thấy thông tin promotion");
 
                     var ingredients = await _ingredientRepository.GetIngredientsByPriceRangeAsync(minPriceThreshold, maxPriceThreshold);
 
@@ -350,7 +349,7 @@ namespace Business_Logic_Layer.Services.PromotionService
 
                     foreach (var ingredient in ingredients)
                     {
-                        ingredient.PricePromotion = ingredient.PriceOrigin * (1 - (discountValue / 100));
+                        ingredient.PricePromotion = ingredient.PriceOrigin * (1 - (promotion.PromotionDetail.DiscountValue / 100));
 
                         ingredientPromotions.Add(new IngredientPromotion
                         {
@@ -413,5 +412,25 @@ namespace Business_Logic_Layer.Services.PromotionService
                 throw new Exception("Không thể lấy danh sach ingredient promotion", ex);
             }
         }
+
+        public async Task ResetPriceAndDeleteExpiredPromotions()
+        {
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    await _promotionRepository.ResetPriceAndDeleteExpiredPromotions();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception("Không thể reset giá và xóa khuyến mãi hết hạn:", ex);
+                }
+            });
+        }
+
     }
 }

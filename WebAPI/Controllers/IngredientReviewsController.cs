@@ -1,8 +1,11 @@
 ﻿using Business_Logic_Layer.Models.Requests;
 using Business_Logic_Layer.Models.Responses;
 using Business_Logic_Layer.Services.IngredientReviewService;
+using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using System.Net;
 
 namespace WebAPI.Controllers
 {
@@ -11,19 +14,31 @@ namespace WebAPI.Controllers
     public class IngredientReviewController : ControllerBase
     {
         private readonly IIngredientReviewService _ingredientReviewService;
+        private readonly IRedisService _redisCacheService;
+        private const string IngredientReviewCacheKey = "ingredient_review_cache";
+        private const int CacheExpirationMinutes = 10;
 
-        public IngredientReviewController(IIngredientReviewService ingredientReviewService)
+        public IngredientReviewController(IIngredientReviewService ingredientReviewService, IRedisService redisCacheService)
         {
             _ingredientReviewService = ingredientReviewService;
+            _redisCacheService = redisCacheService;
         }
 
         [HttpGet("id")]
         public async Task<IActionResult> GetById(Guid id)
         {
+            // Generate a unique cache key based on all parameters
+            var cacheKey = $"{IngredientReviewCacheKey}:{id}";
+            // Try to get data from cache first
+            var cachedData = await _redisCacheService.GetAsync<PageResult<CategoryResponse>>(cacheKey);
+            if (cachedData != null)
+            {
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
+            }
             var review = await _ingredientReviewService.GetByIdAsync(id);
             if (review == null)
                 return NotFound();
-
+            await _redisCacheService.SetAsync(cacheKey, review, TimeSpan.FromMinutes(CacheExpirationMinutes));
             return Ok(review);
         }
 

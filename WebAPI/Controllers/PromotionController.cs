@@ -212,11 +212,11 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("ingredient-promotion")]
-        public async Task<IActionResult> CreateIngrePromo ([FromQuery] Guid? promotionId, [FromQuery] string? promoCode, [FromQuery] double discountValue, [FromQuery] double minPriceThreshold, [FromQuery] double maxPriceThreshold)
+        public async Task<IActionResult> CreateIngrePromo ([FromQuery] Guid? promotionId, [FromQuery] string? promoCode, [FromQuery] double minPriceThreshold, [FromQuery] double maxPriceThreshold)
         {
             try
             {
-                await _promotionService.CreateIngredientPromotionAsync(promotionId, promoCode, discountValue, minPriceThreshold, maxPriceThreshold);
+                await _promotionService.CreateIngredientPromotionAsync(promotionId, promoCode, minPriceThreshold, maxPriceThreshold);
                 return Ok(new ApiResponse(
                     (int)HttpStatusCode.OK,
                     true,
@@ -253,6 +253,28 @@ namespace WebAPI.Controllers
                     (int)HttpStatusCode.InternalServerError,
                     false,
                     "Đã xảy ra lỗi trong quá trình xử lý yêu cầu."
+                ));
+            }
+        }
+
+        [HttpPut("ingredient-promotion")]
+        public async Task<IActionResult> ResetPriceAndDeleteExpiredPromotions()
+        {
+            try
+            {
+                await _promotionService.ResetPriceAndDeleteExpiredPromotions();
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Cập nhật danh sách Ingredient Promotion thành công!"
+                ));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi cập nhật danh sách Ingredient Promotion: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(
+                    (int)HttpStatusCode.InternalServerError,
+                    false
                 ));
             }
         }

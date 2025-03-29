@@ -21,17 +21,15 @@ namespace WebAPI.Controllers
         private readonly IJwtService _jwtService;
         private readonly IMapper _mapper;
         private readonly Source _source;
-        private readonly IRedisService _redisCacheService;
-        private const string AccountsCachePrefix = "accounts_cache";
 
-        public AccountController(IAccountService accountService, IJwtService jwtService, IMapper mapper, Source source, ICustomerService customerService, IRedisService redisCacheService)
+
+        public AccountController(IAccountService accountService, IJwtService jwtService, IMapper mapper, Source source, ICustomerService customerService)
         {
             _accountService = accountService;
             _jwtService = jwtService;
             _mapper = mapper;
             _source = source;
             _customerService = customerService;
-            _redisCacheService = redisCacheService;
         }
 
 
@@ -48,30 +46,18 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var cacheKey = $"{AccountsCachePrefix}:{search}:{accountStatus}:{roleName}:{sortBy}:{isDescending}:{page}:{pageSize}";
-                // Try to get from cache first
-                var cachedAccounts = await _redisCacheService.GetAsync<PageResult<AccountResponse>>(cacheKey);
-                if (cachedAccounts != null)
-                {
-                    return Ok(new ApiResponse(
-                        HttpStatusCode.OK.GetHashCode(),
-                        true,
-                        "Lấy danh sách tài khoản thành công (from cache)",
-                        cachedAccounts
-                    ));
-                }
+
 
                 var accounts = await _accountService.GetAllAccountsAsync(
                             search, accountStatus, roleName, sortBy, isDescending, page, pageSize);
                 if(accounts == null) {
                     return BadRequest(new ApiResponse(
                     HttpStatusCode.BadRequest.GetHashCode(),
-                    true,
+                    false,
                     "Danh sách rỗng",
                     accounts
                 ));
                 }
-                await _redisCacheService.SetAsync(cacheKey, accounts, TimeSpan.FromMinutes(10));
 
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
@@ -106,11 +92,7 @@ namespace WebAPI.Controllers
                 }
 
                 var accountRes = _mapper.Map<AccountResponse>(updatedAccount);
-                // Invalidate cache for this account
-                await _redisCacheService.RemoveAsync($"{AccountsCachePrefix}:{id}");
 
-                // Invalidate all accounts list cache
-                await _redisCacheService.RemoveByPrefixAsync(AccountsCachePrefix);
                 return Ok(new ApiResponse(
                     HttpStatusCode.OK.GetHashCode(),
                     true,
@@ -134,7 +116,7 @@ namespace WebAPI.Controllers
                 {
                     return BadRequest(new ApiResponse(
                         HttpStatusCode.BadRequest.GetHashCode(),
-                        true,
+                        false,
                         "Không tìm thấy tài khoản"
                     ));
                 }
