@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{DFC60D45-0321-46FD-A31A-9A9E32E2D5E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "WebAPI\WebAPI.csproj", "{DFC60D45-0321-46FD-A31A-9A9E32E2D5E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business_Logic_Layer", "Business_Logic_Layer\Business_Logic_Layer.csproj", "{0C358475-3F74-48D8-8BFC-40AE0B67C519}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Business_Logic_Layer", "Business_Logic_Layer\Business_Logic_Layer.csproj", "{0C358475-3F74-48D8-8BFC-40AE0B67C519}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data_Access_Layer", "Data_Access_Layer\Data_Access_Layer.csproj", "{86FAE81F-F4B1-42CE-BD44-6664C79F3533}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data_Access_Layer", "Data_Access_Layer\Data_Access_Layer.csproj", "{86FAE81F-F4B1-42CE-BD44-6664C79F3533}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -10,7 +10,6 @@ using Data_Access_Layer.Entities;
 using Data_Access_Layer.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using XAct.Messages;
 
 namespace WebAPI.Controllers
 {
@@ -33,7 +32,7 @@ namespace WebAPI.Controllers
 
         //GET ALL (with Redis cache)
         [HttpGet]
-        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]        
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
 
         public async Task<IActionResult> GetAll(
             [FromQuery] CategoryStatus? categoryStatus,
@@ -55,7 +54,7 @@ namespace WebAPI.Controllers
                 // Generate a unique cache key based on all parameters
                 var cacheKey = $"{CategoriesCacheKey}:{categoryStatus}:{categoryType}:{page}:{pageSize}:{search}:{sortBy}:{isDescending}:{startDate}:{endDate}";
                 // Try to get data from cache first
-                var cachedData = await _redisCacheService.GetAsync<PagedResponse<CategoryResponse>>(cacheKey);
+                var cachedData = await _redisCacheService.GetAsync<PageResult<CategoryResponse>>(cacheKey);
                 if (cachedData != null)
                 {
                     return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedData));
@@ -192,7 +191,7 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        //[Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryUpdateRequest categoryRequest
