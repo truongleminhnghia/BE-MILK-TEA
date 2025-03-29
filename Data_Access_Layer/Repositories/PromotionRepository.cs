@@ -41,6 +41,8 @@ namespace Data_Access_Layer.Repositories
         Task<Promotion> DeleteAsync(Guid id);
         Task<List<Promotion>> GetActivePromotions(PromotionType? promotionType, double? orderTotalPrice, DateOnly? expiredDate, bool? isActive);
         Task<Promotion?> GetByIdAndCode(Guid? id, string? code);
+        Task<List<IngredientPromotion>> GetAllIngrePromo(Guid promoId, Guid ingreId);
+        Task ResetPriceAndDeleteExpiredPromotions();
     }
 }
 
@@ -431,5 +433,24 @@ namespace Data_Access_Layer.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id && p.PromotionCode == code);
         }
 
+        public async Task<List<IngredientPromotion>> GetAllIngrePromo (Guid promoId, Guid ingreId)
+        {
+            return await _context.IngredientPromotions
+                .Where(ip => ip.IngredientId == ingreId && ip.PromotionId == promoId)
+                .ToListAsync();
+        }
+
+        public async Task ResetPriceAndDeleteExpiredPromotions()
+        {
+            // Xóa các IngredientPromotion có Promotion đã hết hạn
+            await _context.IngredientPromotions
+                .Where(ip => ip.Promotion.EndDate < DateTime.UtcNow)
+                .ExecuteDeleteAsync();
+
+            // Cập nhật PricePromotion về null cho Ingredient không còn IngredientPromotion nào
+            await _context.Ingredients
+                .Where(i => !_context.IngredientPromotions.Any(ip => ip.IngredientId == i.Id))
+                .ExecuteUpdateAsync(setters => setters.SetProperty(i => i.PricePromotion, null));
+        }
     }
 }

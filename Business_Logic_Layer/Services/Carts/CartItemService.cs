@@ -116,23 +116,26 @@ namespace Business_Logic_Layer.Services.Carts
 
             // **Tìm CartItem có cùng IngredientId trong giỏ hàng**
             var existingCartItem = cartExisting.CartItems
-     .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId
-                        && ci.ProductType == cartItemRequest.ProductType);
+                        .FirstOrDefault(ci => ci.IngredientId == cartItemRequest.IngredientId
+                                        && ci.ProductType == cartItemRequest.ProductType);
 
             // **Nếu IsCart == true và đã có nguyên liệu trong giỏ hàng => Báo lỗi**
-            if (cartItemRequest.IsCart && existingCartItem != null)
+            if (cartItemRequest.IsCart==true && existingCartItem != null)
             {
                 throw new Exception("Đã có item trong giỏ hàng rồi");
             }
 
+            int totalQuantity = cartItemRequest.ProductType == ProductType.BAG
+                ? cartItemRequest.Quantity
+                : cartItemRequest.Quantity * ingre.QuantityPerCarton;
             // **Tạo mới CartItem, không cộng dồn số lượng**
             CartItem item = _mapper.Map<CartItem>(cartItemRequest);
             item.CartId = cartExisting.Id;
             item.CreateAt = DateTime.Now;
             item.UpdateAt = DateTime.Now;
+            double finalPrice = GetPrice(ingre);
 
-            double OriginPrice = GetPrice(ingre);
-            double OriginTotalPrice = OriginPrice * item.Quantity;
+            double FinalTotalPrice = finalPrice * totalQuantity;
 
             if (cartItemRequest.IsCart)
             {
@@ -141,13 +144,12 @@ namespace Business_Logic_Layer.Services.Carts
             }
             else
             {
-                item.Price = OriginPrice;
-                item.TotalPrice = OriginTotalPrice;
+                item.Price = finalPrice;
+                item.TotalPrice = FinalTotalPrice;
             }
 
             CartItem cartItem = await _cartItemRepository.SaveCartItem(item);
             cartExisting.CartItems.Add(cartItem);
-
             // **Tạo response trả về**
             CartItemResponse cartItemResponse = _mapper.Map<CartItemResponse>(cartItem);
             return cartItemResponse;
