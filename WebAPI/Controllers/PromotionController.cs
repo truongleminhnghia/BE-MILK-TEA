@@ -211,6 +211,50 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpPost("ingredient-promotion")]
+        public async Task<IActionResult> CreateIngrePromo ([FromQuery] Guid? promotionId, [FromQuery] string? promoCode, [FromQuery] double discountValue, [FromQuery] double minPriceThreshold, [FromQuery] double maxPriceThreshold)
+        {
+            try
+            {
+                await _promotionService.CreateIngredientPromotionAsync(promotionId, promoCode, discountValue, minPriceThreshold, maxPriceThreshold);
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Tạo danh sách Ingredient Promotion thành công!"
+                ));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tạo danh sách Ingredient Promotion: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(
+                    (int)HttpStatusCode.InternalServerError,
+                    false
+                ));
+            }
+        }
 
+        [HttpGet("ingredient-promotion")]
+        public async Task<IActionResult> GetIngrePromo([FromQuery] Guid promotionId, [FromQuery] Guid ingerdientId)
+        {
+            try
+            {
+                var ingredientPromotions = await _promotionService.GetIngredientPromotions(promotionId, ingerdientId);
+                return Ok(new ApiResponse(
+                    (int)HttpStatusCode.OK,
+                    true,
+                    "Lấy danh sách Ingredient Promotion thành công!",
+                    ingredientPromotions
+                ));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy danh sách Ingredient Promotion: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(
+                    (int)HttpStatusCode.InternalServerError,
+                    false,
+                    "Đã xảy ra lỗi trong quá trình xử lý yêu cầu."
+                ));
+            }
+        }
     }
 }

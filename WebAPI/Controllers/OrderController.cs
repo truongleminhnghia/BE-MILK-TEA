@@ -28,10 +28,10 @@ namespace WebAPI.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{accountId?}")]
+        [HttpGet("search")]
         //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetOrder(
-            [FromRoute] Guid accountId,
+            [FromQuery] Guid accountId,
             [FromQuery] OrderStatus? orderStatus,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
@@ -99,7 +99,7 @@ namespace WebAPI.Controllers
 
         //Create
         [HttpPost]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER, ROLE_STAFF, ROLE_CUSTOMER")]
         public async Task<IActionResult> AddOrder([FromBody] OrderRequest order)
         {
             if (order == null || order.orderDetailList == null || !order.orderDetailList.Any())
