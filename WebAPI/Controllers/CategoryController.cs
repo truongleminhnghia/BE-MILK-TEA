@@ -32,7 +32,7 @@ namespace WebAPI.Controllers
 
         //GET ALL (with Redis cache)
         [HttpGet]
-        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]        
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
 
         public async Task<IActionResult> GetAll(
             [FromQuery] CategoryStatus? categoryStatus,
@@ -126,7 +126,7 @@ namespace WebAPI.Controllers
 
         //GET BY ID
         [HttpGet("{id}")]
-        //[Authorize(Roles = "ROLE_STAFF, ROLE_ADMIN, ROLE_MANAGER")]
+        [Authorize(Roles = "ROLE_STAFF, ROLE_ADMIN, ROLE_MANAGER")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var cacheKey = $"{CategoriesCacheKey}:{id}";
@@ -191,7 +191,7 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        //[Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryUpdateRequest categoryRequest
