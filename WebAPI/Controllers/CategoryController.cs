@@ -33,7 +33,7 @@ namespace WebAPI.Controllers
 
         //GET ALL (with Redis cache)
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
+        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
         public async Task<IActionResult> GetAll(
             [FromQuery] CategoryStatus? categoryStatus,
             [FromQuery] CategoryType? categoryType,
@@ -166,7 +166,7 @@ namespace WebAPI.Controllers
 
         //UPDATE
         [HttpPut("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryUpdateRequest categoryRequest
@@ -218,9 +218,7 @@ namespace WebAPI.Controllers
                         )
                     );
                 }
-                // Invalidate cache for this specific category and all categories list
-                await _redisCacheService.RemoveAsync($"{CategoriesCacheKey}:{id}");
-                await _redisCacheService.RemoveByPrefixAsync(CategoriesCacheKey);
+
                 return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Tắt thành công"));
             }
             catch (KeyNotFoundException ex)
