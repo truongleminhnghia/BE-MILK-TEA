@@ -72,7 +72,7 @@ namespace WebAPI.Controllers
         // }
 
         [HttpGet("{accountId}")]
-        [Authorize(Roles = "ROLE_CUSTOMER")]
+        //[Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetByAccount(Guid accountId)
         {
             try

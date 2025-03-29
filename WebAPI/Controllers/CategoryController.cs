@@ -28,8 +28,7 @@ namespace WebAPI.Controllers
 
         //GET ALL
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]
-        
+        //[Authorize(Roles = "ROLE_ADMIN, ROLE_STAFF, ROLE_MANAGER")]        
         public async Task<IActionResult> GetAll(
             [FromQuery] CategoryStatus? categoryStatus,
             [FromQuery] CategoryType? categoryType,
@@ -76,7 +75,7 @@ namespace WebAPI.Controllers
 
         //GET BY ID
         [HttpGet("{id}")]
-        [Authorize(Roles = "ROLE_STAFF")]
+        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var category = await _categoryService.GetByIdAsync(id);
@@ -98,7 +97,6 @@ namespace WebAPI.Controllers
         //CREATE
         [HttpPost]
         [Authorize(Roles = "ROLE_STAFF")]
-        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryRequest category)
         {
             if (category == null)
@@ -132,7 +130,6 @@ namespace WebAPI.Controllers
         //UPDATE
         [HttpPut("{id}")]
         [Authorize(Roles = "ROLE_STAFF")]
-        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryUpdateRequest categoryRequest

@@ -56,7 +56,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "ROLE_CUSTOMER")]
+        //[Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetCartItemById([FromRoute] Guid id)
         {
             try
@@ -71,7 +71,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("cart/{cartId}")]
-        [Authorize(Roles = "ROLE_CUSTOMER")]
+        //[Authorize(Roles = "ROLE_CUSTOMER")]
         public async Task<IActionResult> GetCartItemsByCartId([FromRoute] Guid cartId)
         {
             try
