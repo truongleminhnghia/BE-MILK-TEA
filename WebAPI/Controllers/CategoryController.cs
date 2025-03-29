@@ -104,8 +104,17 @@ namespace WebAPI.Controllers
         [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> GetById(Guid id)
         {
+            var cacheKey = $"{CategoriesCacheKey}:{id}";
+            var cachedCategory = await _redisCacheService.GetAsync<CategoryResponse>(cacheKey);
+
+            if (cachedCategory != null)
+            {
+                return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Thành công (from cache)", cachedCategory));
+            }
             var category = await _categoryService.GetByIdAsync(id);
             var categoryRes = _mapper.Map<CategoryResponse>(category);
+            // Cache the individual category
+            await _redisCacheService.SetAsync(cacheKey, categoryRes, TimeSpan.FromMinutes(CacheExpirationMinutes));
             if (category == null)
                 return NotFound(
                     new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
@@ -122,7 +131,7 @@ namespace WebAPI.Controllers
 
         //CREATE
         [HttpPost]
-        //[Authorize(Roles = "ROLE_STAFF")]
+        [Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryRequest category)
         {
             if (category == null)
@@ -158,7 +167,6 @@ namespace WebAPI.Controllers
         //UPDATE
         [HttpPut("{id}")]
         [Authorize(Roles = "ROLE_STAFF")]
-        //[Authorize(Roles = "ROLE_STAFF")]
         public async Task<IActionResult> UpdateCategory(
             Guid id,
             [FromBody] CategoryUpdateRequest categoryRequest
@@ -184,7 +192,8 @@ namespace WebAPI.Controllers
                     new ApiResponse(HttpStatusCode.NotFound.GetHashCode(), false, "Không tìm thấy")
                 );
             }
-
+            await _redisCacheService.RemoveAsync($"{CategoriesCacheKey}:{id}");
+            await _redisCacheService.RemoveByPrefixAsync(CategoriesCacheKey);
             return Ok(
                 new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Cập nhật thành công")
             );
@@ -209,7 +218,9 @@ namespace WebAPI.Controllers
                         )
                     );
                 }
-
+                // Invalidate cache for this specific category and all categories list
+                await _redisCacheService.RemoveAsync($"{CategoriesCacheKey}:{id}");
+                await _redisCacheService.RemoveByPrefixAsync(CategoriesCacheKey);
                 return Ok(new ApiResponse(HttpStatusCode.OK.GetHashCode(), true, "Tắt thành công"));
             }
             catch (KeyNotFoundException ex)
