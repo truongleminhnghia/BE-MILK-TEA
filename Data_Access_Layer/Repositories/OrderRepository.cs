@@ -84,24 +84,13 @@ namespace Data_Access_Layer.Repositories
         {
             try
             {
-
-                var baseQuery = _context.OrderDetails.Where(w => w.Orders.AccountId == accountId).Include(ic => ic.Orders).AsQueryable();
-                var query = baseQuery.Select(o => new Order
-                {
-                    Id = o.Id,
-                    OrderCode = o.Orders.OrderCode,
-                    OrderDate = o.Orders.OrderDate,
-                    FullNameShipping = o.Orders.FullNameShipping,
-                    PhoneShipping = o.Orders.PhoneShipping,
-                    EmailShipping = o.Orders.EmailShipping,
-                    NoteShipping = o.Orders.NoteShipping,
-                    Quantity = o.Orders.Quantity,
-                    TotalPrice = o.Orders.TotalPrice,
-                    PriceAffterPromotion = o.Orders.PriceAffterPromotion,
-                    AddressShipping = o.Orders.AddressShipping,
-                    OrderDetails = o.Orders.OrderDetails 
-                }).AsQueryable();
-                
+                var query = _context.Orders
+                    .Where(o => o.AccountId == accountId)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.CartItems)
+                            .ThenInclude(ci => ci.Ingredient)
+                                .ThenInclude(i => i.Images)
+                    .AsQueryable();
 
                 if (!string.IsNullOrEmpty(search))
                 {
@@ -127,7 +116,20 @@ namespace Data_Access_Layer.Repositories
 
                 query = query.Skip((Math.Max(1, page) - 1) * pageSize).Take(pageSize);
 
-                return await query.ToListAsync();
+                var orders = await query.ToListAsync();
+
+                foreach (var order in orders)
+                {
+                    foreach (var orderDetail in order.OrderDetails)
+                    {
+                        if (orderDetail.CartItems?.Ingredient?.Images != null) 
+                        {
+                            orderDetail.CartItems.Ingredient.Images = orderDetail.CartItems.Ingredient.Images.Take(1).ToList();
+                        }                                                  
+                    }
+                }
+
+                return orders;
             }
             catch (Exception ex)
             {
