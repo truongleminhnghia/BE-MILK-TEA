@@ -83,7 +83,7 @@ namespace WebAPI.Controllers
             }
             else
             {
-                var cacheKey = $"{CategoriesCacheKey}:fields:{_field.ToLower()}:{CategoryStatus.ACTIVE}";
+                var cacheKey = $"{CategoriesCacheKey}:fields:{_field.ToLower()}:{CategoryStatus.ACTIVE}:{categoryType}";
 
                 // Try to get from cache first
                 var cachedCategories = await _redisCacheService.GetAsync<List<object>>(cacheKey);
@@ -97,7 +97,7 @@ namespace WebAPI.Controllers
                     ));
                 }
                 // If not in cache, get from database
-                var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE);
+                var categories = await _categoryService.GetField(_field, CategoryStatus.ACTIVE, categoryType);
                 if (categories == null || !categories.Any())
                 {
                     return NotFound(new ApiResponse(  // Changed from BadRequest to NotFound

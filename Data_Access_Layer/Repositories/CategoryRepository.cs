@@ -145,12 +145,16 @@ namespace Data_Access_Layer.Repositories
             return true;
         }
 
-        public async Task<List<Dictionary<string, object>>> GetBySomeField(List<string> fields, CategoryStatus status)
+        public async Task<List<Dictionary<string, object>>> GetBySomeField(List<string> fields, CategoryStatus status, CategoryType? type = null)
         {
             var query = _context.Categories.AsQueryable();
             if (!string.IsNullOrEmpty(status.ToString()))
             {
                 query = query.Where(c => status.Equals(c.CategoryStatus));
+            }
+            if (type.HasValue)
+            {
+                query = query.Where(c => type.Equals(c.CategoryType));
             }
             var categories = await query.ToListAsync();
             // lấy field được yêu cầu
